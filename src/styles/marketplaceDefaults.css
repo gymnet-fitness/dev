@@ -16,12 +16,12 @@
 :root {
   /* ================ Colors ================ */
 
-  --marketplaceColor: #0095b3;
-  --marketplaceColorLight: #00bfe6;
-  --marketplaceColorDark: #006a80;
+  --marketplaceColor: #2ebff7;
+  --marketplaceColorLight: #96dffb;
+  --marketplaceColorDark: #0891c6;
 
   /* Used with inline CSS SVGs */
-  --marketplaceColorEncoded: %230095b3;
+  --marketplaceColorEncoded: %232ebff7;
 
   --successColor: #2ecc71;
   --successColorDark: #239954;
