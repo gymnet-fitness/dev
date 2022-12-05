@@ -129,5 +129,6 @@
     "singleQuote": true,
     "trailingComma": "es5",
     "proseWrap": "always"
-  }
+  },
+  "packageManager": "yarn@3.3.0"
 }
