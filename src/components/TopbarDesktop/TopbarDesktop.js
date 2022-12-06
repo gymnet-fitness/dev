@@ -141,12 +141,12 @@ const TopbarDesktop = props => {
         <FormattedMessage id="TopbarDesktop.viewListing" />
       </span>
     </NamedLink>
-  ) : (
-    <NamedLink className={css.createListingLink} name="NewListingPage">
-      <span className={css.createListing}>
-        <FormattedMessage id="TopbarDesktop.createListing" />
-      </span>
-    </NamedLink>
+  //) : (
+    //<NamedLink className={css.createListingLink} name="NewListingPage">
+      //<span className={css.createListing}>
+        //<FormattedMessage id="TopbarDesktop.createListing" />
+      //</span>
+    //</NamedLink>
   );
 
   const signupLink = isAuthenticatedOrJustHydrated ? null : (
@@ -178,14 +178,14 @@ const TopbarDesktop = props => {
       //>
     //) : null;
 
-  //const createListingLink =
-    //isAuthenticatedOrJustHydrated && !(currentUserListingFetched && !currentUserListing) ? null : (
-      //<NamedLink className={css.createListingLink} name="NewListingPage">
-        //<span className={css.createListing}>
-          //<FormattedMessage id="TopbarDesktop.createListing" />
-        //</span>
-      //</NamedLink>
-    //);
+  const createListingLink =
+    isAuthenticatedOrJustHydrated && !(currentUserListingFetched && !currentUserListing) ? null : (
+      <NamedLink className={css.createListingLink} name="NewListingPage">
+        <span className={css.createListing}>
+          <FormattedMessage id="TopbarDesktop.createListing" />
+        </span>
+      </NamedLink>
+    );
 
   return (
     <nav className={classes}>
