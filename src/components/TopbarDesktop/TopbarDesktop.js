@@ -85,20 +85,7 @@ const TopbarDesktop = props => {
       </MenuLabel>
       <MenuContent className={css.profileMenuContent}>
         <MenuItem key="EditListingPage">
-          <OwnListingLink
-            listing={currentUserListing}
-            listingFetched={currentUserListingFetched}
-            className={css.yourListingsLink}
-          >
-            <div>
-              <span className={css.menuItemBorder} />
-              {currentUserListing ? (
-                <FormattedMessage id="TopbarDesktop.editYourListingLink" />
-              ) : (
-                <FormattedMessage id="TopbarDesktop.addYourListingLink" />
-              )}
-            </div>
-          </OwnListingLink>
+          <OwnListingLink listing={currentUserListing} />
         </MenuItem>
         <MenuItem key="ProfileSettingsPage">
           <NamedLink
@@ -141,13 +128,13 @@ const TopbarDesktop = props => {
         <FormattedMessage id="TopbarDesktop.viewListing" />
       </span>
     </NamedLink>
-  //) : (
-    //<NamedLink className={css.createListingLink} name="NewListingPage">
-      //<span className={css.createListing}>
-        //<FormattedMessage id="TopbarDesktop.createListing" />
-      //</span>
-    //</NamedLink>
-  );
+  ) : (
+    <NamedLink className={css.createListingLink} name="NewListingPage">
+      <span className={css.createListing}>
+        <FormattedMessage id="TopbarDesktop.createListing" />
+      </span>
+    </NamedLink>
+   );
 
   const signupLink = isAuthenticatedOrJustHydrated ? null : (
     <NamedLink name="SignupPage" className={css.signupLink}>
@@ -178,14 +165,14 @@ const TopbarDesktop = props => {
       //>
     //) : null;
 
-  const createListingLink =
-    isAuthenticatedOrJustHydrated && !(currentUserListingFetched && !currentUserListing) ? null : (
-      <NamedLink className={css.createListingLink} name="NewListingPage">
-        <span className={css.createListing}>
-          <FormattedMessage id="TopbarDesktop.createListing" />
-        </span>
-      </NamedLink>
-    );
+  //const createListingLink =
+    //isAuthenticatedOrJustHydrated && !(currentUserListingFetched && !currentUserListing) ? null : (
+      //<NamedLink className={css.createListingLink} name="NewListingPage">
+        //<span className={css.createListing}>
+          //<FormattedMessage id="TopbarDesktop.createListing" />
+        //</span>
+      //</NamedLink>
+    //);
 
   return (
     <nav className={classes}>
