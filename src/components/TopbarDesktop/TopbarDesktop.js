@@ -165,18 +165,18 @@ const TopbarDesktop = props => {
     </NamedLink>
   );
 
-  const listingLink =
-    authenticatedOnClientSide && currentUserListingFetched && currentUserListing ? (
-      <ListingLink
-        className={css.createListingLink}
-        listing={currentUserListing}
-        children={
-          <span className={css.createListing}>
-            <FormattedMessage id="TopbarDesktop.viewListing" />
-          </span>
-        }
-      >
-    ) : null;
+  //const listingLink =
+    //authenticatedOnClientSide && currentUserListingFetched && currentUserListing ? (
+      //<ListingLink
+        //className={css.createListingLink}
+        //listing={currentUserListing}
+        //children={
+          //<span className={css.createListing}>
+            //<FormattedMessage id="TopbarDesktop.viewListing" />
+          //</span>
+        //}
+      //>
+    //) : null;
 
   const createListingLink =
     isAuthenticatedOrJustHydrated && !(currentUserListingFetched && !currentUserListing) ? null : (
