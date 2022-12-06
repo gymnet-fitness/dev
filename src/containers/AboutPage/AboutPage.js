@@ -36,50 +36,34 @@ const AboutPage = () => {
 
         <LayoutWrapperMain className={css.staticPageWrapper}>
           <h1 className={css.pageTitle}>Find new depths in your yoga practice</h1>
-          <img className={css.coverImage} src={image} alt="My first ice cream." />
+          <img className={css.coverImage} src={image} alt="" />
 
           <div className={css.contentWrapper}>
             <div className={css.contentSide}>
-              <p>Yoga was listed by UNESCO as an intangible cultural heritage.</p>
+              <p>GymNet connects people to nearby exercise spaces</p>
             </div>
 
             <div className={css.contentMain}>
               <h2>
-                Each yoga practitioner is an individual, and each one of us needs different care.
-                Working together with an experienced yoga teacher offers the possibility to rise
-                our practise to a whole new level.
+                GymNet aims to make it more convenient and affordable to get in a great workout, and easier for fitness trainers and gym owners to grow their business.
               </h2>
 
-              <p>
-                Whether it is the alignment of asanas or being able to set the focus of the class,
-                we all have our own struggles and goals. Some of these cannot be addressed in a
-                regular class of twenty yogis. Working together with the experienced yoga teachers
-                from Yogatime, you can together create just the right class for you.
-              </p>
-
-              <h3 className={css.subtitle}>Are you a yoga teacher?</h3>
+              <h3 className={css.subtitle}>Are you looking for new ways to be active?</h3>
 
               <p>
-                Yogatime offers you a platform through which you can reach thousands of yoga
-                practitioners. Offering private yoga classes through Yogatime offers you a
-                possibility to grow your customer base and earn some extra income on top of your
-                regular classes.
+                GymNet connects you with a variety of opportunities to be active and add variety to your routine - no membership required! Members simply search for a desired workout and pay per booking.
               </p>
 
               <h3 id="contact" className={css.subtitle}>
-                Create your own marketplace like Yogatime
+                Are you a gym owner or personal trainer?
               </h3>
               <p>
-                Yogatime is brought to you by{' '}
-                <ExternalLink href="http://sharetribe.com">Sharetribe</ExternalLink>. Sharetribe
-                offers anyone a possibility to create a marketplace without restricting your own
-                creativity. Do not hesitate to reach out and learn how to best turn your
-                marketplace idea to reality.
+                GymNet offers you a modern booking platform with direct payouts per booking. Hosts can list multiple spaces, message Members, share via social channels, and set their own prices. GymNet gives you all the modern website functionality to grow your business.
               </p>
               <p>
                 You can also checkout our{' '}
                 <ExternalLink href={siteFacebookPage}>Facebook</ExternalLink> and{' '}
-                <ExternalLink href={siteTwitterPage}>Twitter</ExternalLink>.
+                <ExternalLink href={siteInstagramPage}>Instagram</ExternalLink>.
               </p>
             </div>
           </div>
