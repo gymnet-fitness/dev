@@ -256,7 +256,7 @@ const TermsOfService = props => {
     <p>You assign all rights, title, and interest in any Feedback You provide the Company or Operator. If for any reason such assignment is ineffective, You agree to grant the Company or Operator a non-exclusive, perpetual, irrevocable, royalty-free, worldwide right and license to use, reproduce, disclose, sub-license, distribute, modify and exploit such Feedback without restriction.</p>
     <h1>12 - Changes to these Terms of Service</h1>
     <p>We reserve the right, at Our sole discretion, to modify or replace these Terms at any time. If a revision is material We will make reasonable efforts to provide at least 30 days notice prior to any new terms taking effect. What constitutes a material change will be determined at Our sole discretion.</p>
-    <p>By continuing to access or use Our Service after those revisions become effective, You agree to be bound by the revised terms. If You do not agree to the new terms, in whole or in part,
+    <p>By continuing to access or use Our Service after those revisions become effective, You agree to be bound by the revised terms. If You do not agree to the new terms, in whole or in part, please stop using the Application or Website and the Service.</p>
 </div>
   );
 };
