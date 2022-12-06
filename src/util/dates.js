@@ -9,6 +9,7 @@ import jstz from 'jstimezonedetect';
  */
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
+const timeSlotMinutes = 30;
 
 /**
  * Check that the given parameter is a Date object.
@@ -118,7 +119,7 @@ export const getTimeZoneNames = relevantZonesRegExp => {
  */
 export const localizeAndFormatDate = (intl, timeZone, date, formattingOptions = null) => {
   if (!isTimeZoneSupported()) {
-    throw new Error(`Your browser doesn't support timezones.`);
+    throw new Error(`Your browser does not support timezones.`);
   }
 
   if (!isValidTimeZone(timeZone)) {
