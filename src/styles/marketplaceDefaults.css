@@ -1080,3 +1080,9 @@ textarea {
     margin-top: 32px;
   }
 }
+
+
+/*Additional Customizations*/
+#organization > a > span > img {
+  width: 60px;
+}
