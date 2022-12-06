@@ -80,7 +80,7 @@ const PrivacyPolicy = props => {
         <p>Website refers to GymNet, accessible from https://www.gymnet-fitness.com.</p>
     </li>
     <li>
-        <p>You means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.<br>Under GDPR (General Data Protection Regulation), You can be referred to as the Data Subject or as the User as you are the individual using the Service.</p>
+        <p>You means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable. Under GDPR (General Data Protection Regulation), You can be referred to as the Data Subject or as the User as you are the individual using the Service.</p>
     </li>
 </ul>
 <h1>2 - Contact Us</h1>
