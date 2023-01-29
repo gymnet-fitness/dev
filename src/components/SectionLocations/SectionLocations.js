@@ -10,7 +10,7 @@ import css from './SectionLocations.module.css';
 
 import nyImage from './images/ny-yogi.jpg';
 import laImage from './images/la-yogi.jpg';
-import sfImage from './images/sf-yogi.jpg';
+import atlImage from './images/atl-yogi.jpg';
 
 class LocationImage extends Component {
   render() {
