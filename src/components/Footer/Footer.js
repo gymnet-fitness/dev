@@ -141,7 +141,7 @@ const Footer = props => {
                     name="SearchPage"
                     to={{
                       search:
-                        '?address=Atlanta%2C%20Georgia%2C%20USA&bounds=33.659131%2C-84.526561%2C33.881738%2C-84.348033',
+                        '?address=Atlanta%2C%20Georgia%2C%20USA&bounds=33.659131000000%2C-84.526561000000%2C33.88173000000%2C-84.348033000000',
                     }}
                     className={css.link}
                   >
