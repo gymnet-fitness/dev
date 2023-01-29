@@ -93,7 +93,7 @@ export const filters = [
   },
   {
     id: 'yogaStyles',
-    label: 'Yoga styles',
+    label: 'Workout Types',
     type: 'SelectMultipleFilter',
     group: 'secondary',
     queryParamNames: ['pub_yogaStyles'],
@@ -107,19 +107,22 @@ export const filters = [
       // Note: label is not added through the translation files
       // to make filter customizations a bit easier.
       options: [
-        { key: 'ashtanga', label: 'Ashtanga' },
-        { key: 'hatha', label: 'Hatha' },
-        { key: 'kundalini', label: 'Kundalini' },
-        { key: 'restorative', label: 'Restorative' },
-        { key: 'vinyasa', label: 'Vinyasa' },
-        { key: 'yin', label: 'Yin' },
+        { key: 'cardio', label: 'Cardio' },
+        { key: 'strength', label: 'Strength Training' },
+        { key: 'yoga', label: 'Yoga' },
+        { key: 'hiit', label: 'HIIT' },
+        { key: 'swim', label: 'Swimming' },
+        { key: 'weights', label: 'Weight Lifting' },
+        { key: 'crossfit', label: 'CrossFit' },
+        { key: 'running', label: 'Running' },
+        { key: 'cycling', label: 'Cycling' },
       ],
     },
   },
   {
     id: 'certificate',
-    label: 'Certificate',
-    type: 'SelectSingleFilter',
+    label: 'Training Certificate',
+    type: 'SelectMultipleFilter',
     group: 'secondary',
     queryParamNames: ['pub_certificate'],
     config: {
@@ -129,8 +132,15 @@ export const filters = [
       // to make filter customizations a bit easier.
       options: [
         { key: 'none', label: 'None', hideFromFilters: true, hideFromListingInfo: true },
-        { key: '200h', label: 'Registered yoga teacher 200h' },
-        { key: '500h', label: 'Registered yoga teacher 500h' },
+        { key: 'ACSM', label: 'The American College of Sports Medicine (ACSM)' },
+        { key: 'NSCA', label: 'The National Strength and Conditioning Association (NSCA)' },
+        { key: 'NASM', label: 'The National Academy of Sports Medicine (NASM)' },
+        { key: 'ACE', label: 'The American Council on Exercise Certification (ACE)' },
+        { key: 'RYT', label: 'Registered Yoga Teacher (RYT)' },
+        { key: 'ERYT', label: 'Experienced Registered Yoga Teacher (ERYT)' },
+        { key: 'ISSA', label: 'The International Sports Sciences Association (ISSA)' },
+        { key: 'AFPA', label: 'The American Professionals Fitness and Associates(AFPA)' },
+        { key: 'NFPT', label: 'The National Federation of Professional Trainers (NFPT)' },
       ],
     },
   },
