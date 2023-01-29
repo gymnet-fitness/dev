@@ -53,7 +53,7 @@ const SectionLocations = props => {
         {locationLink(
           'Atlanta',
           atlImage,
-          '?address=Atlanta%2C%20Georgia%2C%20USA&bounds=33.659131%2C-84.526561%2C33.88173%2C-84.348033'
+          '?address=Atlanta%2C%20Georgia%2C%20USA&bounds=33.659131000000%2C-84.526561000000%2C33.88173000000%2C-84.348033000000'
         )}
         {locationLink(
           'Los Angeles',
