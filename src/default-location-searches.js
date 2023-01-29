@@ -9,12 +9,12 @@ const { LatLng, LatLngBounds } = sdkTypes;
 // `predictionPlace` (util.types.place) properties.
 const defaultLocations = [
   {
-    id: 'default-new-york',
+    id: 'default-atlanta',
     predictionPlace: {
-      address: 'New York City, New York, USA',
+      address: 'Atlanta, Georgia, USA',
       bounds: new LatLngBounds(
-        new LatLng(40.917576401307, -73.7008392055224),
-        new LatLng(40.477399, -74.2590879797556)
+          new LatLng(33.659131, -84.526561),
+          new LatLng(33.881738, -84.348033)
       ),
     },
   },
@@ -29,32 +29,32 @@ const defaultLocations = [
     },
   },
   {
-    id: 'default-san-francisco',
+    id: 'default-new-york',
     predictionPlace: {
-      address: 'San Francisco, California, USA',
+      address: 'New York City, New York, USA',
       bounds: new LatLngBounds(
-        new LatLng(37.8324430069081, -122.354995082683),
-        new LatLng(37.6044780500533, -122.517910874663)
+        new LatLng(40.917576401307, -73.7008392055224),
+        new LatLng(40.477399, -74.2590879797556)
       ),
     },
   },
   {
-    id: 'default-seattle',
+    id: 'default-chicago',
     predictionPlace: {
-      address: 'Seattle, Washington, USA',
+      address: 'Chicago, Illinois, USA',
       bounds: new LatLngBounds(
-        new LatLng(47.7779392908564, -122.216605992108),
-        new LatLng(47.3403950185547, -122.441233019046)
+        new LatLng(41.689981, -87.825384),
+        new LatLng(42.031590, -87.31089)
       ),
     },
   },
   {
-    id: 'default-portland',
+    id: 'default-dallas',
     predictionPlace: {
-      address: 'Portland, Oregon, USA',
+      address: 'Dallas, Texas, USA',
       bounds: new LatLngBounds(
-        new LatLng(45.858099013046, -122.441059986416),
-        new LatLng(45.3794799927623, -122.929215816001)
+        new LatLng(32.629726, -96.995265),
+        new LatLng(33.022086, -96.465175)
       ),
     },
   },
