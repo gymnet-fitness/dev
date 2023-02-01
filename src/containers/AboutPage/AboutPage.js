@@ -35,7 +35,7 @@ const AboutPage = () => {
         </LayoutWrapperTopbar>
 
         <LayoutWrapperMain className={css.staticPageWrapper}>
-          <h1 className={css.pageTitle}>Find new depths in your yoga practice</h1>
+         <h1 className={css.pageTitle}>Get in a great workout, wherever you are</h1>
           <img className={css.coverImage} src={image} alt="" />
 
           <div className={css.contentWrapper}>
