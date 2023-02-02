@@ -87,7 +87,12 @@ const Footer = props => {
                   <NamedLink name="NewListingPage" className={css.link}>
                     <FormattedMessage id="Footer.toNewListingPage" />
                   </NamedLink>
-                </li>
+                  </li>
+                  <li className={css.listItem}>
+                  <NamedLink name="Shop" className={css.link}>
+                    <a href='https://shop.gymnet-fitness.com/'>Shop</a>
+                  </NamedLink>
+                  </li>
                 <li className={css.listItem}>
                   <NamedLink name="AboutPage" className={css.link}>
                     <FormattedMessage id="Footer.toAboutPage" />
