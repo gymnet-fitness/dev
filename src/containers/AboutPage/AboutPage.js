@@ -20,7 +20,15 @@ const AboutPage = () => {
 
   // prettier-ignore
   return (
-    <StaticPage>
+    <StaticPage
+      title="About Us"
+      schema={{
+        '@context': 'http://schema.org',
+        '@type': 'AboutPage',
+        description: 'About GymNet',
+        name: 'About page',
+      }}
+    >
       <LayoutSingleColumn>
         <LayoutWrapperTopbar>
           <TopbarContainer />
