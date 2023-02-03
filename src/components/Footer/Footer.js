@@ -103,6 +103,10 @@ const Footer = props => {
                     <FormattedMessage id="Footer.toContactPage" />
                   </NamedLink>
                 </li>
+                <li className={css.listItem}>
+                  <Link name="Shop" href="https://shop.gymnet-fitness.com" className={css.link}>
+                  </Link>
+                </li>
               </ul>
             </div>
             <div className={css.searches}>
