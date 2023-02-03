@@ -43,6 +43,8 @@ import { sendVerificationEmail } from '../../ducks/user.duck';
 import { manageDisableScrolling } from '../../ducks/UI.duck';
 
 import css from './AuthenticationPage.module.css';
+import css from './global.css';
+import css from './normalize.css';
 import { FacebookLogo, GoogleLogo } from './socialLoginLogos';
 
 export class AuthenticationPageComponent extends Component {
@@ -349,6 +351,39 @@ export class AuthenticationPageComponent extends Component {
       </p>
     ) : null;
 
+      document.addEventListener('DOMContentLoaded', async () => {
+
+          // Set your publishable key: remember to change this to your live publishable key in production
+          // Find your keys here: https://dashboard.stripe.com/apikeys
+          const { publishableKey } = await fetch('/config').then(r => r.json());
+          const stripe = Stripe(publishableKey);
+
+          var verifyButton = document.getElementById('verify-button');
+          verifyButton.addEventListener('click', async () => {
+              // Get the VerificationSession client secret using the server-side
+              // endpoint you created in step 3.
+
+              try {
+
+                  // Create the VerificationSession on the server.
+                  const { client_secret } = await fetch('/create-verification-session', {
+                      method: 'POST',
+                  }).then(r => r.json())
+
+                  // Open the modal on the client.
+                  const { error } = await stripe.verifyIdentity(client_secret);
+                  if (!error) {
+                      window.location.href = '/submitted.html';
+                  } else {
+                      alert(error.message);
+                  }
+              } catch (e) {
+                  alert(e.message);
+              }
+          })
+
+      })
+
     const emailVerificationContent = (
       <div className={css.content}>
         <NamedLink className={css.verifyClose} name="ProfileSettingsPage">
@@ -418,7 +453,31 @@ export class AuthenticationPageComponent extends Component {
               <div className={css.termsWrapper}>
                 <h2 className={css.termsHeading}>
                   <FormattedMessage id="AuthenticationPage.termsHeading" />
-                </h2>
+                            </h2>
+                            <div class="sr-root">
+                                <div class="sr-main">
+                                    <section class="container">
+                                        <div>
+                                            <h1>Verify your identity to book</h1>
+                                            <h4>Get ready to take a photo of your ID and a selfie</h4>
+
+                                            <button id="verify-button">Verify me</button>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <div class="sr-root">
+                                <div class="sr-main">
+                                    <section class="container">
+                                        <div>
+                                            <h1>Thanks for submitting your identity document.</h1>
+                                            <p>We are processing your verification.</p>
+
+                                            <a href="/">Restart demo</a>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
                 <TermsOfService />
               </div>
             </Modal>
