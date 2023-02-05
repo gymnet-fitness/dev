@@ -349,8 +349,7 @@ export class AuthenticationPageComponent extends Component {
       </p>
     ) : null;
 
-
-      const emailVerificationContent = (
+    const emailVerificationContent = (
       <div className={css.content}>
         <NamedLink className={css.verifyClose} name="ProfileSettingsPage">
           <span className={css.closeText}>
