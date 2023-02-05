@@ -349,37 +349,47 @@ export class AuthenticationPageComponent extends Component {
       </p>
     ) : null;
 
-    const emailVerificationContent = (
-      <div className={css.content}>
-        <NamedLink className={css.verifyClose} name="ProfileSettingsPage">
-          <span className={css.closeText}>
-            <FormattedMessage id="AuthenticationPage.verifyEmailClose" />
-          </span>
-          <IconClose rootClassName={css.closeIcon} />
-        </NamedLink>
-        <IconEmailSent className={css.modalIcon} />
-        <h1 className={css.modalTitle}>
-          <FormattedMessage id="AuthenticationPage.verifyEmailTitle" values={{ name }} />
-        </h1>
-        <p className={css.modalMessage}>
-          <FormattedMessage id="AuthenticationPage.verifyEmailText" values={{ email }} />
-        </p>
-        {resendErrorMessage}
+      
+          
+      const emailVerificationContent = isUserVerified || this.state.isVerified ? (
+          <div className={css.content}>
+              <NamedLink className={css.verifyClose} name="ProfileSettingsPage">
+                  <span className={css.closeText}>
+                      <FormattedMessage id="AuthenticationPage.verifyEmailClose" />
+                  </span>
+                  <IconClose rootClassName={css.closeIcon} />
+              </NamedLink>
+              <IconEmailSent className={css.modalIcon} />
+              <h1 className={css.modalTitle}>
+                  <FormattedMessage id="AuthenticationPage.verifyEmailTitle" values={{ name }} />
+              </h1>
+              <p className={css.modalMessage}>
+                  <FormattedMessage id="AuthenticationPage.verifyEmailText" values={{ email }} />
+              </p>
+              {resendErrorMessage}
 
-        <div className={css.bottomWrapper}>
-          <p className={css.modalHelperText}>
-            {sendVerificationEmailInProgress ? (
-              <FormattedMessage id="AuthenticationPage.sendingEmail" />
-            ) : (
-              <FormattedMessage id="AuthenticationPage.resendEmail" values={{ resendEmailLink }} />
-            )}
-          </p>
-          <p className={css.modalHelperText}>
-            <FormattedMessage id="AuthenticationPage.fixEmail" values={{ fixEmailLink }} />
-          </p>
-        </div>
-      </div>
-    );
+              <div className={css.bottomWrapper}>
+                  <p className={css.modalHelperText}>
+                      {sendVerificationEmailInProgress ? (
+                          <FormattedMessage id="AuthenticationPage.sendingEmail" />
+                      ) : (
+                              <FormattedMessage id="AuthenticationPage.resendEmail" values={{ resendEmailLink }} />
+                          )}
+                  </p>
+                  <p className={css.modalHelperText}>
+                      <FormattedMessage id="AuthenticationPage.fixEmail" values={{ fixEmailLink }} />
+                  </p>
+              </div>
+          </div>
+      ) : (
+              <VerifyButton
+                  stripePromise={stripePromise}
+                  id={currentUser?.id?.uuid || ''}
+                  inProgress={submitInProgress}
+                  disabled={submitDisabled}
+                  setIsVerified={value => this.setState({ isVerified: value })}
+              />
+          );
 
     const siteTitle = config.siteTitle;
     const schemaTitle = isLogin
