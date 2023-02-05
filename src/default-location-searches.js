@@ -11,10 +11,10 @@ const defaultLocations = [
   {
     id: 'default-atlanta',
     predictionPlace: {
-      address: 'Atlanta, GA, USA',
+      address: 'Atlanta, Georgia, USA',
       bounds: new LatLngBounds(
-          new LatLng(33.659131000001, -84.526561000001),
-          new LatLng(33.881738000001, -84.348033000001)
+          new LatLng(33.659131000000, -84.526561000000),
+          new LatLng(33.881738000000, -84.348033000000)
       ),
     },
   },
