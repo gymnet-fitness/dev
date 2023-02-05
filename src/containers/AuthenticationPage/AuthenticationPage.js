@@ -351,7 +351,7 @@ export class AuthenticationPageComponent extends Component {
 
 
       const emailVerificationContent = (
-          { isUserVerified || this.state.isVerified ? (<div className={css.content}>
+      <div className={css.content}>
         <NamedLink className={css.verifyClose} name="ProfileSettingsPage">
           <span className={css.closeText}>
             <FormattedMessage id="AuthenticationPage.verifyEmailClose" />
@@ -379,15 +379,7 @@ export class AuthenticationPageComponent extends Component {
             <FormattedMessage id="AuthenticationPage.fixEmail" values={{ fixEmailLink }} />
           </p>
         </div>
-          </div>) : (
-                  <VerifyButton
-                      stripePromise={stripePromise}
-                      id={currentUser?.id?.uuid || ''}
-                      inProgress={submitInProgress}
-                      disabled={submitDisabled}
-                      setIsVerified={value => this.setState({ isVerified: value })}
-                  />
-              )}
+      </div>
     );
 
     const siteTitle = config.siteTitle;

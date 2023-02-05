@@ -206,7 +206,8 @@ export class EditListingPhotosFormComponent extends Component {
               {publishListingFailed}
               {showListingFailed}
 
-              <Button
+                  {isUserVerified || this.state.isVerified ? (
+                      <Button
                 className={css.submitButton}
                 type="submit"
                 inProgress={submitInProgress}
@@ -214,7 +215,16 @@ export class EditListingPhotosFormComponent extends Component {
                 ready={submitReady}
               >
                 {saveActionMsg}
-              </Button>
+                      </Button>
+                  ) : (
+                          <VerifyButton
+                              stripePromise={stripePromise}
+                              id={currentUser?.id?.uuid || ''}
+                              inProgress={submitInProgress}
+                              disabled={submitDisabled}
+                              setIsVerified={value => this.setState({ isVerified: value })}
+                          />
+                      )}
             </Form>
           );
         }}
