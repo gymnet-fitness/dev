@@ -49,7 +49,6 @@ import {
   setInitialValues,
   fetchTimeSlots,
   fetchTransactionLineItems,
-  updateLikes,
 } from './ListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
@@ -84,8 +83,7 @@ export class ListingPageComponent extends Component {
     this.state = {
       pageClassNames: [],
       imageCarouselOpen: false,
-        enquiryModalOpen: enquiryModalOpenForListingId === params.id,
-        likesOffset: 0,
+      enquiryModalOpen: enquiryModalOpenForListingId === params.id,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -191,8 +189,6 @@ export class ListingPageComponent extends Component {
       getOwnListing,
       intl,
       onManageDisableScrolling,
-      onUpdateLikes,
-      updateLikesInProgress,
       onFetchTimeSlots,
       params: rawParams,
       location,
@@ -429,10 +425,7 @@ export class ListingPageComponent extends Component {
               <div className={css.contentContainer}>
                 <SectionAvatar user={currentAuthor} params={params} />
                 <div className={css.mainContent}>
-                                <SectionHeading
-                                    likesOffset={this.state.likesOffset}
-                                    onSubtractLike={() => this.setState({ likesOffset: this.state.likesOffset - 1 })}
-                                    onAddLike={() => this.setState({ likesOffset: this.state.likesOffset + 1 })}
+                  <SectionHeading
                     priceTitle={priceTitle}
                     formattedPrice={formattedPrice}
                     richTitle={richTitle}
@@ -440,12 +433,7 @@ export class ListingPageComponent extends Component {
                     certificateOptions={certificateOptions}
                     hostLink={hostLink}
                     showContactUser={showContactUser}
-                                    onContactUser={this.onContactUser}
-                                    publicData={publicData}
-                        onUpdateLikes={onUpdateLikes}
-                                 listingId={listingId.uuid}
-                                 currentUser={currentUser}
-                                 updateLikesInProgress={updateLikesInProgress}
+                    onContactUser={this.onContactUser}
                   />
                   <SectionDescriptionMaybe description={description} />
                   <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
@@ -561,8 +549,7 @@ ListingPageComponent.propTypes = {
   filterConfig: array,
   onFetchTransactionLineItems: func.isRequired,
   lineItems: array,
-    fetchLineItemsInProgress: bool.isRequired,
-    updateLikesInProgress: bool.isRequired,
+  fetchLineItemsInProgress: bool.isRequired,
   fetchLineItemsError: propTypes.error,
 };
 
@@ -615,8 +602,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   onManageDisableScrolling: (componentId, disableScrolling) =>
-        dispatch(manageDisableScrolling(componentId, disableScrolling)),
-    onUpdateLikes: (listingId) => dispatch(updateLikes(listingId)),
+    dispatch(manageDisableScrolling(componentId, disableScrolling)),
   callSetInitialValues: (setInitialValues, values, saveToSessionStorage) =>
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: (bookingData, listingId, isOwnListing) =>
