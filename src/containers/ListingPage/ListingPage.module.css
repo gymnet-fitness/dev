@@ -611,3 +611,29 @@
   word-break: break-word;
   hyphens: auto;
 }
+.heartIcon {
+    border-radius: 11px;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px;
+    &:hover
+
+{
+    background-color: #e3e1e1;
+}
+
+}
+
+.heartDisabled > svg {
+    fill: var(--marketplaceColorLight);
+}
+
+.heartIcon > svg {
+    fill: #fdb7b0;
+    transition: all 0.2s;
+}
+
+.iconLiked > svg {
+    fill: var(--marketplaceColorLight);
+    transition: all 0.2s;
+}

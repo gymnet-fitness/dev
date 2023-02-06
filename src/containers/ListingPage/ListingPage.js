@@ -27,6 +27,12 @@ import {
 import { timestampToDate, calculateQuantityFromHours } from '../../util/dates';
 import { richText } from '../../util/richText';
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
+import {
+    sendEnquiry,
+    fetchTransactionLineItems,
+    setInitialValues,
+    updateLikes,
+} from './ListingPage.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/UI.duck';
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
 import {
@@ -188,7 +194,9 @@ export class ListingPageComponent extends Component {
       getListing,
       getOwnListing,
       intl,
-      onManageDisableScrolling,
+        onManageDisableScrolling,
+          onUpdateLikes,
+     updateLikesInProgress,
       onFetchTimeSlots,
       params: rawParams,
       location,
@@ -202,7 +210,8 @@ export class ListingPageComponent extends Component {
       filterConfig,
       onFetchTransactionLineItems,
       lineItems,
-      fetchLineItemsInProgress,
+        fetchLineItemsInProgress,
+        updateLikesInProgress: bool.isRequired,
       fetchLineItemsError,
     } = this.props;
 
@@ -433,7 +442,12 @@ export class ListingPageComponent extends Component {
                     certificateOptions={certificateOptions}
                     hostLink={hostLink}
                     showContactUser={showContactUser}
-                    onContactUser={this.onContactUser}
+                                    onContactUser={this.onContactUser}
+                                    publicData={publicData}
+                        onUpdateLikes={onUpdateLikes}
+                                 listingId={listingId.uuid}
+                                 currentUser={currentUser}
+                                 updateLikesInProgress={updateLikesInProgress}
                   />
                   <SectionDescriptionMaybe description={description} />
                   <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
@@ -602,7 +616,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   onManageDisableScrolling: (componentId, disableScrolling) =>
-    dispatch(manageDisableScrolling(componentId, disableScrolling)),
+        dispatch(manageDisableScrolling(componentId, disableScrolling)),
+    onUpdateLikes: (listingId) => dispatch(updateLikes(listingId)),
   callSetInitialValues: (setInitialValues, values, saveToSessionStorage) =>
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: (bookingData, listingId, isOwnListing) =>

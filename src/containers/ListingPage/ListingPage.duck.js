@@ -4,6 +4,7 @@ import { types as sdkTypes } from '../../util/sdkLoader';
 import { storableError } from '../../util/errors';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { transactionLineItems } from '../../util/api';
+import { fetchCurrentUser,fetchCurrentUserHasOrdersSuccess,currentUserShowSuccess,} from '../../ducks/user.duck';
 import * as log from '../../util/log';
 import { denormalisedResponseEntities } from '../../util/data';
 import { findNextBoundary, nextMonthFn, monthIdStringInTimeZone } from '../../util/dates';
@@ -35,6 +36,10 @@ export const FETCH_LINE_ITEMS_REQUEST = 'app/ListingPage/FETCH_LINE_ITEMS_REQUES
 export const FETCH_LINE_ITEMS_SUCCESS = 'app/ListingPage/FETCH_LINE_ITEMS_SUCCESS';
 export const FETCH_LINE_ITEMS_ERROR = 'app/ListingPage/FETCH_LINE_ITEMS_ERROR';
 
+export const UPDATE_LIKES_REQUEST = 'app/ListingPage/UPDATE_LIKES_REQUEST';
+export const UPDATE_LIKES_SUCCESS = 'app/ListingPage/UPDATE_LIKES_SUCCESS';
+export const UPDATE_LIKES_ERROR = 'app/ListingPage/UPDATE_LIKES_ERROR';
+
 export const SEND_ENQUIRY_REQUEST = 'app/ListingPage/SEND_ENQUIRY_REQUEST';
 export const SEND_ENQUIRY_SUCCESS = 'app/ListingPage/SEND_ENQUIRY_SUCCESS';
 export const SEND_ENQUIRY_ERROR = 'app/ListingPage/SEND_ENQUIRY_ERROR';
@@ -58,7 +63,9 @@ const initialState = {
   fetchLineItemsError: null,
   sendEnquiryInProgress: false,
   sendEnquiryError: null,
-  enquiryModalOpenForListingId: null,
+    enquiryModalOpenForListingId: null,
+    updateLikesError: null,
+ updateLikesInProgress: false,
 };
 
 const listingPageReducer = (state = initialState, action = {}) => {
@@ -77,7 +84,14 @@ const listingPageReducer = (state = initialState, action = {}) => {
     case FETCH_REVIEWS_SUCCESS:
       return { ...state, reviews: payload };
     case FETCH_REVIEWS_ERROR:
-      return { ...state, fetchReviewsError: payload };
+          return { ...state, fetchReviewsError: payload };
+
+      case UPDATE_LIKES_REQUEST:
+          return { ...state, updateLikesInProgress: true, updateLikesError: null };
+      case UPDATE_LIKES_SUCCESS:
+          return { ...state, updateLikesInProgress: false };
+      case UPDATE_LIKES_ERROR:
+          return { ...state, updateLikesInProgress: false, updateLikesError: payload };
 
     case FETCH_TIME_SLOTS_REQUEST: {
       const monthlyTimeSlots = {
@@ -160,6 +174,20 @@ export const fetchReviewsError = error => ({
   type: FETCH_REVIEWS_ERROR,
   error: true,
   payload: error,
+});
+
+export const updateLikesRequest = params => ({
+    type: UPDATE_LIKES_REQUEST,
+    payload: { params },
+});
+export const updateLikesSuccess = result => ({
+    type: UPDATE_LIKES_SUCCESS,
+    payload: result.data,
+});
+export const updateLikesError = error => ({
+    type: UPDATE_LIKES_ERROR,
+    payload: error,
+    error: true,
 });
 
 export const fetchTimeSlotsRequest = monthId => ({
@@ -249,6 +277,54 @@ export const fetchReviews = listingId => (dispatch, getState, sdk) => {
     })
     .catch(e => {
       dispatch(fetchReviewsError(storableError(e)));
+    });
+};
+
+export const updateLikes = listingId => (dispatch, getState, sdk) => {
+    dispatch(updateLikesRequest());
+
+    return dispatch(fetchCurrentUser()).then(() => {
+        const currentUser = getState().user.currentUser;
+        const currentLikes =
+            currentUser?.attributes?.profile?.privateData?.likedListings;
+
+        const queryParams = {
+            expand: true,
+            include: ['profileImage'],
+            'fields.image': [
+                'variants.square-small',
+                'variants.square-small2x',
+            ],
+        };
+
+        // if listingId already exists in currentLikes, it should be removed from currentLikes
+        // if user has current likes, merge listingId into current likes
+        const ifDislike = !!currentLikes?.includes(listingId);
+        const likedListings = ifDislike
+            ? currentLikes.filter(id => id !== listingId)
+            : currentLikes
+                ? [...currentLikes, listingId]
+                : [listingId];
+
+        return sdk.currentUser
+            .updateProfile({ privateData: { likedListings } }, queryParams)
+            .then(response => {
+                dispatch(updateLikesSuccess(response));
+
+                const entities = denormalisedResponseEntities(response);
+                if (entities.length !== 1) {
+                    throw new Error(
+                        'Expected a resource in the sdk.currentUser.updateProfile response'
+                    );
+                }
+                const currentUser = entities[0];
+
+                // Update current user in state.user.currentUser through user.duck.js
+                dispatch(currentUserShowSuccess(currentUser));
+            })
+            .catch(e => {
+                dispatch(updateLikesError(storableError(e)));
+            });
     });
 };
 

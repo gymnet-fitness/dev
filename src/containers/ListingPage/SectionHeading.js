@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormattedMessage } from '../../util/reactIntl';
 import { InlineTextButton } from '../../components';
-
+import SectionLikes from './SectionLikes';
 import css from './ListingPage.module.css';
 
 const getCertificateInfo = (certificateOptions, key) => {
@@ -14,7 +14,8 @@ const SectionHeading = props => {
     listingCertificate,
     certificateOptions,
     showContactUser,
-    onContactUser,
+      onContactUser,
+      ...rest,
   } = props;
 
   const certificate = getCertificateInfo(certificateOptions, listingCertificate);
@@ -36,7 +37,9 @@ const SectionHeading = props => {
                 <FormattedMessage id="ListingPage.contactUser" />
               </InlineTextButton>
             </span>
-          ) : null}
+                  ) : null}
+                  <span className={css.separator}>•</span>
+                  +         <SectionLikes {...rest} />
         </div>
       </div>
     </div>
