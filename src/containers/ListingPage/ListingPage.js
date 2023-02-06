@@ -84,7 +84,8 @@ export class ListingPageComponent extends Component {
     this.state = {
       pageClassNames: [],
       imageCarouselOpen: false,
-      enquiryModalOpen: enquiryModalOpenForListingId === params.id,
+        enquiryModalOpen: enquiryModalOpenForListingId === params.id,
+        likesOffset: 0,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -429,7 +430,10 @@ export class ListingPageComponent extends Component {
               <div className={css.contentContainer}>
                 <SectionAvatar user={currentAuthor} params={params} />
                 <div className={css.mainContent}>
-                  <SectionHeading
+                                <SectionHeading
+                                    likesOffset={this.state.likesOffset}
+                                    onSubtractLike={() => this.setState({ likesOffset: this.state.likesOffset - 1 })}
+                                    onAddLike={() => this.setState({ likesOffset: this.state.likesOffset + 1 })}
                     priceTitle={priceTitle}
                     formattedPrice={formattedPrice}
                     richTitle={richTitle}

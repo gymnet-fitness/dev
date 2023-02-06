@@ -19,6 +19,7 @@ const IconHeart = () => {
 
 const currentLikes =
     currentUser?.attributes?.profile?.privateData?.likedListings;
+const alreadyLiked = currentLikes?.includes(listingId);
 
 const SectionLikes = props => {
     const {
@@ -26,20 +27,30 @@ const SectionLikes = props => {
         onUpdateLikes,
        listingId,
            currentUser,
-           updateLikesInProgress,
+        updateLikesInProgress,
+        likesOffset,
+   onAddLike,
+           onSubtractLike,
     } = props;
 
     const likes = publicData?.likes ? publicData.likes : 0;
+    const classes = classNames(currentUser ? css.heartIcon : css.heartDisabled, alreadyLiked ? css.iconLiked : null)
 
     return (
-        <span className={css.heartIcon}
+        <span className={classes}
             onClick={() => {
                    if (!updateLikesInProgress && currentUser) {
-                        onUpdateLikes(listingId);
+                       onUpdateLikes(listingId);
+                       if (alreadyLiked) {
+                                     onSubtractLike();
+                                    }
+                                else {
+                                  onAddLike();
+                                }
                         }
                   }}>
         >
-            <IconHeart /> {likes}
+            <IconHeart /> {likes + likesOffset}
         </span>
     );
 };
