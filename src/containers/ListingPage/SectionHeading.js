@@ -39,7 +39,7 @@ const SectionHeading = props => {
             </span>
                   ) : null}
                   <span className={css.separator}>•</span>
-                  +         <SectionLikes {...rest} />
+                           <SectionLikes {...rest} />
         </div>
       </div>
     </div>
