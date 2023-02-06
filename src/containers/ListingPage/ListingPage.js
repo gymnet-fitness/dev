@@ -48,8 +48,8 @@ import {
   sendEnquiry,
   setInitialValues,
   fetchTimeSlots,
-    fetchTransactionLineItems,
-    updateLikes,
+  fetchTransactionLineItems,
+  updateLikes,
 } from './ListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
@@ -190,9 +190,9 @@ export class ListingPageComponent extends Component {
       getListing,
       getOwnListing,
       intl,
-        onManageDisableScrolling,
-          onUpdateLikes,
-     updateLikesInProgress,
+      onManageDisableScrolling,
+      onUpdateLikes,
+      updateLikesInProgress,
       onFetchTimeSlots,
       params: rawParams,
       location,
@@ -206,8 +206,7 @@ export class ListingPageComponent extends Component {
       filterConfig,
       onFetchTransactionLineItems,
       lineItems,
-        fetchLineItemsInProgress,
-        updateLikesInProgress: bool.isRequired,
+      fetchLineItemsInProgress,
       fetchLineItemsError,
     } = this.props;
 
@@ -562,7 +561,8 @@ ListingPageComponent.propTypes = {
   filterConfig: array,
   onFetchTransactionLineItems: func.isRequired,
   lineItems: array,
-  fetchLineItemsInProgress: bool.isRequired,
+    fetchLineItemsInProgress: bool.isRequired,
+    updateLikesInProgress: bool.isRequired,
   fetchLineItemsError: propTypes.error,
 };
 
