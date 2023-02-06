@@ -19,6 +19,13 @@ export const apiBaseUrl = () => {
   return `${window.location.origin}`;
 };
 
+// Check if user can be deleted and then delete the user. Endpoint logic
+  // must be modified to accommodate the transaction processes used in
+      // the marketplace.
+      export const deleteUserAccount = body => {
+            return post('/api/delete-account', body);
+          }
+
 // Application type handlers for JS SDK.
 //
 // NOTE: keep in sync with `typeHandlers` in `server/api-util/sdk.js`
