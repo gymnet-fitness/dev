@@ -27,12 +27,6 @@ import {
 import { timestampToDate, calculateQuantityFromHours } from '../../util/dates';
 import { richText } from '../../util/richText';
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
-import {
-    sendEnquiry,
-    fetchTransactionLineItems,
-    setInitialValues,
-    updateLikes,
-} from './ListingPage.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/UI.duck';
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
 import {
@@ -54,7 +48,8 @@ import {
   sendEnquiry,
   setInitialValues,
   fetchTimeSlots,
-  fetchTransactionLineItems,
+    fetchTransactionLineItems,
+    updateLikes,
 } from './ListingPage.duck';
 import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
