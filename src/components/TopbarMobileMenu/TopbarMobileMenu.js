@@ -117,8 +117,7 @@ const TopbarMobileMenu = props => {
         >
           <FormattedMessage id="TopbarMobileMenu.accountSettingsLink" />
               </NamedLink>
-              <ExternalLink>
-                  <a href="https://shop.gymnet-fitness.com">Visit Shop</a>
+              <ExternalLink href="https://shop.gymnet-fitness.com">Visit Shop
               </ExternalLink>
       </div>
       <div className={css.footer}>
