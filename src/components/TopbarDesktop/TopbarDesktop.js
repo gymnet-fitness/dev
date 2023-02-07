@@ -118,13 +118,7 @@ const TopbarDesktop = props => {
           </NamedLink>
               </MenuItem>
               <MenuItem key="VisitShop">
-                  <NamedLink
-                      className={css.yourListingsLink}
-                      name="VisitShop"
-                  >
-                      <span className={css.menuItemBorder} />
-                      <FormattedMessage id="TopbarDesktop.VisitShop" />
-                  </NamedLink>
+                  <ExternalLink href="https://shop.gymnet-fitness.com">Visit Shop</ExternalLink>
               </MenuItem>
         <MenuItem key="logout">
           <InlineTextButton rootClassName={css.logoutButton} onClick={onLogout}>
