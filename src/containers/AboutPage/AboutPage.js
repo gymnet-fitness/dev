@@ -35,49 +35,40 @@ const AboutPage = () => {
         </LayoutWrapperTopbar>
 
         <LayoutWrapperMain className={css.staticPageWrapper}>
-          <h1 className={css.pageTitle}>Find new depths in your yoga practice</h1>
-          <img className={css.coverImage} src={image} alt="My first ice cream." />
+          <h1 className={css.pageTitle}>Discover new ways to work out with GymNet</h1>
+          <img className={css.coverImage} src={image} alt="Athlete" />
 
           <div className={css.contentWrapper}>
             <div className={css.contentSide}>
-              <p>Yoga was listed by UNESCO as an intangible cultural heritage.</p>
+              <p>"Cross-training is crucial to staying healthy and giving my body a break. With GymNet, I can easily incorporate a spin or elliptical session into my training when I need it without the hassle of joining a gym!" - Elizabeth Laseter, competitive runner and beer miler</p>
             </div>
 
             <div className={css.contentMain}>
               <h2>
-                Each yoga practitioner is an individual, and each one of us needs different care.
-                Working together with an experienced yoga teacher offers the possibility to rise
-                our practise to a whole new level.
+                Each of us is an individual, and each one of us needs variety in our fitness routine to grow and challenge ourselves.
+                With GymNet, athletes in the US can discover new fitness styles and options near them without the need for a monthly membership or expensive equipment.
               </h2>
 
               <p>
-                Whether it is the alignment of asanas or being able to set the focus of the class,
-                we all have our own struggles and goals. Some of these cannot be addressed in a
-                regular class of twenty yogis. Working together with the experienced yoga teachers
-                from Yogatime, you can together create just the right class for you.
+                Whether you're looking to try out the latest cardio equipment, want to get in a low-impact swim, or even work with a personal trainer, GymNet is here to help.
+                Our site makes it simple and fast to browse, book, pay and review all in one place so you can focus on getting in the best shape of your life.              
               </p>
 
-              <h3 className={css.subtitle}>Are you a yoga teacher?</h3>
+              <h3 className={css.subtitle}>Are you a trainer or gym owner?</h3>
 
               <p>
-                Yogatime offers you a platform through which you can reach thousands of yoga
-                practitioners. Offering private yoga classes through Yogatime offers you a
-                possibility to grow your customer base and earn some extra income on top of your
-                regular classes.
+                GymNet offers you a platform through which you can connect with nearby athletes. Offering private sessions through GymNet offers you a
+                possibility to grow your customer base and earn some extra revenue on top of your main income.
               </p>
 
               <h3 id="contact" className={css.subtitle}>
-                Create your own marketplace like Yogatime
+                Get In Touch
               </h3>
               <p>
-                Yogatime is brought to you by{' '}
-                <ExternalLink href="http://sharetribe.com">Sharetribe</ExternalLink>. Sharetribe
-                offers anyone a possibility to create a marketplace without restricting your own
-                creativity. Do not hesitate to reach out and learn how to best turn your
-                marketplace idea to reality.
+                Have questions? Send us a message at liz@gymnet-fitness.com or via social media below.
               </p>
               <p>
-                You can also checkout our{' '}
+                Follow us on {' '}
                 <ExternalLink href={siteFacebookPage}>Facebook</ExternalLink> and{' '}
                 <ExternalLink href={siteTwitterPage}>Twitter</ExternalLink>.
               </p>
