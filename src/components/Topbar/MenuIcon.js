@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { IconPng } from '/public/static/icons/android-chrome-384x384.png'
+import { IconPng } from './android-chrome-384x384.png'
 import css from './Topbar.module.css';
 
 const MenuIcon = props => {
