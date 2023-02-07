@@ -14,7 +14,7 @@ const MenuIcon = props => {
       width="18"
       height="12"
       viewBox="0 0 18 12"
-      xmlns="http://www.w3.org/2000/svg"
+          xmlns="/public/static/icons/android-chrome-384x384.png"
     >
       <g fillRule="evenodd">
         <rect width="18" height="2" rx="1" />
