@@ -125,7 +125,7 @@ const TopbarDesktop = props => {
         </MenuItem>
               <MenuItem>
                   <ExternalLink className={css.ExternalLink}>
-                      <a href="https://shop.gymnet-fitness.com">Shop</a>
+                      <a href="https://shop.gymnet-fitness.com">Visit Shop</a>
                       <span className={css.menuItemBorder} />
                   </ExternalLink>
               </MenuItem>
