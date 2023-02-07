@@ -124,8 +124,10 @@ const TopbarDesktop = props => {
           </InlineTextButton>
         </MenuItem>
               <MenuItem>
-                  <ExternalLink className={css.ExternalLink} href="https://shop.gymnet-fitness.com">
-                      <span className={css.menuItemBorder} />Shop</ExternalLink>
+                  <ExternalLink className={css.ExternalLink}>
+                      <a href="https://shop.gymnet-fitness.com">Shop</a>
+                      <span className={css.menuItemBorder} />
+                  </ExternalLink>
               </MenuItem>
       </MenuContent>
     </Menu>
