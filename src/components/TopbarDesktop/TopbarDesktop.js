@@ -123,6 +123,10 @@ const TopbarDesktop = props => {
             <FormattedMessage id="TopbarDesktop.logout" />
           </InlineTextButton>
         </MenuItem>
+              <MenuItem>
+                  <ExternalLink className={css.ExternalLink} href="https://shop.gymnet-fitness.com">
+                      <span className={css.menuItemBorder} />Shop</ExternalLink>
+              </MenuItem>
       </MenuContent>
     </Menu>
   ) : null;
