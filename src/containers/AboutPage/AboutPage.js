@@ -65,7 +65,7 @@ const AboutPage = () => {
                 Get In Touch
               </h3>
                           <p>
-                              Have questions? <a class={css.ExternalLink} href="mailto: liz@gymnet-fitness.com">Send Us An Email</a>or reach out via social media below.
+                              Have questions? <a class={css.ExternalLink} href="mailto: liz@gymnet-fitness.com">Send Us An Email</a> or reach out via social media below.
               </p>
               <p>
                 Follow us on {' '}
