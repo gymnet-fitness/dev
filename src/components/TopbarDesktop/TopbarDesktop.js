@@ -116,19 +116,23 @@ const TopbarDesktop = props => {
             <span className={css.menuItemBorder} />
             <FormattedMessage id="TopbarDesktop.accountSettingsLink" />
           </NamedLink>
-        </MenuItem>
+              </MenuItem>
+              <MenuItem key="VisitShop">
+                  <NamedLink
+                      className={css.yourListingsLink}
+                      name="VisitShop"
+                  >
+                      <span className={css.menuItemBorder} />
+                      <FormattedMessage id="TopbarDesktop.VisitShop" />
+                  </NamedLink>
+              </MenuItem>
         <MenuItem key="logout">
           <InlineTextButton rootClassName={css.logoutButton} onClick={onLogout}>
             <span className={css.menuItemBorder} />
             <FormattedMessage id="TopbarDesktop.logout" />
           </InlineTextButton>
         </MenuItem>
-              <MenuItem>
-                  <ExternalLink className={css.ExternalLink}>
-                      <a href="https://shop.gymnet-fitness.com">Visit Shop</a>
-                      <span className={css.menuItemBorder} />
-                  </ExternalLink>
-              </MenuItem>
+        
       </MenuContent>
     </Menu>
   ) : null;
