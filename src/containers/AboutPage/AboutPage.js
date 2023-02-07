@@ -64,8 +64,8 @@ const AboutPage = () => {
               <h3 id="contact" className={css.subtitle}>
                 Get In Touch
               </h3>
-              <p>
-                Have questions? Send us a message at liz@gymnet-fitness.com or via social media below.
+                          <p>
+                              Have questions? <a class={css.ExternalLink} href="mailto: liz@gymnet-fitness.com">Send Us An Email</a>or reach out via social media below.
               </p>
               <p>
                 Follow us on {' '}
