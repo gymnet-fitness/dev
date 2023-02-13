@@ -27,4 +27,4 @@ MenuIcon.propTypes = {
   rootClassName: string,
 };
 
-export default Logo;
+export default MenuIcon;
