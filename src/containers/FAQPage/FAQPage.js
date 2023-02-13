@@ -30,8 +30,9 @@ const FAQPage = () => {
           </div>
           <div>
             <h3>What safety measures are in place?</h3>
-            <p>We take the safety of our hosts and members very seriously at GymNet. Currently, we strongly recommended all hosts to have active renters' insurance to protect them in the case of unexpected issues.</p>
-            <p>In the near future, GymNet plans to provide liability and property insurance for hosts and members automatically as part of our services.</p>
+                      <p>We take the safety of our hosts and members very seriously at GymNet. All GymNet Hosts undergo identity verification and a rigorous background check through our partner, <a class={css.ExternalLink} href="https://checkr.com/">Checkr</a>. Additionally, all host listings go through a screening process before being available for booking.</p>< br />
+                      <p>All Hosts have control over which booking requests they accept or deny. When a booking is approved, the member receives a confirmation message either through the website, email, or SMS.</p>
+            <p>GymNet will soon include Host liability and property coverage through our services.</p>
           </div>
           <div>
             <h3>Can hosts control who books with them?</h3>
