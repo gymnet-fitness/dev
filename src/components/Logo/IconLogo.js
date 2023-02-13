@@ -7,12 +7,12 @@ const IconLogo = props => {
 
   if (format === 'desktop') {
     return (
-        <img src={LogoImage} alt="Logo" />;
+        <img src={LogoImage} alt="Logo" />
     );
   }
 
   return (
-      <img src={LogoImage} alt="Logo" />;
+      <img src={LogoImage} alt="Logo" />
   );
 };
 
