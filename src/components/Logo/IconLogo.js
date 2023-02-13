@@ -26,4 +26,4 @@ IconLogo.propTypes = {
   className: string,
 };
 
-export default IconLogo;
+export default LogoImage;
