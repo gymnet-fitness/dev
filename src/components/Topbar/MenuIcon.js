@@ -11,7 +11,7 @@ const MenuIcon = props => {
   const { className, rootClassName } = props;
   const classes = classNames(rootClassName || css.rootMenuIcon, className);
 
-    console.log(Logo);
+    
     return <img src={Logo} alt="Logo" />;
 };
 
