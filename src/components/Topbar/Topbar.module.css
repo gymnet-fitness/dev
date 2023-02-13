@@ -258,6 +258,6 @@
   }
 }
 
-a #Topbar_home__rHKwi NamedLink_active > svg {
+a.Topbar_home__rHKwi > svg {
     display: none!important;
 }
