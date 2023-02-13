@@ -257,3 +257,7 @@
     margin: 0;
   }
 }
+
+a #Topbar_home__rHKwi NamedLink_active > svg {
+    display: none!important;
+}
