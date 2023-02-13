@@ -34,8 +34,11 @@ const AboutPage = () => {
           <TopbarContainer />
         </LayoutWrapperTopbar>
 
-        <LayoutWrapperMain className={css.staticPageWrapper}>
-          <h1 className={css.pageTitle}>Discover new ways to work out with GymNet</h1>
+              <LayoutWrapperMain className={css.staticPageWrapper}>
+                  <h1 className={css.pageTitle}>The GymNet Philosophy</h1>
+
+
+                  <h1 className={css.pageTitle}>Discover new ways to work out with GymNet</h1>
           <img className={css.coverImage} src={image} alt="Athlete" />
 
           <div className={css.contentWrapper}>
