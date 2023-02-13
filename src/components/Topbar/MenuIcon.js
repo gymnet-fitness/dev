@@ -12,7 +12,7 @@ const MenuIcon = props => {
   const classes = classNames(rootClassName || css.rootMenuIcon, className);
 
     console.log(Logo);
-    return <img src={logo} alt="Logo" />;
+    return <img src={Logo} alt="Logo" />;
 };
 
 const { string } = PropTypes;
