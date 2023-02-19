@@ -434,7 +434,7 @@ export class ListingPageComponent extends Component {
                     richTitle={richTitle}
                     listingCertificate={publicData ? publicData.certificate : null}
                                     certificateOptions={certificateOptions}
-                                    recognitionOptions={publicData ? publicData.recognition : null}
+                                    recognitionOptions={recognitionOptions}
                     hostLink={hostLink}
                     showContactUser={showContactUser}
                     onContactUser={this.onContactUser}
