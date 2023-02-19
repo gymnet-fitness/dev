@@ -441,7 +441,7 @@ export class ListingPageComponent extends Component {
                   />
                   <SectionDescriptionMaybe description={description} />
                                 <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
-                                <SectionRecognitionMaybe options=recognitionOptions} publicData={publicData} />
+                                <SectionRecognitionMaybe options={recognitionOptions} publicData={publicData} />
                                 
                   <SectionMapMaybe
                     geolocation={geolocation}
