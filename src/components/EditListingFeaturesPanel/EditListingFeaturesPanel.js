@@ -58,10 +58,10 @@ const EditListingFeaturesPanel = props => {
         name={FEATURES_NAME}
         initialValues={initialValues}
         onSubmit={values => {
-          const { yogaStyles = [] } = values;
+          const { yogaStyles = [], website = '' } = values;
 
           const updatedValues = {
-            publicData: { yogaStyles },
+            publicData: { yogaStyles, website },
           };
           onSubmit(updatedValues);
         }}
