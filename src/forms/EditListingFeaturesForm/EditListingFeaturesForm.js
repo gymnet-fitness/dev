@@ -64,17 +64,13 @@ const EditListingFeaturesFormComponent = props => (
               <FieldCheckboxGroup className={css.features} id={name} name={name} options={options} />
 
               <FieldCheckboxGroup
-                  className={css.features}
+                  className={css.recognition}
                   name={recognitionKey}
                   id={recognitionKey}
+                  options={recognitionOptions}
                   label={'Recognitions and Awards'}
-              >
-                  {recognitionOptions.map(o => (
-                      <option key={o.key} value={o.key}>
-                          {o.label}
-                      </option>
-                  ))}
-              </FieldCheckboxGroup>
+              />
+                 
 
           <Button
             className={css.submitButton}
