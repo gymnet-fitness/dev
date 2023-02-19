@@ -118,7 +118,28 @@ export const filters = [
         { key: 'cycling', label: 'Cycling' },
       ],
     },
-  },
+    },
+    {
+        id: 'recognition',
+        label: 'Recognition',
+        type: 'SelectMultipleFilter',
+        group: 'secondary',
+        queryParamNames: ['pub_recognition'],
+        config: {
+            // Schema type is enum for SelectSingleFilter
+            schemaType: 'enum',
+            options: [
+                { key: 'blackowned', label: 'Black Owned' },
+                { key: 'womenowned', label: 'Women Owned' },
+                { key: 'minorityowned', label: 'Minority Owned' },
+                { key: 'veteranowned', label: 'Veteran Owned' },
+                { key: 'familyowned', label: 'Family Owned' },
+                { key: 'localbusiness', label: 'Locally Owned' },
+                { key: 'bestof', label: 'Best of the City Award' },
+                { key: 'classpass', label: 'ClassPass Top Rated' },
+            ],
+        },
+    },
   {
     id: 'certificate',
     label: 'Training Certificate',
