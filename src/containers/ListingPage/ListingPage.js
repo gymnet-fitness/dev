@@ -434,14 +434,14 @@ export class ListingPageComponent extends Component {
                     richTitle={richTitle}
                     listingCertificate={publicData ? publicData.certificate : null}
                                    
-                                    recognitionOptions={recognitionOptions}
+                                    recognitionOptions={publicData ? publicData.recognition : null}
                     hostLink={hostLink}
                     showContactUser={showContactUser}
                     onContactUser={this.onContactUser}
                   />
                   <SectionDescriptionMaybe description={description} />
                                 <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
-                                <SectionRecognitionMaybe options={recognitionOptions} publicData={publicData} />
+                                
                                 
                   <SectionMapMaybe
                     geolocation={geolocation}
