@@ -64,7 +64,7 @@ const EditListingFeaturesFormComponent = props => (
               <FieldCheckboxGroup className={css.features} id={name} name={name} options={options} />
 
               <FieldCheckboxGroup
-                  className={css.recognition}
+                  className={css.features}
                   name={recognitionKey}
                   id={recognitionKey}
                   options={recognitionOptions}
