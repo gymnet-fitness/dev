@@ -50,7 +50,7 @@ const EditListingFeaturesPanel = props => {
     const yogaStyles = publicData && publicData.yogaStyles;
     const recognition = publicData && publicData.recognition;
     const classtype = publicData && publicData.classtype;
-  const initialValues = { yogaStyles, recognition };
+  const initialValues = { yogaStyles, recognition, classtype };
 
   return (
     <div className={classes}>
