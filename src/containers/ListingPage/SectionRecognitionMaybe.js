@@ -1,34 +1,29 @@
 ﻿import React from 'react';
 import { FormattedMessage } from '../../util/reactIntl';
+import { PropertyGroup } from '../../components';
 
-// Import css from existing CSS Modules file:
 import css from './ListingPage.module.css';
 
-// Create new React component
 const SectionRecognitionMaybe = props => {
-    // Component's props should include all the possible options (from config)
-    // and listing's publicData
     const { options, publicData } = props;
-    const selectedOption =
-        publicData && publicData.recognition ? publicData.recognition : null;
-
-    // Don't return anything if public data doesn't contain view field
-    // That's why we named this component as SectionRecognitionMaybe
-    if (!publicData || !selectedOption) {
+    if (!publicData) {
         return null;
     }
 
-    // Find selected options label
-    const optionConfig = options.find(o => o.key === selectedOption);
-    const optionLabel = optionConfig ? optionConfig.label : null;
+    const selectedOptions = publicData && publicData.recognition ? publicData.recognition : [];
+    const selectedConfigOptions = options.filter(o => selectedOptions.find(s => s === o.key));
+
     return (
         <div className={css.sectionFeatures}>
-            <h2>
-                <FormattedMessage
-                    id="ListingPage.recognitionType"
-                    values={{ recognition: optionLabel.toLowerCase() }}
-                />
+            <h2 className={css.featuresTitle}>
+                <FormattedMessage id="ListingPage.featuresTitle" />
             </h2>
+            <PropertyGroup
+                id="ListingPage.recognition"
+                options={selectedConfigOptions}
+                selectedOptions={selectedOptions}
+                twoColumns={selectedConfigOptions.length > 5}
+            />
         </div>
     );
 };
