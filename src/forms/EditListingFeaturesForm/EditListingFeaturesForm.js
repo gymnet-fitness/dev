@@ -63,7 +63,7 @@ const EditListingFeaturesFormComponent = props => (
 
               <FieldCheckboxGroup className={css.features} id={name} name={name} options={options} />
 
-              <FieldSelect
+              <FieldCheckboxGroup
                   className={css.features}
                   name={recognitionKey}
                   id={recognitionKey}
@@ -74,7 +74,7 @@ const EditListingFeaturesFormComponent = props => (
                           {o.label}
                       </option>
                   ))}
-              </FieldSelect>
+              </FieldCheckboxGroup>
 
           <Button
             className={css.submitButton}
