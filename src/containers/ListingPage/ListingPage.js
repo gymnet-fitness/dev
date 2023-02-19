@@ -433,7 +433,7 @@ export class ListingPageComponent extends Component {
                     formattedPrice={formattedPrice}
                     richTitle={richTitle}
                     listingCertificate={publicData ? publicData.certificate : null}
-                                    certificateOptions={certificateOptions}
+                                   
                                     recognitionOptions={recognitionOptions}
                     hostLink={hostLink}
                     showContactUser={showContactUser}
@@ -441,6 +441,7 @@ export class ListingPageComponent extends Component {
                   />
                   <SectionDescriptionMaybe description={description} />
                                 <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
+                                <SectionRecognitionMaybe options=recognitionOptions} publicData={publicData} />
                                 
                   <SectionMapMaybe
                     geolocation={geolocation}
