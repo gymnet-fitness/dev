@@ -47,8 +47,9 @@ const EditListingFeaturesPanel = props => {
     <FormattedMessage id="EditListingFeaturesPanel.createListingTitle" />
   );
 
-  const yogaStyles = publicData && publicData.yogaStyles;
-  const initialValues = { yogaStyles };
+    const yogaStyles = publicData && publicData.yogaStyles;
+    const website = publicData && publicData.view;
+  const initialValues = { yogaStyles, website };
 
   return (
     <div className={classes}>
