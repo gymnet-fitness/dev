@@ -13,7 +13,7 @@ exports[`TopbarDesktop data matches snapshot 1`] = `
     style={Object {}}
     title={null}
   >
-    <img src="logo.png" alt="Logo" width="25" height="25">
+    <img src="./logo.png" alt="Logo" width="25" height="25">
   </a>
   <form
     action="/"
