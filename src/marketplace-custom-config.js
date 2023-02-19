@@ -183,7 +183,7 @@ export const filters = [
         queryParamNames: ['pub_classtype'],
         config: {
             // Schema type is enum for SelectSingleFilter
-            
+            schemaType: 'enum',
             options: [
                 { key: 'virtual', label: 'Virtual Classes' },
                 { key: 'group', label: 'Group Class' },

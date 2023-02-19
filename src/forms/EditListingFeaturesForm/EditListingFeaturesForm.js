@@ -56,6 +56,10 @@ const EditListingFeaturesFormComponent = props => (
         const recognitionKey = 'recognition';
         const recognitionOptions = findOptionsForSelectFilter(recognitionKey, filterConfig);
 
+        // Props for "classtype" select field
+        const classtypeKey = 'classtype';
+        const classtypeOptions = findOptionsForSelectFilter(classtypeKey, filterConfig);
+
       return (
         <Form className={classes} onSubmit={handleSubmit}>
           {errorMessage}
@@ -70,7 +74,19 @@ const EditListingFeaturesFormComponent = props => (
                   options={recognitionOptions}
                   label={'Recognitions and Awards'}
               />
-              
+
+              <FieldSelect
+                  className={css.features}
+                  name={classtypeKey}
+                  id={classtypeKey}
+                  label={'Class Environment'}
+              >
+                  {classtypeOptions.map(o => (
+                      <option key={o.key} value={o.key}>
+                          {o.label}
+                      </option>
+                  ))}
+              </FieldSelect>
 
           <Button
             className={css.submitButton}
