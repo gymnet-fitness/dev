@@ -136,7 +136,7 @@ export const filters = [
         queryParamNames: ['pub_recognition'],
         config: {
             // Schema type is enum for SelectSingleFilter
-            schemaType: 'multi-enum',
+            
             searchMode: 'has_any',
             options: [
                 { key: 'blackowned', label: 'Black Owned' },
@@ -183,7 +183,7 @@ export const filters = [
         queryParamNames: ['pub_classtype'],
         config: {
             // Schema type is enum for SelectSingleFilter
-            schemaType: 'enum',
+            
             options: [
                 { key: 'virtual', label: 'Virtual Classes' },
                 { key: 'group', label: 'Group Class' },
