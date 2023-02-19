@@ -136,7 +136,8 @@ export const filters = [
         queryParamNames: ['pub_recognition'],
         config: {
             // Schema type is enum for SelectSingleFilter
-            schemaType: 'enum',
+            schemaType: 'multi-enum',
+            searchMode: 'has_any',
             options: [
                 { key: 'blackowned', label: 'Black Owned' },
                 { key: 'womenowned', label: 'Women Owned' },
@@ -173,7 +174,23 @@ export const filters = [
         { key: 'NFPT', label: 'The National Federation of Professional Trainers (NFPT)' },
       ],
     },
-  },
+    },
+    {
+        id: 'classtype',
+        label: 'Class Environment',
+        type: 'SelectSingleFilter',
+        group: 'secondary',
+        queryParamNames: ['pub_classtype'],
+        config: {
+            // Schema type is enum for SelectSingleFilter
+            schemaType: 'enum',
+            options: [
+                { key: 'virtual', label: 'Virtual Classes' },
+                { key: 'group', label: 'Group Class' },
+                { key: 'personal', label: 'Personal Training' },
+            ],
+        },
+    },
 ];
 
 export const sortConfig = {

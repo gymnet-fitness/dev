@@ -54,6 +54,7 @@ import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
 import SectionDescriptionMaybe from './SectionDescriptionMaybe';
+import SectionClasstypeMaybe from './SectionClasstypeMaybe';
 import SectionFeaturesMaybe from './SectionFeaturesMaybe';
 import SectionReviews from './SectionReviews';
 import SectionRecognitionMaybe from './SectionRecognitionMaybe';
@@ -386,6 +387,7 @@ export class ListingPageComponent extends Component {
 
       const yogaStylesOptions = findOptionsForSelectFilter('yogaStyles', filterConfig);
       const recognitionOptions = findOptionsForSelectFilter('recognition', filterConfig);
+      const classtypeOptions = findOptionsForSelectFilter('classtype', filterConfig);
       
     const certificateOptions = findOptionsForSelectFilter('certificate', filterConfig);
 
@@ -439,7 +441,8 @@ export class ListingPageComponent extends Component {
                     showContactUser={showContactUser}
                     onContactUser={this.onContactUser}
                   />
-                  <SectionDescriptionMaybe description={description} />
+                                <SectionDescriptionMaybe description={description} />
+                                <SectionClasstypeMaybe options={classtypeOptions} publicData={publicData} />
                                 <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
                                 <SectionRecognitionMaybe options={recognitionOptions} publicData={publicData} />
                                 

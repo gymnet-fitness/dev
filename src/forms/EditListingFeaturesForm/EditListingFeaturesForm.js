@@ -70,7 +70,18 @@ const EditListingFeaturesFormComponent = props => (
                   options={recognitionOptions}
                   label={'Recognitions and Awards'}
               />
-                 
+              <FieldSelect
+                  className={css.features}
+                  name={classtypeKey}
+                  id={classtypeKey}
+                  label={'Class Environment'}
+              >
+                  {classtypeOptions.map(o => (
+                      <option key={o.key} value={o.key}>
+                          {o.label}
+                      </option>
+                  ))}
+              </FieldSelect> 
 
           <Button
             className={css.submitButton}
