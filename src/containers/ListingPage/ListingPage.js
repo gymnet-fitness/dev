@@ -55,7 +55,6 @@ import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
 import SectionDescriptionMaybe from './SectionDescriptionMaybe';
 import SectionFeaturesMaybe from './SectionFeaturesMaybe';
-import SectionWebsiteMaybe from './SectionViewMaybe';
 import SectionReviews from './SectionReviews';
 import SectionMapMaybe from './SectionMapMaybe';
 import css from './ListingPage.module.css';
@@ -442,8 +441,7 @@ export class ListingPageComponent extends Component {
                     geolocation={geolocation}
                     publicData={publicData}
                     listingId={currentListing.id}
-                                />
-                                <SectionWebsiteMaybe website={website} publicData={publicData} />
+                  />
                   <SectionReviews reviews={reviews} fetchReviewsError={fetchReviewsError} />
                 </div>
                 <BookingPanel

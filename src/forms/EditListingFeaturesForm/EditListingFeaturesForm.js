@@ -57,16 +57,7 @@ const EditListingFeaturesFormComponent = props => (
 
               <FieldCheckboxGroup className={css.features} id={name} name={name} options={options} />
 
-              <FieldTextInput
-                  id={website}
-                  name={website}
-                  className={css.title}
-                  type="text"
-                  label="Website"
-                  placeholder="Your gym's website"
-                  validate={validBusinessURL(website)}
-                  autoFocus
-              />
+           
 
           <Button
             className={css.submitButton}
