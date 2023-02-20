@@ -5,7 +5,7 @@ import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import { Form as FinalForm } from 'react-final-form';
 import classNames from 'classnames';
 import * as validators from '../../util/validators';
-import { Form, PrimaryButton, FieldTextInput } from '../../components';
+import { Form, PrimaryButton, FieldTextInput, FieldPhoneNumberInput } from '../../components';
 
 import css from './SignupForm.module.css';
 
@@ -153,14 +153,14 @@ const SignupFormComponent = props => (
               placeholder={emailPlaceholder}
               validate={validators.composeValidators(emailRequired, emailValid)}
                   />
-                  <FieldPhoneNumberInput
-                      className={css.phone}
-                      id={formId ? `${formId}.phoneNumber` : 'phoneNumber'}
-                      name="phoneNumber"
-                      label={phoneLabel}
-                      placeholder={phonePlaceholder}
-                      validate={phoneRequired}
-                  />
+            <FieldPhoneNumberInput
+              className={css.phone}
+              id={formId ? `${formId}.phoneNumber` : 'phoneNumber'}
+              name="phoneNumber"
+              label={phoneLabel}
+              placeholder={phonePlaceholder}
+              validate={phoneRequired}
+            />
             <div className={css.name}>
               <FieldTextInput
                 className={css.firstNameRoot}
