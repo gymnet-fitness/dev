@@ -23,9 +23,9 @@ const SectionClasstypeMaybe = props => {
   const optionLabel = optionConfig ? optionConfig.label : null;
   return (
     <div className={css.sectionFeatures}>
-      <h2>
+          <h2 className={css.featuresTitle}>
         <FormattedMessage
-          id="ListingPage.classtype"
+          id="ListingPage.classtypeTitle"
           values={{ classtype: optionLabel.toLowerCase() }}
         />
       </h2>
