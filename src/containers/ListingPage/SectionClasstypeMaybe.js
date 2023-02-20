@@ -32,9 +32,14 @@ const SectionClasstypeMaybe = props => {
           <h2 className={css.featuresTitle}>
         <FormattedMessage
           id="ListingPage.classtypeTitle"
-          values={{ classtype: optionLabel.toLowerCase() }}
         />
-      </h2>
+          </h2>
+          <PropertyGroup
+              id="ListingPage.classtype"
+              options={selectedConfigOptions}
+              selectedOptions={selectedOptions}
+              twoColumns={selectedConfigOptions.length > 5}
+          />
     </div>
   );
 };
