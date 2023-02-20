@@ -32,7 +32,9 @@ const SectionClasstypeMaybe = props => {
           <h2 className={css.featuresTitle}>
         <FormattedMessage
                   id="ListingPage.classtypeTitle"
-                  values={{ classtype: optionLabel }}
+          values={{ classtype: optionLabel }}
+          options={selectedConfigOptions}
+          selectedOptions={selectedOptions}
         />
           </h2>
           
