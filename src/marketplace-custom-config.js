@@ -95,7 +95,7 @@ export const filters = [
     id: 'yogaStyles',
     label: 'Workout Types',
     type: 'SelectMultipleFilter',
-    group: 'secondary',
+    group: 'primary',
     queryParamNames: ['pub_yogaStyles'],
     config: {
       // Optional modes: 'has_all', 'has_any'
@@ -179,7 +179,7 @@ export const filters = [
         id: 'classtype',
         label: 'Class Environment',
         type: 'SelectSingleFilter',
-        group: 'secondary',
+        group: 'primary',
         queryParamNames: ['pub_classtype'],
         config: {
             // Schema type is enum for SelectSingleFilter
@@ -190,7 +190,21 @@ export const filters = [
                 { key: 'personal', label: 'Personal Training' },
             ],
         },
+  },
+  {
+    id: 'background',
+    label: 'Background Check',
+    type: 'SelectSingleFilter',
+    group: 'secondary',
+    queryParamNames: ['pub_background'],
+    config: {
+      // Schema type is enum for SelectSingleFilter
+      schemaType: 'boolean',
+      options: [
+        { key: 'true', label: 'Host Verified' },
+      ],
     },
+  },
 ];
 
 export const sortConfig = {

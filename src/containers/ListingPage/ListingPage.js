@@ -53,6 +53,7 @@ import {
 import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
+import SectionBackgroundMaybe from './SectionBackgroundMaybe';
 import SectionDescriptionMaybe from './SectionDescriptionMaybe';
 import SectionClasstypeMaybe from './SectionClasstypeMaybe';
 import SectionFeaturesMaybe from './SectionFeaturesMaybe';

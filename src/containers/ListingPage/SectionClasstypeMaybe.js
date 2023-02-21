@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { FormattedMessage } from '../../util/reactIntl';
-import { PropertyGroup } from '../../components';
+import { FieldSelect } from '../../components';
 
 // Import css from existing CSS Modules file:
 
@@ -33,10 +33,14 @@ const SectionClasstypeMaybe = props => {
           <h2 className={css.featuresTitle}>
         <FormattedMessage
           id="ListingPage.classtypeTitle"
-          values={{ optionLabel }}
         />
       </h2>
-      
+      <FieldSelect
+        id="ListingPage.classtype"
+        options={selectedConfigOptions}
+        selectedOptions={selectedOptions}
+        twoColumns={selectedConfigOptions.length > 5}
+      />
           
     </div>
   );

@@ -49,7 +49,8 @@ const EditListingFeaturesPanel = props => {
 
     const yogaStyles = publicData && publicData.yogaStyles;
     const recognition = publicData && publicData.recognition;
-    const classtype = publicData && publicData.classtype;
+  const classtype = publicData && publicData.classtype;
+  const background = publicData && publicData.background;
   const initialValues = { yogaStyles, recognition, classtype };
 
   return (
@@ -60,10 +61,10 @@ const EditListingFeaturesPanel = props => {
         name={FEATURES_NAME}
         initialValues={initialValues}
         onSubmit={values => {
-          const { yogaStyles = [], recognition = '', classtype = ''} = values;
+          const { yogaStyles = [], recognition = '', classtype = '', background = ''} = values;
 
           const updatedValues = {
-            publicData: { yogaStyles, recognition, classtype },
+            publicData: { yogaStyles, recognition, classtype , background},
           };
           onSubmit(updatedValues);
         }}
