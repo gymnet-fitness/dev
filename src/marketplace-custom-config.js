@@ -179,7 +179,7 @@ export const filters = [
         id: 'classtype',
         label: 'Class Environment',
         type: 'SelectSingleFilter',
-        group: 'primary',
+        group: 'secondary',
         queryParamNames: ['pub_classtype'],
         config: {
             // Schema type is enum for SelectSingleFilter
