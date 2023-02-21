@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { FormattedMessage } from '../../util/reactIntl';
-import { FieldSelect } from '../../components';
+import { PropertyGroup } from '../../components';
 
 // Import css from existing CSS Modules file:
 
@@ -35,7 +35,7 @@ const SectionClasstypeMaybe = props => {
           id="ListingPage.classtypeTitle"
         />
       </h2>
-      <FieldSelect
+      <PropertyGroup
         id="ListingPage.classtype"
         options={selectedConfigOptions}
         selectedOptions={selectedOptions}

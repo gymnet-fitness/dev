@@ -192,21 +192,7 @@ export const filters = [
             ],
         },
   },
-  {
-    id: 'background',
-    label: 'Background Check',
-    type: 'SelectSingleFilter',
-    group: 'secondary',
-    queryParamNames: ['pub_background'],
-    config: {
-      // Schema type is enum for SelectSingleFilter
-      schemaType: 'enum',
-      searchMode: 'has_all',
-      options: [
-        { key: 'true', label: 'Host Verified' },
-      ],
-    },
-  },
+
 ];
 
 export const sortConfig = {
