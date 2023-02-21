@@ -178,13 +178,12 @@ export const filters = [
     {
         id: 'classtype',
         label: 'Class Environment',
-      type: 'SelectSingleFilter',
+        type: 'SelectSingleFilter',
         group: 'primary',
         queryParamNames: ['pub_classtype'],
         config: {
             // Schema type is enum for SelectSingleFilter
-          schemaType: 'enum',
-          searchMode: 'has_all',
+          
             options: [
                 { key: 'virtual', label: 'Virtual Classes' },
                 { key: 'group', label: 'Group Class' },
