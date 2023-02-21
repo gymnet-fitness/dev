@@ -184,7 +184,7 @@ export const filters = [
         config: {
             // Schema type is enum for SelectSingleFilter
           schemaType: 'enum',
-          searchMode: 'has_all',
+          searchMode: 'has_any',
             options: [
                 { key: 'virtual', label: 'Virtual Classes' },
                 { key: 'group', label: 'Group Class' },
