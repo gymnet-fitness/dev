@@ -200,7 +200,7 @@ export const filters = [
     queryParamNames: ['pub_background'],
     config: {
       // Schema type is enum for SelectSingleFilter
-      schemaType: 'boolean',
+      schemaType: 'enum',
       searchMode: 'has_all',
       options: [
         { key: 'true', label: 'Host Verified' },
