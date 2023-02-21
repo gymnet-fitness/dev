@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { FormattedMessage } from '../../util/reactIntl';
-import { Boolean } from '../../components';
+import { PropertyGroup } from '../../components';
 
 // Import css from existing CSS Modules file:
 import css from './ListingPage.module.css';
@@ -29,7 +29,7 @@ const SectionBackgroundMaybe = props => {
                     id="ListingPage.background"
                 />
             </h2>
-            <Boolean
+            <PropertyGroup
                 id="ListingPage.background"
                 options={selectedConfigOptions}
                 selectedOptions={selectedOptions}
