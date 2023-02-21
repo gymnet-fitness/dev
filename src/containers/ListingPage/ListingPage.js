@@ -55,7 +55,7 @@ import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
 
 import SectionDescriptionMaybe from './SectionDescriptionMaybe';
-import SectionClasstypeMaybe from './SectionClasstypeMaybe';
+
 import SectionFeaturesMaybe from './SectionFeaturesMaybe';
 import SectionReviews from './SectionReviews';
 import SectionRecognitionMaybe from './SectionRecognitionMaybe';
@@ -436,7 +436,8 @@ export class ListingPageComponent extends Component {
                     formattedPrice={formattedPrice}
                     richTitle={richTitle}
                     listingCertificate={publicData ? publicData.certificate : null}
-                                    certificateOptions={certificateOptions}
+                    certificateOptions={certificateOptions}
+
                                     
                     hostLink={hostLink}
                     showContactUser={showContactUser}
@@ -444,7 +445,7 @@ export class ListingPageComponent extends Component {
                   />
                   
                                 <SectionDescriptionMaybe description={description} />
-                                <SectionClasstypeMaybe options={classtypeOptions} publicData={publicData} />
+                                
                                 <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
                                 <SectionRecognitionMaybe options={recognitionOptions} publicData={publicData} />
                                 
