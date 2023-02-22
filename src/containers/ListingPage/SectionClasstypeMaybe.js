@@ -29,9 +29,9 @@ const SectionClasstypeMaybe = props => {
         />
       </h2> 
       <PropertyGroup
-        id="ListingPage.yogaStyles"
+        id="ListingPage.classtype"
         options={selectedConfigOptions}
-        selectedOptions={selectedOptions}
+        selectedOptions={selectedConfigOptions}
         twoColumns={selectedConfigOptions.length > 5}
       />
     </div>
