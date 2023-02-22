@@ -5,7 +5,7 @@ import { FormattedMessage } from '../../util/reactIntl';
 import css from './ListingPage.module.css';
 
 // Create new React component
-const SectionclasstypeMaybe = props => {
+const SectionClasstypeMaybe = props => {
   // Component's props should include all the possible options (from config)
   // and listing's publicData
   const { options, publicData } = props;
@@ -14,7 +14,7 @@ const SectionclasstypeMaybe = props => {
 
   // Don't return anything if public data doesn't contain classtype field
   // That's why we named this component as SectionclasstypeMaybe
-  if (!publicData || !selectedOption) {
+  if (!publicData || !selectedOption) { 
     return null;
   }
 
@@ -27,7 +27,7 @@ const SectionclasstypeMaybe = props => {
         <FormattedMessage
           id="ListingPage.classtypeType"
         />
-      </h2>
+      </h2> 
       <PropertyGroup
         id="ListingPage.yogaStyles"
         options={selectedConfigOptions}
@@ -38,4 +38,4 @@ const SectionclasstypeMaybe = props => {
   );
 };
 
-export default SectionclasstypeMaybe;
+export default SectionClasstypeMaybe;
