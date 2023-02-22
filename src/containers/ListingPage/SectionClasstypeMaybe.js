@@ -16,14 +16,12 @@ const SectionClasstypeMaybe = props => {
     return (
         <div className={css.sectionFeatures}>
             <h2 className={css.featuresTitle}>
-          <FormattedMessage id="ListingPage.classtypeTitle" />
+          <FormattedMessage id="ListingPage.classtypeTitle"
+            options={selectedConfigOptions}
+            selectedOptions={selectedOptions}
+            twoColumns={selectedConfigOptions.length > 5/>
             </h2>
-            <FormattedMessage
-                id="ListingPage.classtypeType"
-                options={selectedConfigOptions}
-                selectedOptions={selectedOptions}
-                twoColumns={selectedConfigOptions.length > 5}
-            />
+            
         </div>
     );
 };
