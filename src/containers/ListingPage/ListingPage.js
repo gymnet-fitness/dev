@@ -388,8 +388,8 @@ export class ListingPageComponent extends Component {
     );
 
       const yogaStylesOptions = findOptionsForSelectFilter('yogaStyles', filterConfig);
-    const recognitionOptions = findOptionsForSelectFilter('recognition', filterConfig);
-          const classtypeOptions = findOptionsForSelectFilter('classtype', filterConfig);
+      const recognitionOptions = findOptionsForSelectFilter('recognition', filterConfig);
+      const classtypeOptions = findOptionsForSelectFilter('classtype', filterConfig);
       
     const certificateOptions = findOptionsForSelectFilter('certificate', filterConfig);
 
