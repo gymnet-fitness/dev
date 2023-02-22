@@ -31,9 +31,7 @@ const SectionClasstypeMaybe = props => {
       </h2>
       <PropertyGroup
         id="ListingPage.classtype"
-        options={selectedConfigOptions}
-        selectedOptions={selectedOption}
-        twoColumns={selectedConfigOptions.length > 5}
+        values={{ optionLabel }}
       />
       
     </div>
