@@ -26,7 +26,7 @@ const SectionclasstypeMaybe = props => {
       <h2>
         <FormattedMessage
           id="ListingPage.classtypeType"
-          values={{ classtype: optionLabel.toLowerCase() }}
+          
         />
       </h2>
     </div>
