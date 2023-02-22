@@ -2,47 +2,30 @@
 import { FormattedMessage } from '../../util/reactIntl';
 import { PropertyGroup } from '../../components';
 
-// Import css from existing CSS Modules file:
-
 import css from './ListingPage.module.css';
 
-// Create new React component
-
 const SectionClasstypeMaybe = props => {
+    const { options, publicData } = props;
+    if (!publicData) {
+        return null;
+    }
 
-    // Component's props should include all the possible options (from config)
-  // and listing's publicData
+  const selectedOptions = publicData && publicData.classtype ? publicData.classtype : [];
+    const selectedConfigOptions = options.filter(o => selectedOptions.find(s => s === o.key));
 
-  const { options, publicData } = props;
-  const selectedOption =
-    publicData && publicData.classtype ? publicData.classtype : null;
-
-  // Don't return anything if public data doesn't contain classtype field
-  // That's why we named this component as SectionClasstypeMaybe
-
-    if (!publicData || !selectedOption) {
-    return null;
-  }
-
-  // Find selected options label
-
-  const optionConfig = options.find(o => o.key === selectedOption);
-  const optionLabel = optionConfig ? optionConfig.label : null;
-  return (
-    <div className={css.sectionFeatures}>
-          <h2 className={css.featuresTitle}>
-        <FormattedMessage
-          id="ListingPage.classtypeType"
-        />
-      </h2>
-      <PropertyGroup
-        id="ListingPage.classtype"
-        options={selectedConfigOptions}
-        selectedOptions={selectedOptions}
-      />
-          
-    </div>
-  );
+    return (
+        <div className={css.sectionFeatures}>
+            <h2 className={css.featuresTitle}>
+          <FormattedMessage id="ListingPage.classtypeTitle" />
+            </h2>
+            <PropertyGroup
+          id="ListingPage.classtype"
+                options={selectedConfigOptions}
+                selectedOptions={selectedOptions}
+                twoColumns={selectedConfigOptions.length > 5}
+            />
+        </div>
+    );
 };
 
 export default SectionClasstypeMaybe;
