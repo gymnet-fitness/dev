@@ -23,11 +23,18 @@ const SectionClasstypeMaybe = props => {
   const optionLabel = optionConfig ? optionConfig.label : null;
   return (
     <div className={css.sectionFeatures}>
-      <h2>
+      <h2 className={css.featuresTitle}>
         <FormattedMessage
-          id="ListingPage.classtypeType"
+          id="ListingPage.classtypeTitle"
+
         />
-      </h2> 
+      </h2>
+      <PropertyGroup
+        id="ListingPage.classtypeType"
+        options={selectedConfigOptions}
+        selectedOptions={optionLabel}
+        twoColumns={selectedConfigOptions.length > 5}
+      />
       
     </div>
   );
