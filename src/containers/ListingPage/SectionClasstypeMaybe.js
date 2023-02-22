@@ -28,12 +28,7 @@ const SectionClasstypeMaybe = props => {
           id="ListingPage.classtypeType"
         />
       </h2> 
-      <PropertyGroup
-        id="ListingPage.classtype"
-        options={selectedConfigOptions}
-        selectedOptions={selectedConfigOptions}
-        twoColumns={selectedConfigOptions.length > 5}
-      />
+      
     </div>
   );
 };
