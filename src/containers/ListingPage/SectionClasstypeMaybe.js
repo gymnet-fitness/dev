@@ -26,9 +26,14 @@ const SectionclasstypeMaybe = props => {
       <h2>
         <FormattedMessage
           id="ListingPage.classtypeType"
-          
         />
       </h2>
+      <PropertyGroup
+        id="ListingPage.yogaStyles"
+        options={selectedConfigOptions}
+        selectedOptions={selectedOptions}
+        twoColumns={selectedConfigOptions.length > 5}
+      />
     </div>
   );
 };
