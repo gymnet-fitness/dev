@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { FormattedMessage } from '../../util/reactIntl';
-import { FieldSelect } from '../../components';
+
 
 import css from './ListingPage.module.css';
 
@@ -18,8 +18,8 @@ const SectionClasstypeMaybe = props => {
             <h2 className={css.featuresTitle}>
           <FormattedMessage id="ListingPage.classtypeTitle" />
             </h2>
-            <FieldSelect
-                id="ListingPage.classtype"
+            <FormattedMessage
+                id="ListingPage.classtypeType"
                 options={selectedConfigOptions}
                 selectedOptions={selectedOptions}
                 twoColumns={selectedConfigOptions.length > 5}
