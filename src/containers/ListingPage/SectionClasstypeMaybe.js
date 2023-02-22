@@ -26,13 +26,10 @@ const SectionClasstypeMaybe = props => {
       <h2 className={css.featuresTitle}>
         <FormattedMessage
           id="ListingPage.classtypeTitle"
-
+          values={{ optionLabel }}
         />
       </h2>
-      <PropertyGroup
-        id="ListingPage.classtype"
-        values={{ optionLabel }}
-      />
+      
       
     </div>
   );
