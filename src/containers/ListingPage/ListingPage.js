@@ -59,7 +59,7 @@ import SectionDescriptionMaybe from './SectionDescriptionMaybe';
 import SectionFeaturesMaybe from './SectionFeaturesMaybe';
 import SectionReviews from './SectionReviews';
 import SectionRecognitionMaybe from './SectionRecognitionMaybe';
-import SectionClasstypeMaybe from './SectionClasstypeMaybe';
+import SectionclasstypeMaybe from './SectionclasstypeMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
 import css from './ListingPage.module.css';
 
@@ -446,7 +446,7 @@ export class ListingPageComponent extends Component {
                   />
                   
                                 <SectionDescriptionMaybe description={description} />
-                  <SectionClasstypeMaybe options={classtypeOptions} publicData={publicData} />
+                  <SectionclasstypeMaybe options={classtypeOptions} publicData={publicData} />
                                 <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
                                 <SectionRecognitionMaybe options={recognitionOptions} publicData={publicData} />
                                 
