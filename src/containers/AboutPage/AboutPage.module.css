@@ -57,5 +57,5 @@
 
 #root > div > div > div > div.LayoutSingleColumn_layoutWrapperMain__NmLnV.AboutPage_staticPageWrapper__2-TIk > div:nth-child(2) > div.AboutPage_contentSide__dtj8f > img
 {
-    width: 250px;
+    width: 250px!important;
 }
