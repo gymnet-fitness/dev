@@ -40,7 +40,7 @@ const AboutPage = () => {
 
           <div className={css.contentWrapper}>
             <div className={css.contentSide}>
-              <img src={image} alt="Athlete" />
+              <img className={css.coverImage} src={image} alt="Athlete" />
               <p>"Cross-training is crucial to staying healthy and giving my body a break. With GymNet, I can easily incorporate a spin or elliptical session into my training when I need it without the hassle of joining a gym!" - Elizabeth Laseter, competitive runner and beer miler</p>
             </div>
 
@@ -71,7 +71,7 @@ const AboutPage = () => {
               <li><b>Health</b> - We prioritize the mental and physical health of our people and strive to support the improved health of our users.</li>
               <li><b>Sustainability</b> - We strive to leave the planet better than it is today through financial and operational methods.</li>
               <li><b>Community</b> - Building a strong and supportive community of users, employees, and partners. We are only as strong as the community we are a part of.</li>
-              <li><b>Creativity</b> - We approach problems and challenges with creative thinking. Not all solutions are the same, and we value diverse and new ways of thinking.</li>
+              <li><b>Creativity</b> - We approach problems and challenges with creative thinking. Not all solutions are the same, and we value new ways of thinking.</li>
             </ul>
             <h2>
               Our Philosophy
