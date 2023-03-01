@@ -68,10 +68,10 @@ const AboutPage = () => {
               </h2>
 
             <ul>
-              <li><b>Health</b></li>
-              <li><b>Sustainability</b></li>
-              <li><b>Community</b></li>
-              <li><b>Creativity</b></li>
+              <li><b>Health</b> - We prioritize the mental and physical health of our people and strive to support the improved health of our users.</li>
+              <li><b>Sustainability</b> - We strive to leave the planet better than it is today through financial and operational methods.</li>
+              <li><b>Community</b> - Building a strong and supportive community of users, employees, and partners. We are only as strong as the community we are a part of.</li>
+              <li><b>Creativity</b> - We approach problems and challenges with creative thinking. Not all solutions are the same, and we value diverse and new ways of thinking.</li>
             </ul>
             <h2>
               Our Philosophy
