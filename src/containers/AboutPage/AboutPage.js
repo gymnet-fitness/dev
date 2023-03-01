@@ -88,7 +88,7 @@ const AboutPage = () => {
             <ul>
               <li><b>Environmental Impact</b> - GymNet helps reduce exercise equipment waste that the traditional gym creates. We are focused on reusing and sharing existing gyms and equipment to lower the impact we have to the environment.</li>
               <li><b>Financial impact</b> - A portion of GymNet's revenue is automatically donated to non-profits committed to reducing the environmental impact of humans. </li> 
-              </li><b>Sustainable Products</b> - GymNet's retail products are sourced with goods and materials through partnerships with leading sustainable brands.</li>
+              <li><b>Sustainable Products</b> - GymNet's retail products are sourced with goods and materials through partnerships with leading sustainable brands.</li>
               </ul>
             <h3 id="contact" className={css.subtitle}>
               Get In Touch
