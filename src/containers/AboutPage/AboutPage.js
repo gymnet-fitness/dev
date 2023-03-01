@@ -36,11 +36,11 @@ const AboutPage = () => {
 
               <LayoutWrapperMain className={css.staticPageWrapper}>
           <h1 className={css.pageTitle}>Working out has never been easier</h1>
-          
+          <img className={css.coverImage} src={image} alt="Athlete" />
 
           <div className={css.contentWrapper}>
             <div className={css.contentSide}>
-              <img className={css.coverImage} src={image} alt="Athlete" />
+              
               <p>"Cross-training is crucial to staying healthy and giving my body a break. With GymNet, I can easily incorporate a spin or elliptical session into my training when I need it without the hassle of joining a gym!" - Elizabeth Laseter, competitive runner and beer miler</p>
             </div>
 
