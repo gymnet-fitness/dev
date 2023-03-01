@@ -38,7 +38,7 @@ const AboutPage = () => {
                   <h1 className={css.pageTitle}>The GymNet Philosophy</h1>
 
 
-                  <h1 className={css.pageTitle}>Discover new ways to work out with GymNet</h1>
+          <h1 className={css.pageTitle}>Working out has never been easier</h1>
           <img className={css.coverImage} src={image} alt="Athlete" />
 
           <div className={css.contentWrapper}>
@@ -48,20 +48,18 @@ const AboutPage = () => {
 
             <div className={css.contentMain}>
               <h2>
-                Each of us is an individual, and each one of us needs variety in our fitness routine to grow and challenge ourselves.
-                With GymNet, athletes in the US can discover new fitness styles and options near them without the need for a monthly membership or expensive equipment.
+                We get it - you're tired of the traditional gym with high membership fees, crowded spaces, and lack of expertise to guide you. With GymNet, find a trainer or gym near you at a time that works in your schedule.
               </h2>
 
               <p>
                 Whether you're looking to try out the latest cardio equipment, want to get in a low-impact swim, or even work with a personal trainer, GymNet is here to help.
-                Our site makes it simple and fast to browse, book, pay and review all in one place so you can focus on getting in the best shape of your life.              
+                Our site makes it simple and fast to browse, book, and pay all in one place so you can focus on getting in the best shape of your life.              
               </p>
 
-              <h3 className={css.subtitle}>Are you a trainer or gym owner?</h3>
+              <h3 className={css.subtitle}>Are you a personal trainer or gym owner?</h3>
 
               <p>
-                GymNet offers you a platform through which you can connect with nearby athletes. Offering private sessions through GymNet offers you a
-                possibility to grow your customer base and earn some extra revenue on top of your main income.
+                GymNet helps you grow your business and client base. Click on 'List My Gym' to get started on listing your gym or training services. Listing is FREE with GymNet.
               </p>
 
               <h3 id="contact" className={css.subtitle}>
