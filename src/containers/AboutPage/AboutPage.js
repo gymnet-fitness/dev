@@ -60,8 +60,13 @@ const AboutPage = () => {
               </p>    
             </div>
           </div>
-          <h1 className={css.pageTitle}>About GymNet</h1>
-          <div className={css.contentMain}>
+          <div className={css.contentWrapper}>
+            <div className={css.contentSide}>
+              <p></p>
+            </div>
+         
+            <div className={css.contentMain}>
+              <h1 className={css.pageTitle}>About GymNet</h1>
             <h2>
               Our Values
               </h2>
@@ -101,7 +106,8 @@ const AboutPage = () => {
               <ExternalLink href={siteFacebookPage}>Facebook</ExternalLink> and{' '}
               <ExternalLink href={siteTwitterPage}>Twitter</ExternalLink>.
               </p>
-          </div>
+            </div>
+            </div>
         </LayoutWrapperMain>
 
         <LayoutWrapperFooter>
