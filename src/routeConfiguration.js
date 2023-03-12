@@ -295,7 +295,7 @@ const routeConfiguration = () => {
       path: '/privacy-policy',
       name: 'PrivacyPolicyPage',
       component: PrivacyPolicyPage,
-      loadData: pageDataLoadingAPI.PrivacyPolicyPage.loadData,
+      
     },
     {
       path: '/styleguide',
