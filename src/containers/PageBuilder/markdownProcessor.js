@@ -1,6 +1,6 @@
 import { createElement, Fragment } from 'react';
 // cjs module
-import { default as unified } from 'unified';
+import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remark2rehype from 'remark-rehype';
 // If you need to support HTML tags, remember to sanitize the output
