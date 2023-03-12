@@ -1133,8 +1133,7 @@ textarea {
 
 @media screen and (max-width: 340px) {
     .brandpush-title-hr {
-        display: none;
-        !important;
+        display: none !important;
     }
 
     .brandpush-title {
