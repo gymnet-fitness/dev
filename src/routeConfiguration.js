@@ -1,4 +1,4 @@
-import React from 'react';
+primport React from 'react';
 import loadable from '@loadable/component';
 import getPageDataLoadingAPI from './containers/pageDataLoadingAPI';
 import { NotFoundPage } from './containers';
@@ -295,6 +295,7 @@ const routeConfiguration = () => {
       path: '/privacy-policy',
       name: 'PrivacyPolicyPage',
       component: PrivacyPolicyPage,
+      loadData: pageDataLoadingAPI.PrivacyPolicyPage.loadData,
     },
     {
       path: '/styleguide',

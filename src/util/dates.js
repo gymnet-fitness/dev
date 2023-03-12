@@ -9,7 +9,6 @@ import jstz from 'jstimezonedetect';
  */
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
-const timeSlotMinutes = 30;
 
 /**
  * Check that the given parameter is a Date object.
@@ -119,7 +118,7 @@ export const getTimeZoneNames = relevantZonesRegExp => {
  */
 export const localizeAndFormatDate = (intl, timeZone, date, formattingOptions = null) => {
   if (!isTimeZoneSupported()) {
-    throw new Error(`Your browser does not support timezones.`);
+    throw new Error(`Your browser doesn't support timezones.`);
   }
 
   if (!isValidTimeZone(timeZone)) {
@@ -174,23 +173,6 @@ export const localizeAndFormatTime = (
   }
 ) => {
   return localizeAndFormatDate(intl, timeZone, date, formattingOptions);
-};
-
-/**
- * Rounding function for moment.js. Rounds the Moment provided by the context
- * to the start of the specified time value in the specified units.
- * @param {*} value the rounding value
- * @param {*} timeUnit time units to specify the value
- * @returns Moment rounded to the start of the specified time value
- */
-moment.fn.startOfDuration = function (value, timeUnit) {
-    const getMs = (val, unit) => moment.duration(val, unit)._milliseconds;
-    const ms = getMs(value, timeUnit);
-
-    // Get UTC offset to account for potential time zone difference between
-    // customer and listing
-    const offsetMs = this._isUTC ? 0 : getMs(this.utcOffset(), 'minute');
-    return moment(Math.floor((this.valueOf() + offsetMs) / ms) * ms);
 };
 
 // NOTE: If your customization is using different time-units than hours
@@ -252,8 +234,8 @@ export const findNextBoundary = (timeZone, currentMomentOrDate) =>
   moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
-    .add(timeSlotMinutes, 'minutes')
-    .startOfDuration(timeSlotMinutes, 'minutes')
+    .add(1, 'hour')
+    .startOf('hour')
     .toDate();
 
 /**
