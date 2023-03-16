@@ -45,14 +45,14 @@ module.exports = (req, res) => {
             res.status(200).send({ status: 200, statusText: 'OK' });
 
             // // If the user has only completed transactions, delete the user
-             trustedSdk.currentUser.delete({ currentPassword })
-               .then(resp => {
-                 res
-                   .status(resp.status)
-                   .send(resp);
-               })
+            // trustedSdk.currentUser.delete({ currentPassword })
+            //   .then(resp => {
+            //     res
+            //       .status(resp.status)
+            //       .send(resp);
+            //   })
             //   // If deleting fails, use the built-in handler to pass the error as a response
-               .catch(e => handleError(res, e))
+            //   .catch(e => handleError(res, e))
         })
         .catch(e => handleError(res, e));
 };

@@ -116,15 +116,13 @@ const TopbarDesktop = props => {
             <span className={css.menuItemBorder} />
             <FormattedMessage id="TopbarDesktop.accountSettingsLink" />
           </NamedLink>
-              </MenuItem>
-              
+        </MenuItem>
         <MenuItem key="logout">
           <InlineTextButton rootClassName={css.logoutButton} onClick={onLogout}>
             <span className={css.menuItemBorder} />
             <FormattedMessage id="TopbarDesktop.logout" />
           </InlineTextButton>
         </MenuItem>
-        
       </MenuContent>
     </Menu>
   ) : null;

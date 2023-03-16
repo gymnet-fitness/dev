@@ -95,7 +95,7 @@ export const filters = [
     id: 'yogaStyles',
     label: 'Workout Types',
     type: 'SelectMultipleFilter',
-    group: 'primary',
+    group: 'secondary',
     queryParamNames: ['pub_yogaStyles'],
     config: {
       // Optional modes: 'has_all', 'has_any'
@@ -107,49 +107,18 @@ export const filters = [
       // Note: label is not added through the translation files
       // to make filter customizations a bit easier.
       options: [
-          { key: 'aerial', label: 'Aerial' },
-          { key: 'barre', label: 'Barre' },
-          { key: 'bootcamp', label: 'Bootcamp' },
-          { key: 'boxing', label: 'Boxing' },
-          { key: 'cardio', label: 'Cardio' },
-          { key: 'circuit', label: 'Circuit Training' },
-          { key: 'crossfit', label: 'CrossFit' },
-          { key: 'cycling', label: 'Cycling' },
-          { key: 'dance', label: 'Dance' },
-          { key: 'hiit', label: 'HIIT' },
-          { key: 'pilates', label: 'Pilates' },
-          { key: 'pole', label: 'Pole Dance' },
-          { key: 'running', label: 'Running' },
-          { key: 'strength', label: 'Strength Training' },
-          { key: 'swim', label: 'Swimming' },
-          { key: 'wateraerobics', label: 'Water Aerobics' },
-          { key: 'weights', label: 'Weight Lifting' },
-          { key: 'yoga', label: 'Yoga' },
+        { key: 'cardio', label: 'Cardio' },
+        { key: 'strength', label: 'Strength Training' },
+        { key: 'yoga', label: 'Yoga' },
+        { key: 'hiit', label: 'HIIT' },
+        { key: 'swim', label: 'Swimming' },
+        { key: 'weights', label: 'Weight Lifting' },
+        { key: 'crossfit', label: 'CrossFit' },
+        { key: 'running', label: 'Running' },
+        { key: 'cycling', label: 'Cycling' },
       ],
     },
-    },
-    {
-        id: 'recognition',
-        label: 'Recognition',
-        type: 'SelectMultipleFilter',
-        group: 'secondary',
-        queryParamNames: ['pub_recognition'],
-        config: {
-            // Schema type is enum for SelectSingleFilter
-            
-            searchMode: 'has_any',
-            options: [
-                { key: 'blackowned', label: 'Black Owned' },
-                { key: 'womenowned', label: 'Women Owned' },
-                { key: 'minorityowned', label: 'Minority Owned' },
-                { key: 'veteranowned', label: 'Veteran Owned' },
-                { key: 'familyowned', label: 'Family Owned' },
-                { key: 'localbusiness', label: 'Locally Owned' },
-                { key: 'bestof', label: 'Best of the City Award' },
-                { key: 'classpass', label: 'ClassPass Top Rated' },
-            ],
-        },
-    },
+  },
   {
     id: 'certificate',
     label: 'Training Certificate',
@@ -174,24 +143,7 @@ export const filters = [
         { key: 'NFPT', label: 'The National Federation of Professional Trainers (NFPT)' },
       ],
     },
-    },
-    {
-        id: 'classtype',
-        label: 'Class Environment',
-        type: 'SelectSingleFilter',
-        group: 'secondary',
-        queryParamNames: ['pub_classtype'],
-        config: {
-            // Schema type is enum for SelectSingleFilter
-          
-            options: [
-                { key: 'virtual', label: 'Virtual Classes' },
-                { key: 'group', label: 'Group Class' },
-                { key: 'personal', label: 'Personal Training' },
-            ],
-        },
   },
-
 ];
 
 export const sortConfig = {

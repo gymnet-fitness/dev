@@ -7,7 +7,7 @@ import { FormattedMessage } from '../../util/reactIntl';
 import { findOptionsForSelectFilter } from '../../util/search';
 import { propTypes } from '../../util/types';
 import config from '../../config';
-import { Button, FieldCheckboxGroup, FieldSelect, Form } from '../../components';
+import { Button, FieldCheckboxGroup, Form } from '../../components';
 
 import css from './EditListingFeaturesForm.module.css';
 
@@ -49,44 +49,13 @@ const EditListingFeaturesFormComponent = props => (
         </p>
       ) : null;
 
-        const options = findOptionsForSelectFilter('yogaStyles', filterConfig);
-
-        // Properties for the recognition field
-
-        const recognitionKey = 'recognition';
-        const recognitionOptions = findOptionsForSelectFilter(recognitionKey, filterConfig);
-
-        // Props for "classtype" select field
-        const classtypeKey = 'classtype';
-        const classtypeOptions = findOptionsForSelectFilter(classtypeKey, filterConfig);
-
+      const options = findOptionsForSelectFilter('yogaStyles', filterConfig);
       return (
         <Form className={classes} onSubmit={handleSubmit}>
           {errorMessage}
           {errorMessageShowListing}
 
-              <FieldCheckboxGroup className={css.features} id={name} name={name} options={options} />
-
-              <FieldCheckboxGroup
-                  className={css.features}
-                  name={recognitionKey}
-                  id={recognitionKey}
-                  options={recognitionOptions}
-                  label={'Recognitions and Awards'}
-              />
-
-              <FieldSelect
-                  className={css.features}
-                  name={classtypeKey}
-                  id={classtypeKey}
-                  label={'Class Environment'}
-              >
-                  {classtypeOptions.map(o => (
-                      <option key={o.key} value={o.key}>
-                          {o.label}
-                      </option>
-                  ))}
-              </FieldSelect>
+          <FieldCheckboxGroup className={css.features} id={name} name={name} options={options} />
 
           <Button
             className={css.submitButton}

@@ -167,10 +167,3 @@
     width: 37.5vw;
   }
 }
-
-
-
-/* OVERRIDES */
-#root > div > div > div.SearchPage_container__7zmhN > div.SearchPage_searchResultContainer__moBrf > div.SearchFiltersPrimary_root__m7W5F.SearchPage_searchFiltersPrimary__Fbrr4 > div.SearchFiltersPrimary_filters__v8hnR > div.Menu_root__yISLg.SelectSingleFilterPopup_root__w4ux7 > button {
-    background-color: #2ebff7;
-}
