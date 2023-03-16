@@ -53,9 +53,13 @@ import {
 import SectionImages from './SectionImages';
 import SectionAvatar from './SectionAvatar';
 import SectionHeading from './SectionHeading';
+
 import SectionDescriptionMaybe from './SectionDescriptionMaybe';
+
 import SectionFeaturesMaybe from './SectionFeaturesMaybe';
 import SectionReviews from './SectionReviews';
+import SectionRecognitionMaybe from './SectionRecognitionMaybe';
+import SectionClasstypeMaybe from './SectionClasstypeMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
 import css from './ListingPage.module.css';
 
@@ -383,7 +387,10 @@ export class ListingPageComponent extends Component {
       </NamedLink>
     );
 
-    const yogaStylesOptions = findOptionsForSelectFilter('yogaStyles', filterConfig);
+      const yogaStylesOptions = findOptionsForSelectFilter('yogaStyles', filterConfig);
+      const recognitionOptions = findOptionsForSelectFilter('recognition', filterConfig);
+      const classtypeOptions = findOptionsForSelectFilter('classtype', filterConfig);
+      
     const certificateOptions = findOptionsForSelectFilter('certificate', filterConfig);
 
     return (
@@ -431,12 +438,18 @@ export class ListingPageComponent extends Component {
                     richTitle={richTitle}
                     listingCertificate={publicData ? publicData.certificate : null}
                     certificateOptions={certificateOptions}
+
+                                    
                     hostLink={hostLink}
                     showContactUser={showContactUser}
                     onContactUser={this.onContactUser}
                   />
-                  <SectionDescriptionMaybe description={description} />
-                  <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
+                  
+                                <SectionDescriptionMaybe description={description} />
+                  <SectionClasstypeMaybe options={classtypeOptions} publicData={publicData} />
+                                <SectionFeaturesMaybe options={yogaStylesOptions} publicData={publicData} />
+                                <SectionRecognitionMaybe options={recognitionOptions} publicData={publicData} />
+                                
                   <SectionMapMaybe
                     geolocation={geolocation}
                     publicData={publicData}

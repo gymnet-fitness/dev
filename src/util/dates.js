@@ -176,6 +176,23 @@ export const localizeAndFormatTime = (
   return localizeAndFormatDate(intl, timeZone, date, formattingOptions);
 };
 
+/**
+ * Rounding function for moment.js. Rounds the Moment provided by the context
+ * to the start of the specified time value in the specified units.
+ * @param {*} value the rounding value
+ * @param {*} timeUnit time units to specify the value
+ * @returns Moment rounded to the start of the specified time value
+ */
+moment.fn.startOfDuration = function (value, timeUnit) {
+    const getMs = (val, unit) => moment.duration(val, unit)._milliseconds;
+    const ms = getMs(value, timeUnit);
+
+    // Get UTC offset to account for potential time zone difference between
+    // customer and listing
+    const offsetMs = this._isUTC ? 0 : getMs(this.utcOffset(), 'minute');
+    return moment(Math.floor((this.valueOf() + offsetMs) / ms) * ms);
+};
+
 // NOTE: If your customization is using different time-units than hours
 // and different boundaries than sharp hours, you need to modify these functions:
 // - findBookingUnitBoundaries (DST changes)
@@ -235,8 +252,8 @@ export const findNextBoundary = (timeZone, currentMomentOrDate) =>
   moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
-    .add(1, 'hour')
-    .startOf('hour')
+    .add(timeSlotMinutes, 'minutes')
+    .startOfDuration(timeSlotMinutes, 'minutes')
     .toDate();
 
 /**

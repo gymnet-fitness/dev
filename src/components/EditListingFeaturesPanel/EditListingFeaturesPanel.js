@@ -47,8 +47,11 @@ const EditListingFeaturesPanel = props => {
     <FormattedMessage id="EditListingFeaturesPanel.createListingTitle" />
   );
 
-  const yogaStyles = publicData && publicData.yogaStyles;
-  const initialValues = { yogaStyles };
+    const yogaStyles = publicData && publicData.yogaStyles;
+    const recognition = publicData && publicData.recognition;
+  const classtype = publicData && publicData.classtype;
+  
+  const initialValues = { yogaStyles, recognition, classtype };
 
   return (
     <div className={classes}>
@@ -58,10 +61,10 @@ const EditListingFeaturesPanel = props => {
         name={FEATURES_NAME}
         initialValues={initialValues}
         onSubmit={values => {
-          const { yogaStyles = [] } = values;
+          const { yogaStyles = [], recognition = '', classtype = ''} = values;
 
           const updatedValues = {
-            publicData: { yogaStyles },
+            publicData: { yogaStyles, recognition, classtype },
           };
           onSubmit(updatedValues);
         }}
