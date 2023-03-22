@@ -4,6 +4,8 @@ export class LoggingAnalyticsHandler {
   }
 }
 
+
+
 // Google Analytics 4 (GA4) using gtag.js script, which is included in server/rendered.js
 // Note: the script is only available locally when running "yarn run dev-server"
 export class GoogleAnalyticsHandler {
