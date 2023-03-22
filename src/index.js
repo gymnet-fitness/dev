@@ -111,6 +111,11 @@ const setupAnalyticsHandlers = () => {
     }
   }
   
+  // Add Meta Handler
+  if (process.env.META_PIXEL_ID) {
+  	handlers.push(new MetaHandler());
+  }
+  
 
   return handlers;
 };
