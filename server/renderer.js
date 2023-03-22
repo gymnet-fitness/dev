@@ -134,7 +134,7 @@ exports.render = function(requestUrl, context, data, renderApp, webExtractor) {
   
   // Add Meta Pixel to header
   const metaScripts = 
-  '<script>
+  `<script>
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -148,7 +148,7 @@ fbq('track', 'PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=954243245573919&ev=PageView&noscript=1"
-/></noscript>';
+/></noscript>`;
 
   // Google Analytics: gtag.js
   // NOTE: FTW is a single-page application (SPA).
