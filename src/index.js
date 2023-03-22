@@ -111,16 +111,6 @@ const setupAnalyticsHandlers = () => {
     }
   }
   
-  //Add Meta Pixel Analytics if Access Token and Pixel ID are found
-  if (process.env.META_PIXEL_ID) {
-	handlers.push(new metaAnalyticsHandler);
-  } else {
-  	// some adblockers might block the Meta integration.
-  	console.warn(
-  	'Meta Analytics is not available. It might be that your adblocker is blocking it.'
-  	);
-  }
-  
 
   return handlers;
 };
