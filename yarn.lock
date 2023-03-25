@@ -3719,12 +3719,7 @@
   "resolved" "https://registry.npmjs.org/core-js/-/core-js-3.29.1.tgz"
   "version" "3.29.1"
 
-"core-util-is@~1.0.0":
-  "integrity" "sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ=="
-  "resolved" "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.3.tgz"
-  "version" "1.0.3"
-
-"core-util-is@1.0.2":
+"core-util-is@~1.0.0", "core-util-is@1.0.2":
   "integrity" "sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ=="
   "resolved" "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.2.tgz"
   "version" "1.0.2"
@@ -10641,9 +10636,9 @@
     "is-typedarray" "^1.0.0"
 
 "typescript@^3.2.1 || ^4", "typescript@^4.5", "typescript@>= 2.7", "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta":
-  "integrity" "sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g=="
-  "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.9.5.tgz"
-  "version" "4.9.5"
+  "integrity" "sha512-wVORMBGO/FAs/++blGNeAVdbNKtIh1rbBL2EyQ1+J9lClJ93KiiKe8PmFIVdXhHcyv44SL9oglmfeSsndo0jRw=="
+  "resolved" "https://registry.npmjs.org/typescript/-/typescript-5.0.2.tgz"
+  "version" "5.0.2"
 
 "uid2@0.0.x":
   "integrity" "sha512-IevTus0SbGwQzYh3+fRsAMTVVPOoIVufzacXcHPmdlle1jUpq7BRL+mw3dgeLanvGZdwwbWhRV6XrcFNdBmjWA=="
