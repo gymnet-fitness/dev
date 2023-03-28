@@ -24,8 +24,6 @@ import facebookImage from '../../assets/yogatimeFacebook-1200x630.jpg';
 import twitterImage from '../../assets/yogatimeTwitter-600x314.jpg';
 import css from './LandingPage.module.css';
 
-  // Importing Brandpush trust badge
-import brandPushBadge from '../../assets/brandpush-trust-badge.png';
 
 export const LandingPageComponent = props => {
   const {
