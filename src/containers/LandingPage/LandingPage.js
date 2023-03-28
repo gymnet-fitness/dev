@@ -144,34 +144,7 @@ export const LandingPageComponent = props => {
           className="brandpush-logo-container"
           style={{ textAlign: "center", margin: "0 auto" }}
         >
-          <img
-            className="brandpush-leaf"
-            style={{
-              position: "absolute",
-              height: 110,
-              opacity: 0,
-              left: 25,
-              margin: 0,
-              padding: 0,
-              zIndex: 0
-            }}
-            src={leftLeaf}
-          />
-          <img
-            className="brandpush-leaf"
-            style={{
-              position: "absolute",
-              height: 110,
-              opacity: 0,
-              right: 25,
-              margin: 0,
-              padding: 0,
-              zIndex: 0,
-              WebkitTransform: "scaleX(-1)",
-              transform: "scaleX(-1)"
-            }}
-            src={rightLeaf}
-          />
+          
           <div className="brandpush-logo-container-item">
             <div className="brandpush-vertical-center">
               <a
