@@ -32,7 +32,7 @@ import digitalJournal from '../../assets/digital-journal.png';
 import ncn from '../../assets/ncn.png';
 import market-watch from '../../assets/market-watch.png';
 import benzinga from '../../assets/benzinga.png';
-import checkmark from '../../assets/checkmark.png';
+import badge from '../../assets/checkmark.png';
 
 export const LandingPageComponent = props => {
   const {
@@ -173,7 +173,7 @@ export const LandingPageComponent = props => {
                     <div style="color: #717171; font-size: 10px; letter-spacing: 0; height: 15px; margin: 3px 0 10px 0; display: flex; justify-content: center; align-content: center; align-items: center;">
                         <img
                             style="width: 12px; margin: 0 3px 0 0;"
-                            src={checkmark}
+                            src={badge}
                         />
                         <span>
                             Verified by <a style="color: #717171;" href="https://www.brandpush.co?utm_source=Client+Referral&utm_medium=Trust+Badge&utm_campaign=Trust+Badge&utm_content=1677701596175" target="_Blank">BrandPush.co</a>
