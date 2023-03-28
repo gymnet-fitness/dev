@@ -82,7 +82,7 @@ export const LandingPageComponent = props => {
 	  
 <div style={{width: 100%; margin-top: 10px; all: unset;}}>
     
-    <div id={"brandpush-trust-badge"} style={{position: relative; width: 100%; background: #fff; border-radius: 10px; min-height: 180px; margin-left: auto; margin-right: auto;}}>
+    <div id='brandpush-trust-badge' style={{position: relative; width: 100%; background: #fff; border-radius: 10px; min-height: 180px; margin-left: auto; margin-right: auto;}}>
         <div style={{text-align: center; padding: 30px 5px 15px 5px; font-size: 18px; font-family: sans-serif; font-weight: 600; letter-spacing: 8px;}}>
             <div>
                 <span class={brandpush-title-hr} style={{border-top: 1.5px solid #dadada; position: absolute; padding: 0; margin: 0 0 0 5%; width: 90%; top: 30px; left: 0; z-index: 0;}}></span>
