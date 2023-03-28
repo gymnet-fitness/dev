@@ -94,7 +94,7 @@ export const LandingPageComponent = props => {
       style={{
         position: "relative",
         width: "100%",
-        background: "#fff",
+        background: "#70f5cb",
         borderRadius: 10,
         minHeight: 180,
         marginLeft: "auto",
@@ -128,13 +128,13 @@ export const LandingPageComponent = props => {
           <span
             className="brandpush-title"
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: "#70f5cb",
               zIndex: 1,
               position: "relative",
               padding: "0 20px",
               margin: 0,
               top: "-13px",
-              color: "#000"
+              color: "#fff"
             }}
           >
             AS SEEN ON
