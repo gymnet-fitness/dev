@@ -132,6 +132,22 @@ exports.render = function(requestUrl, context, data, renderApp, webExtractor) {
   // Add Google Analytics script if correct id exists (it should start with 'G-' prefix)
   const hasGoogleAnalyticsv4Id = googleAnalyticsId?.indexOf('G-') === 0;
   
+  // Add Meta Pixel Script
+  const metaScripts = `
+      <script>
+	!function(f,b,e,v,n,t,s)
+		{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+		n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+		if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+		n.queue=[];t=b.createElement(e);t.async=!0;
+		t.src=v;s=b.getElementsByTagName(e)[0];
+		s.parentNode.insertBefore(t,s)}(window, document,'script',
+		'https://connect.facebook.net/en_US/fbevents.js');
+		fbq('init', '954243245573919');
+		fbq('track', 'PageView');
+	</script>
+	<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=954243245573919&ev=PageView&noscript=1"/></noscript>
+	`;
 
 
   // Google Analytics: gtag.js
@@ -161,6 +177,7 @@ exports.render = function(requestUrl, context, data, renderApp, webExtractor) {
     script: head.script.toString(),
     preloadedStateScript,
     googleAnalyticsScript,
+    metaScripts,
     ssrStyles: webExtractor.getStyleTags(),
     ssrLinks: webExtractor.getLinkTags(),
     ssrScripts: webExtractor.getScriptTags(),
