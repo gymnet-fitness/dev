@@ -81,7 +81,6 @@ export const LandingPageComponent = props => {
           </div>
 	  
 <div style={{width: 100%; margin-top: 10px; all: unset;}}>
-    
     <div style={{position: relative; width: 100%; background: #fff; border-radius: 10px; min-height: 180px; margin-left: auto; margin-right: auto;}}>
         <div style={{text-align: center; padding: 30px 5px 15px 5px; font-size: 18px; font-family: sans-serif; font-weight: 600; letter-spacing: 8px;}}>
             <div>
