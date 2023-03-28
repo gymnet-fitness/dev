@@ -72,7 +72,7 @@ export const LandingPageComponent = props => {
           <div className={css.heroContainer}>
             <SectionHero className={css.hero} history={history} location={location} />
           </div>
-	  <img className={css.brandPush} src={brandPushBadge} alt={"Logo image"} style="width: 300;"/>
+	  <img src={brandPushBadge} alt="brandpushimage" style="width: 300;"/>
           <ul className={css.sections}>
             <li className={css.section}>
               <div className={css.sectionContentFirstChild}>
