@@ -103,8 +103,7 @@ export const LandingPageComponent = props => {
                     <div class={brandpush-vertical-center}>
                         <a
                             href={"http://finance.azcentral.com/azcentral/article/getnews-2023-3-10-atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model/"}
-                            target={"_Blank"}
-                            rel={"nofollow"}
+
                         >
                             <img
                                 alt={"Featured on USA Today"}
@@ -115,8 +114,7 @@ export const LandingPageComponent = props => {
                         </a>
                         <a
                             href={"https://digitaljournal.com/pr/news/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model"}
-                            target={"_Blank"}
-                            rel={"nofollow"}
+
                         >
                             <img
                                 alt={"Featured on DigitalJournal"}
@@ -126,8 +124,7 @@ export const LandingPageComponent = props => {
                         </a>
                         <a
                             href={"https://www.newschannelnebraska.com/story/48524299/atlantabased-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model"}
-                            target={"_Blank"}
-                            rel={"nofollow"}
+
                         >
                             <img
                                 alt={"Featured on NCN"}
@@ -138,8 +135,7 @@ export const LandingPageComponent = props => {
                         </a>
                         <a
                             href={"https://www.marketwatch.com/press-release/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model-2023-03-09"}
-                            target={"_Blank"}
-                            rel={"nofollow"}
+
                         >
                             <img
                                 alt={"Featured on Market Watch"}
@@ -151,8 +147,7 @@ export const LandingPageComponent = props => {
                         <a
                             href={"https://www.benzinga.com/pressreleases/23/03/ab31290363/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-wo
  "}
-                            target={"_Blank"}
-                            rel={"nofollow"}
+
                         >
                             <img
                                 alt={"Featured on Benzinga"}
@@ -176,7 +171,7 @@ export const LandingPageComponent = props => {
                             src={checkmark}
                         />
                         <span>
-                            Verified by <a style={{color: #717171;}} href={"https://www.brandpush.co?utm_source=Client+Referral&utm_medium=Trust+Badge&utm_campaign=Trust+Badge&utm_content=1677701596175"} target={"_Blank"}>BrandPush.co</a>
+                            Verified by <a style={{color: #717171;}} href={"https://www.brandpush.co?utm_source=Client+Referral&utm_medium=Trust+Badge&utm_campaign=Trust+Badge&utm_content=1677701596175"}>BrandPush.co</a>
                         </span>
                     </div>
                 </div>
