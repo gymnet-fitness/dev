@@ -74,9 +74,6 @@ export const LandingPageComponent = props => {
           </div>
 	  
 <div style="width: 100%; margin-top: 10px; all: unset;">
-    <style scoped>
-        .brandpush-logo-container-item { height: 100px; position: relative; } .brandpush-vertical-center { margin: 0; position: relative; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%); text-align: center; } .brandpush-vertical-center img.brandpush-news-logo{ width: 100%; max-width: 100px; height: auto; margin: 7px 10px; } @media screen and (min-width: 585px) { .brandpush-leaf {opacity:0.2 !important;} .brandpush-logo-container{padding: 0 20px;} } @media screen and (max-width: 584px) { .brandpush-news-logo {max-width:70px !important;} .brandpush-title {font-size: 15px;top: -5px;letter-spacing: 6px;} } @media screen and (max-width: 340px) { .brandpush-title-hr { display:none; !important; } .brandpush-title {font-size:14px;padding:0 !important;} .brandpush-footer {font-size:11px !important;margin:20px 0 25px 0 !important;letter-spacing: 2px !important;} .brandpush-news-logo{max-width:50px !important;} } #brandpush-trust-badge {box-shadow: 0 18px 50px rgb(0 0 0 / 7%); -webkit-transition: box-shadow 0.3s;}
-    </style>
     <div id="brandpush-trust-badge" style="position: relative; width: 100%; background: #fff; border-radius: 10px; min-height: 180px; margin-left: auto; margin-right: auto;">
         <div style="text-align: center; padding: 30px 5px 15px 5px; font-size: 18px; font-family: sans-serif; font-weight: 600; letter-spacing: 8px;">
             <div>
