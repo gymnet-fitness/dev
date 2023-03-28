@@ -80,84 +80,84 @@ export const LandingPageComponent = props => {
             <SectionHero className={css.hero} history={history} location={location} />
           </div>
 	  
-<div style="width: 100%; margin-top: 10px; all: unset;">
+<div style={{width: 100%; margin-top: 10px; all: unset;}}>
     
-    <div id="brandpush-trust-badge" style="position: relative; width: 100%; background: #fff; border-radius: 10px; min-height: 180px; margin-left: auto; margin-right: auto;">
-        <div style="text-align: center; padding: 30px 5px 15px 5px; font-size: 18px; font-family: sans-serif; font-weight: 600; letter-spacing: 8px;">
+    <div id={css.brandpush-trust-badge} style={{position: relative; width: 100%; background: #fff; border-radius: 10px; min-height: 180px; margin-left: auto; margin-right: auto;}}>
+        <div style={{text-align: center; padding: 30px 5px 15px 5px; font-size: 18px; font-family: sans-serif; font-weight: 600; letter-spacing: 8px;}}>
             <div>
-                <span class="brandpush-title-hr" style="border-top: 1.5px solid #dadada; position: absolute; padding: 0; margin: 0 0 0 5%; width: 90%; top: 30px; left: 0; z-index: 0;"></span>
-                <span class="brandpush-title" style="background-color: #fff; z-index: 1; position: relative; padding: 0 20px; margin: 0; top: -13px; color: #000;">AS SEEN ON</span>
+                <span class={brandpush-title-hr} style={{border-top: 1.5px solid #dadada; position: absolute; padding: 0; margin: 0 0 0 5%; width: 90%; top: 30px; left: 0; z-index: 0;}}></span>
+                <span class={brandpush-title} style={{background-color: #fff; z-index: 1; position: relative; padding: 0 20px; margin: 0; top: -13px; color: #000;}}>AS SEEN ON</span>
             </div>
-            <div class="brandpush-logo-container" style="text-align: center; margin: 0 auto;">
+            <div class={brandpush-logo-container} style={{text-align: center; margin: 0 auto;}}>
                 <img
-                    class="brandpush-leaf"
-                    style="position: absolute; height: 110px; opacity: 0; left: 25px; margin: 0; padding: 0; z-index: 0;"
+                    class={css.brandpush-leaf}
+                    style={{position: absolute; height: 110px; opacity: 0; left: 25px; margin: 0; padding: 0; z-index: 0;}}
                     src={leftLeaf}
                 />
                 <img
-                    class="brandpush-leaf"
-                    style="position: absolute; height: 110px; opacity: 0; right: 25px; margin: 0; padding: 0; z-index: 0; -webkit-transform: scaleX(-1); transform: scaleX(-1);"
+                    class={css.brandpush-leaf}
+                    style={{position: absolute; height: 110px; opacity: 0; right: 25px; margin: 0; padding: 0; z-index: 0; -webkit-transform: scaleX(-1); transform: scaleX(-1);}}
                     src={rightLeaf}
                 />
-                <div class="brandpush-logo-container-item">
-                    <div class="brandpush-vertical-center">
+                <div class={css.brandpush-logo-container-item}>
+                    <div class={brandpush-vertical-center}>
                         <a
-                            href="http://finance.azcentral.com/azcentral/article/getnews-2023-3-10-atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model/"
-                            target="_Blank"
-                            rel="nofollow"
+                            href={"http://finance.azcentral.com/azcentral/article/getnews-2023-3-10-atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model/"}
+                            target={"_Blank"}
+                            rel={"nofollow"}
                         >
                             <img
-                                alt="Featured on USA Today"
-                                class="brandpush-news-logo"
-                                style="max-width: 100px;"
+                                alt={"Featured on USA Today"}
+                                class={css.brandpush-news-logo}
+                                style={{max-width: 100px;}}
                                 src={usaToday}
                             />
                         </a>
                         <a
-                            href="https://digitaljournal.com/pr/news/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model"
-                            target="_Blank"
-                            rel="nofollow"
+                            href={"https://digitaljournal.com/pr/news/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model"}
+                            target={"_Blank"}
+                            rel={"nofollow"}
                         >
                             <img
-                                alt="Featured on DigitalJournal"
-                                class="brandpush-news-logo"
+                                alt={"Featured on DigitalJournal"}
+                                class={css.brandpush-news-logo}
                                 src={digitalJournal}
                             />
                         </a>
                         <a
-                            href="https://www.newschannelnebraska.com/story/48524299/atlantabased-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model"
-                            target="_Blank"
-                            rel="nofollow"
+                            href={"https://www.newschannelnebraska.com/story/48524299/atlantabased-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model"}
+                            target={"_Blank"}
+                            rel={"nofollow"}
                         >
                             <img
-                                alt="Featured on NCN"
-                                class="brandpush-news-logo"
-                                style="max-width: 80px;"
+                                alt={"Featured on NCN"}
+                                class={css.brandpush-news-logo}
+                                style={{max-width: 80px;}}
                                 src={ncn}
                             />
                         </a>
                         <a
-                            href="https://www.marketwatch.com/press-release/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model-2023-03-09"
-                            target="_Blank"
-                            rel="nofollow"
+                            href={"https://www.marketwatch.com/press-release/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-workout-model-2023-03-09"}
+                            target={"_Blank"}
+                            rel={"nofollow"}
                         >
                             <img
-                                alt="Featured on Market Watch"
-                                class="brandpush-news-logo"
-                                style="max-width: 83px;"
+                                alt={"Featured on Market Watch"}
+                                class={css.brandpush-news-logo}
+                                style={{max-width: 83px;}}
                                 src={marketWatch}
                             />
                         </a>
                         <a
-                            href="https://www.benzinga.com/pressreleases/23/03/ab31290363/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-wo
- "
-                            target="_Blank"
-                            rel="nofollow"
+                            href={"https://www.benzinga.com/pressreleases/23/03/ab31290363/atlanta-based-startup-gymnet-is-revolutionizing-the-fitness-industry-with-their-innovative-new-wo
+ "}
+                            target={"_Blank"}
+                            rel={"nofollow"}
                         >
                             <img
-                                alt="Featured on Benzinga"
-                                class="brandpush-news-logo"
-                                style="max-width: 125px;"
+                                alt={"Featured on Benzinga"}
+                                class={css.brandpush-news-logo}
+                                style={{max-width: 125px;}}
                                 src={benzinga}
                             />
                         </a>
@@ -165,18 +165,18 @@ export const LandingPageComponent = props => {
                 </div>
                 <div>
                     <span
-                        class="brandpush-footer"
-                        style="text-align: center; padding: 0 20px; font-size: 13px; font-family: sans-serif; font-weight: 600; letter-spacing: 3px; position: relative; width: 100%; margin: 0 0 8px 0; display: inline-block; color: #a5a5a5;"
+                        class={css.brandpush-footer}
+                        style={{text-align: center; padding: 0 20px; font-size: 13px; font-family: sans-serif; font-weight: 600; letter-spacing: 3px; position: relative; width: 100%; margin: 0 0 8px 0; display: inline-block; color: #a5a5a5;}}
                     >
                         AND OVER 400 NEWS SITES
                     </span>
-                    <div style="color: #717171; font-size: 10px; letter-spacing: 0; height: 15px; margin: 3px 0 10px 0; display: flex; justify-content: center; align-content: center; align-items: center;">
+                    <div style={{color: #717171; font-size: 10px; letter-spacing: 0; height: 15px; margin: 3px 0 10px 0; display: flex; justify-content: center; align-content: center; align-items: center;}}>
                         <img
-                            style="width: 12px; margin: 0 3px 0 0;"
+                            style={{width: 12px; margin: 0 3px 0 0;}}
                             src={checkmark}
                         />
                         <span>
-                            Verified by <a style="color: #717171;" href="https://www.brandpush.co?utm_source=Client+Referral&utm_medium=Trust+Badge&utm_campaign=Trust+Badge&utm_content=1677701596175" target="_Blank">BrandPush.co</a>
+                            Verified by <a style={{color: #717171;}} href={"https://www.brandpush.co?utm_source=Client+Referral&utm_medium=Trust+Badge&utm_campaign=Trust+Badge&utm_content=1677701596175"} target={"_Blank"}>BrandPush.co</a>
                         </span>
                     </div>
                 </div>
