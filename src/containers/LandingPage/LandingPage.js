@@ -115,7 +115,7 @@ export const LandingPageComponent = props => {
           <span
             className="brandpush-title-hr"
             style={{
-              borderTop: "1.5px solid #000",
+              borderTop: "1.5px solid #4A4A4A",
               position: "absolute",
               padding: 0,
               margin: "0 0 0 5%",
@@ -134,7 +134,7 @@ export const LandingPageComponent = props => {
               padding: "0 20px",
               margin: 0,
               top: "-13px",
-              color: "#000"
+              color: "#4A4A4A"
             }}
           >
             AS SEEN ON
@@ -227,14 +227,14 @@ export const LandingPageComponent = props => {
                 width: "100%",
                 margin: "0 0 8px 0",
                 display: "inline-block",
-                color: "#000"
+                color: "#4A4A4A"
               }}
             >
               AND OVER 400 NEWS SITES
             </span>
             <div
               style={{
-                color: "#000",
+                color: "#4A4A4A",
                 fontSize: 10,
                 letterSpacing: 0,
                 height: 15,
@@ -252,7 +252,7 @@ export const LandingPageComponent = props => {
               <span>
                 Verified by{" "}
                 <a
-                  style={{ color: "#000" }}
+                  style={{ color: "#4A4A4A" }}
                   href="https://www.brandpush.co?utm_source=Client+Referral&utm_medium=Trust+Badge&utm_campaign=Trust+Badge&utm_content=1677701596175"
                   target="_Blank"
                 >
