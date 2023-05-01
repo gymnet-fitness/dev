@@ -140,11 +140,11 @@ const Footer = props => {
                     name="SearchPage"
                     to={{
                       search:
-                        '?address=Los%20Angeles%2C%20California%2C%20USA&bounds=34.161440999758%2C-118.121305008073%2C33.9018913203336%2C-118.521456965901',
+                        '?address=Chicago%2C%20Illinois%2C%20United%20States&bounds=42.034895347%2C-87.509753018%2C41.644286%2C-87.869226',
                     }}
                     className={css.link}
                   >
-                    <FormattedMessage id="Footer.searchLosAngeles" />
+                    <FormattedMessage id="Footer.searchChicago" />
                   </NamedLink>
                 </li>
                 

@@ -19,12 +19,12 @@ const defaultLocations = [
     },
   },
   {
-    id: 'default-los-angeles',
+    id: 'default-chicago',
     predictionPlace: {
-      address: 'Los Angeles, California, USA',
+      address: 'Chicago, IL, USA',
       bounds: new LatLngBounds(
-        new LatLng(34.161440999758, -118.121305008073),
-        new LatLng(33.9018913203336, -118.521456965901)
+        new LatLng(42.035, -87.510),
+        new LatLng(41.644, -87.869)
       ),
     },
   },
@@ -35,16 +35,6 @@ const defaultLocations = [
       bounds: new LatLngBounds(
         new LatLng(40.917576401307, -73.7008392055224),
         new LatLng(40.477399, -74.2590879797556)
-      ),
-    },
-  },
-  {
-    id: 'default-chicago',
-    predictionPlace: {
-      address: 'Chicago, Illinois, USA',
-      bounds: new LatLngBounds(
-        new LatLng(41.689981, -87.825384),
-        new LatLng(42.031590, -87.31089)
       ),
     },
   },
