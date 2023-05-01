@@ -9,7 +9,7 @@ import { NamedLink } from '../../components';
 import css from './SectionLocations.module.css';
 
 import nyImage from './images/ny-yogi.jpg';
-import laImage from './images/la-yogi.jpg';
+import chicagoImage from './images/chicago.png';
 import atlImage from './images/atl-yogi.jpg';
 
 class LocationImage extends Component {
@@ -57,7 +57,7 @@ const SectionLocations = props => {
         )}
         {locationLink(
           'Chicago',
-          laImage,
+          chicagoImage,
           '?address=Chicago%2C%20Illinois%2C%20United%20States&bounds=42.034895347%2C-87.509753018%2C41.644286%2C-87.869226'
         )}
         {locationLink(
