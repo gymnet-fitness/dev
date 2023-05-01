@@ -56,9 +56,9 @@ const SectionLocations = props => {
           '?address=Atlanta%2C%20Georgia%2C%20USA&bounds=33.659131000000%2C-84.526561000000%2C33.88173000000%2C-84.348033000000'
         )}
         {locationLink(
-          'Los Angeles',
+          'Chicago',
           laImage,
-          '?address=Los%20Angeles%2C%20California%2C%20USA&bounds=34.161440999758%2C-118.121305008073%2C33.9018913203336%2C-118.521456965901'
+          '?address=Chicago%2C%20Illinois%2C%20United%20States&bounds=42.034895347%2C-87.509753018%2C41.644286%2C-87.869226'
         )}
         {locationLink(
           'New York',
