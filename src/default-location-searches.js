@@ -33,8 +33,8 @@ const defaultLocations = [
     predictionPlace: {
       address: 'Miami, FL, USA',
       bounds: new LatLngBounds(
-        new LatLng(25.979, -80.144),
-        new LatLng(25.515, -80.874)
+        new LatLng(25.967, -80.026),
+        new LatLng(25.611, -80.345)
       ),
     },
   },

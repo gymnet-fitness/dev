@@ -63,7 +63,7 @@ const SectionLocations = props => {
         {locationLink(
           'Miami',
           miamiImage,
-          '?address=Miami%2C%20Florida%2C%20United%20States&bounds=25.979434%2C-80.144468%2C25.515125%2C-80.8736'
+          '?address=Miami%20Beach%2C%20Miami%2C%20Florida%2033125%2C%20United%20States&bounds=25.96759075%2C-80.02646385%2C25.61146077%2C-80.34572239'
         )}
       </div>
     </div>
