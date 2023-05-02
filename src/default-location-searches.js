@@ -29,12 +29,12 @@ const defaultLocations = [
     },
   },
   {
-    id: 'default-new-york',
+    id: 'default-miami',
     predictionPlace: {
-      address: 'New York City, New York, USA',
+      address: 'Miami, FL, USA',
       bounds: new LatLngBounds(
-        new LatLng(40.917576401307, -73.7008392055224),
-        new LatLng(40.477399, -74.2590879797556)
+        new LatLng(25.979, -80.144),
+        new LatLng(25.515, -80.874)
       ),
     },
   },

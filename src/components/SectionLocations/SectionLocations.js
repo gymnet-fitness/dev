@@ -8,7 +8,7 @@ import { NamedLink } from '../../components';
 
 import css from './SectionLocations.module.css';
 
-import nyImage from './images/ny-yogi.jpg';
+import miamiImage from './images/miami.jpg';
 import chicagoImage from './images/chicago.png';
 import atlImage from './images/atl-yogi.jpg';
 
@@ -61,9 +61,9 @@ const SectionLocations = props => {
           '?address=Chicago%2C%20Illinois%2C%20United%20States&bounds=42.034895347%2C-87.509753018%2C41.644286%2C-87.869226'
         )}
         {locationLink(
-          'New York',
-          nyImage,
-          '?address=New%20York%20City%2C%20New%20York%2C%20USA&bounds=40.917576401307%2C-73.7008392055224%2C40.477399%2C-74.2590879797556'
+          'Miami',
+          miamiImage,
+          '?address=Miami%2C%20Florida%2C%20United%20States&bounds=25.979434%2C-80.144468%2C25.515125%2C-80.8736'
         )}
       </div>
     </div>
