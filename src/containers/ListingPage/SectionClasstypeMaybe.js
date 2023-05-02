@@ -19,7 +19,7 @@ const SectionClasstypeMaybe = props => {
                 <FormattedMessage id="ListingPage.classtypeTitle" />
             </h2>
             <PropertyGroup
-                id="ListingPage.classtype"
+                id="ListingPage.classtypeType"
                 options={selectedConfigOptions}
                 selectedOptions={selectedOptions}
                 twoColumns={selectedConfigOptions.length > 5}
