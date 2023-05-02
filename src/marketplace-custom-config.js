@@ -178,7 +178,7 @@ export const filters = [
     {
         id: 'classtype',
         label: 'Class Environment',
-        type: 'SelectSingleFilter',
+        type: 'SelectMultipleFilter',
         group: 'secondary',
         queryParamNames: ['pub_classtype'],
         config: {

@@ -56,7 +56,7 @@ const EditListingFeaturesFormComponent = props => (
         const recognitionKey = 'recognition';
         const recognitionOptions = findOptionsForSelectFilter(recognitionKey, filterConfig);
 
-        // Props for "classtype" select field
+        // Props for classtype select field
         const classtypeKey = 'classtype';
         const classtypeOptions = findOptionsForSelectFilter(classtypeKey, filterConfig);
 
@@ -75,18 +75,13 @@ const EditListingFeaturesFormComponent = props => (
                   label={'Recognitions and Awards'}
               />
 
-              <FieldSelect
+              <FieldCheckboxGroup
                   className={css.features}
                   name={classtypeKey}
                   id={classtypeKey}
-                  label={'Class Environment'}
-              >
-                  {classtypeOptions.map(o => (
-                      <option key={o.key} value={o.key}>
-                          {o.label}
-                      </option>
-                  ))}
-              </FieldSelect>
+		  options={classtypeOptions}
+                  label={'Class Environment(s)'}
+              />
 
           <Button
             className={css.submitButton}
