@@ -21,7 +21,7 @@ const selectedOptions = publicData && publicData.classtype ? publicData.classtyp
 
   return (
     <div className={css.sectionFeatures}>
-      <h2 className={css.featuresTitle}
+      <h2 className={css.featuresTitle}>
 	   <FormattedMessage id="ListingPage.classtypeTitle" />
       </h2>
       <PropertyGroup
