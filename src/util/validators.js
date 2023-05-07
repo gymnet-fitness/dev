@@ -1,6 +1,6 @@
-import moment from 'moment';
-import { types as sdkTypes } from './sdkLoader';
 import toPairs from 'lodash/toPairs';
+import { types as sdkTypes } from './sdkLoader';
+import { diffInTime } from './dates';
 
 const { LatLng, Money } = sdkTypes;
 
@@ -119,6 +119,11 @@ const parseNum = str => {
   return Number.isNaN(num) ? null : num;
 };
 
+export const numberAtLeast = (message, minNumber) => value => {
+  const valueNum = parseNum(value);
+  return typeof valueNum === 'number' && valueNum >= minNumber ? VALID : message;
+};
+
 export const ageAtLeast = (message, minYears) => value => {
   const { year, month, day } = value;
   const dayNum = parseNum(day);
@@ -127,9 +132,9 @@ export const ageAtLeast = (message, minYears) => value => {
 
   // day, month, and year needs to be numbers
   if (dayNum !== null && monthNum !== null && yearNum !== null) {
-    const now = moment();
+    const now = new Date();
     const age = new Date(yearNum, monthNum - 1, dayNum);
-    const ageInYears = now.diff(moment(age), 'years', true);
+    const ageInYears = diffInTime(now, age, 'years', true);
 
     return age && age instanceof Date && ageInYears >= minYears ? VALID : message;
   }

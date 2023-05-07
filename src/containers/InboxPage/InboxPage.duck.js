@@ -2,7 +2,7 @@ import reverse from 'lodash/reverse';
 import sortBy from 'lodash/sortBy';
 import { storableError } from '../../util/errors';
 import { parse } from '../../util/urlHelpers';
-import { TRANSITIONS } from '../../util/transaction';
+import { getAllTransitionsForEveryProcess } from '../../transactions/transaction';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 
 const sortedTransactions = txs =>
@@ -33,7 +33,7 @@ const initialState = {
   transactionRefs: [],
 };
 
-export default function checkoutPageReducer(state = initialState, action = {}) {
+export default function inboxPageReducer(state = initialState, action = {}) {
   const { type, payload } = action;
   switch (type) {
     case FETCH_ORDERS_OR_SALES_REQUEST:
@@ -92,26 +92,29 @@ export const loadData = (params, search) => (dispatch, getState, sdk) => {
 
   const apiQueryParams = {
     only: onlyFilter,
-    lastTransitions: TRANSITIONS,
+    lastTransitions: getAllTransitionsForEveryProcess(),
     include: [
+      'listing',
       'provider',
       'provider.profileImage',
       'customer',
       'customer.profileImage',
       'booking',
-      'listing',
     ],
     'fields.transaction': [
+      'processName',
       'lastTransition',
       'lastTransitionedAt',
       'transitions',
       'payinTotal',
       'payoutTotal',
+      'lineItems',
     ],
+    'fields.listing': ['title', 'availabilityPlan', 'publicData.listingType'],
     'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
     'fields.image': ['variants.square-small', 'variants.square-small2x'],
     page,
-    per_page: INBOX_PAGE_SIZE,
+    perPage: INBOX_PAGE_SIZE,
   };
 
   return sdk.transactions

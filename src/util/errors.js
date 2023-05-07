@@ -22,7 +22,10 @@ import {
   ERROR_CODE_UPLOAD_OVER_LIMIT,
   ERROR_CODE_MISSING_STRIPE_ACCOUNT,
   ERROR_CODE_TRANSACTION_BOOKING_TIME_NOT_AVAILABLE,
+  ERROR_CODE_TRANSACTION_LISTING_INSUFFICIENT_STOCK,
+  ERROR_CODE_STOCK_OLD_TOTAL_MISMATCH,
 } from './types';
+// NOTE: This file imports types.js, which may lead to circular dependency
 
 const errorAPIErrors = error => {
   return error && error.apiErrors ? error.apiErrors : [];
@@ -74,6 +77,13 @@ export const isUploadImageOverLimitError = error =>
   hasErrorWithCode(error, ERROR_CODE_UPLOAD_OVER_LIMIT);
 
 /**
+ * Check if the given API error (from
+ * `sdk.stock.compareAndSet()`) is due to the oldTotal being wrong.
+ */
+export const isOldTotalMismatchStockError = error =>
+  hasErrorWithCode(error, ERROR_CODE_STOCK_OLD_TOTAL_MISMATCH);
+
+/**
  * Check if the given API error (from `sdk.passwordReset.request()`)
  * is due to no user having the given email address.
  */
@@ -103,6 +113,13 @@ export const isTransactionInitiateMissingStripeAccountError = error =>
  */
 export const isTransactionInitiateBookingTimeNotAvailableError = error =>
   hasErrorWithCode(error, ERROR_CODE_TRANSACTION_BOOKING_TIME_NOT_AVAILABLE);
+
+/**
+ * Check if the given API error (from `sdk.transaction.initiate()` or
+ * `sdk.transaction.initiateSpeculative()`) is due to insufficient stock.
+ */
+export const isTransactionInitiateListingInsufficientStockError = error =>
+  hasErrorWithCode(error, ERROR_CODE_TRANSACTION_LISTING_INSUFFICIENT_STOCK);
 
 /**
  * Check if the given API error (from `sdk.transaction.initiate()` or
@@ -237,6 +254,14 @@ export const isStripeError = error => {
   });
 };
 
+/**
+ * Check if the given transition error is
+ * due to no quantity information in the transition params.
+ */
+export const isTransitionQuantityInfoMissingError = error =>
+  error?.status === 400 &&
+  error?.statusText.startsWith('Error: transition should contain quantity information');
+
 export const storableError = err => {
   const error = err || {};
   const { name, message, status, statusText } = error;
@@ -253,10 +278,3 @@ export const storableError = err => {
     apiErrors,
   };
 };
-
-export const responseApiErrorInfo = err =>
-  responseAPIErrors(err).map(e => ({
-    status: e.status,
-    code: e.code,
-    meta: e.meta,
-  }));

@@ -1,9 +1,9 @@
-// These helpers are calling FTW's own server-side routes
+// These helpers are calling this template's own server-side routes
 // so, they are not directly calling Marketplace API or Integration API.
 // You can find these api endpoints from 'server/api/...' directory
 
+import appSettings from '../config/settings';
 import { types as sdkTypes, transit } from './sdkLoader';
-import config from '../config';
 import Decimal from 'decimal.js';
 
 export const apiBaseUrl = () => {
@@ -19,13 +19,6 @@ export const apiBaseUrl = () => {
   return `${window.location.origin}`;
 };
 
-// Check if user can be deleted and then delete the user. Endpoint logic
-  // must be modified to accommodate the transaction processes used in
-      // the marketplace.
-      export const deleteUserAccount = body => {
-            return post('/api/delete-account', body);
-          }
-
 // Application type handlers for JS SDK.
 //
 // NOTE: keep in sync with `typeHandlers` in `server/api-util/sdk.js`
@@ -40,7 +33,7 @@ export const typeHandlers = [
 ];
 
 const serialize = data => {
-  return transit.write(data, { typeHandlers, verbose: config.sdk.transitVerbose });
+  return transit.write(data, { typeHandlers, verbose: appSettings.sdk.transitVerbose });
 };
 
 const deserialize = str => {
@@ -89,7 +82,7 @@ export const transactionLineItems = body => {
 // Initiate a privileged transaction.
 //
 // With privileged transitions, the transactions need to be created
-// from the backend. This endpoint enables sending the booking data to
+// from the backend. This endpoint enables sending the order data to
 // the local backend, and passing that to the Marketplace API.
 //
 // See `server/api/initiate-privileged.js` to see what data should be
@@ -112,7 +105,7 @@ export const transitionPrivileged = body => {
 
 // Create user with identity provider (e.g. Facebook or Google)
 //
-// If loginWithIdp api call fails and user can't authenticate to Flex with idp
+// If loginWithIdp api call fails and user can't authenticate to Marketplace API with idp
 // we will show option to create a new user with idp.
 // For that user needs to confirm data fetched from the idp.
 // After the confirmation, this endpoint is called to create a new user with confirmed data.

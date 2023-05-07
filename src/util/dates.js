@@ -1,40 +1,15 @@
-// Import moment from moment-timezone. 10-year range only.
-// The full data included in moment-timezone dependency is mostly irrelevant
-// and slows down the first paint.
 import moment from 'moment-timezone/builds/moment-timezone-with-data-10-year-range.min';
-import jstz from 'jstimezonedetect';
 
 /**
  * Input names for the DateRangePicker from react-dates.
  */
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
-const timeSlotMinutes = 30;
-
-/**
- * Check that the given parameter is a Date object.
- *
- * @param {Date} object that should be a Date.
- *
- * @returns {boolean} true if given parameter is a Date object.
- */
-export const isDate = d =>
-  d && Object.prototype.toString.call(d) === '[object Date]' && !Number.isNaN(d.getTime());
-
-/**
- * Check if the given parameters represent the same Date value (timestamps are compared)
- *
- * @param {Date} first param that should be a Date and it should have same timestamp as second param.
- * @param {Date} second param that should be a Date and it should have same timestamp as second param.
- *
- * @returns {boolean} true if given parameters have the same timestamp.
- */
-export const isSameDate = (a, b) => a && isDate(a) && b && isDate(b) && a.getTime() === b.getTime();
 
 /**
  * Check if the browser's DateTimeFormat API supports time zones.
  *
- * @returns {Boolean} true if the browser returns current timezone.
+ * @returns {Boolean} true if the browser returns current time zone.
  */
 export const isTimeZoneSupported = () => {
   if (!Intl || typeof Intl === 'undefined' || typeof Intl.DateTimeFormat === 'undefined') {
@@ -70,15 +45,17 @@ export const getDefaultTimeZoneOnBrowser = () => {
     }
   }
 
-  // Fallback to jstimezonedetect dependency.
-  // However, most browsers support Intl.DateTimeFormat already.
-  return jstz.determine().name();
+  console.error(
+    'Utility function: getDefaultTimeZoneOnBrowser() was not able to detect time zone.'
+  );
+  return 'Etc/UTC';
 };
 
 /**
  * Check if the given time zone key is valid.
  *
- * @param {String} name of the time zone in IANA format
+ * @param {String} timeZone time zone id, see:
+ *   https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
  *
  * @returns {Boolean} true if the browser recognizes the key.
  */
@@ -104,271 +81,116 @@ export const getTimeZoneNames = relevantZonesRegExp => {
 };
 
 /**
- * Format date instance to string and localized it to given time zone.
- * Default formatting shows date and hours and minutes in 24 hour format:
+ * Check that the given parameter is a Date object.
  *
- * > localizeAndFormatDate(intl, 'America/Los_Angeles', new Date())
- * => "9/18/2019, 08:18"
+ * @param {Date} object that should be a Date.
  *
- * @param {Object} instance of React Intl
- * @param {String} timezone name. It should represent IANA timezone key.
- * @param {Date} date to be localized.
- * @param {Object} formatting options for Intl.DateTimeFormat.
- *
- * @returns {String} date localized and formatted to string.
+ * @returns {boolean} true if given parameter is a Date object.
  */
-export const localizeAndFormatDate = (intl, timeZone, date, formattingOptions = null) => {
-  if (!isTimeZoneSupported()) {
-    throw new Error(`Your browser does not support timezones.`);
-  }
+export const isDate = d =>
+  d && Object.prototype.toString.call(d) === '[object Date]' && !Number.isNaN(d.getTime());
 
-  if (!isValidTimeZone(timeZone)) {
-    throw new Error(`Given time zone key (${timeZone}) is not valid.`);
-  }
+/**
+ * Check if the given parameters represent the same Date value (timestamps are compared)
+ *
+ * @param {Date} first param that should be a Date and it should have same timestamp as second param.
+ * @param {Date} second param that should be a Date and it should have same timestamp as second param.
+ *
+ * @returns {boolean} true if given parameters have the same timestamp.
+ */
+export const isSameDate = (a, b) => a && isDate(a) && b && isDate(b) && a.getTime() === b.getTime();
 
-  const format = formattingOptions || {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-
-    // With the default `en` locale, times are formatted in the en-US format:
-    // "05:45 PM". If you want to keep the English language, but customize the
-    // time formatting, you can use the `hourCycle` option here.
-    //
-    // Formerly FTW hourly used the `hour12: false` option here, which is the
-    // same as `hourCycle: 'h24'`.
-    //
-    // To see the possible values for `hourCycle` and how they render times, see:
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/hourCycle
-    hour: '2-digit',
-    minute: '2-digit',
-  };
-
-  return intl.formatTime(date, { ...format, timeZone });
+/**
+ * Compare is dateA is after dateB
+ *
+ * @param {Date} dateA date instance
+ * @param {Date} dateB date instance
+ *
+ * @returns {Date} true if dateA is after dateB
+ */
+export const isAfterDate = (dateA, dateB) => {
+  return moment(dateA).isAfter(moment(dateB));
 };
 
 /**
- * Format date instance to string and localized it to given time zone.
- * Default formatting shows hours and minutes in 24 hour format:
+ * Compare is dateA is after dateB
  *
- * > localizeAndFormatTime(intl, 'America/Los_Angeles', new Date())
- * => "08:18"
+ * @param {Date} dateA date instance
+ * @param {Date} dateB date instance
  *
- * @param {Object} instance of React Intl
- * @param {String} timezone name. It should represent IANA timezone key.
- * @param {Date} date to be localized.
- * @param {Object} formatting options for Intl.DateTimeFormat.
- *
- * @returns {String} date localized and formatted to string.
+ * @returns {Date} true if dateA is after dateB
  */
-export const localizeAndFormatTime = (
-  intl,
-  timeZone,
-  date,
-
-  // Override default formatting options. See the `localizeAndFormatDate`
-  // function above for more info on the options.
-  formattingOptions = {
-    hour: '2-digit',
-    minute: '2-digit',
-  }
-) => {
-  return localizeAndFormatDate(intl, timeZone, date, formattingOptions);
+export const isDateSameOrAfter = (dateA, dateB) => {
+  return moment(dateA).isSameOrAfter(moment(dateB));
 };
 
 /**
- * Rounding function for moment.js. Rounds the Moment provided by the context
- * to the start of the specified time value in the specified units.
- * @param {*} value the rounding value
- * @param {*} timeUnit time units to specify the value
- * @returns Moment rounded to the start of the specified time value
+ * Check that the given dates are pointing to the same day.
+ *
+ * @param {Date} date1 first date object
+ * @param {Date} date2 second date object
+ * @param {String} timeZone (if omitted local time zone is used)
+ *
+ * @returns {boolean} true if Date objects are pointing to the same day on given time zone.
  */
-moment.fn.startOfDuration = function (value, timeUnit) {
-    const getMs = (val, unit) => moment.duration(val, unit)._milliseconds;
-    const ms = getMs(value, timeUnit);
-
-    // Get UTC offset to account for potential time zone difference between
-    // customer and listing
-    const offsetMs = this._isUTC ? 0 : getMs(this.utcOffset(), 'minute');
-    return moment(Math.floor((this.valueOf() + offsetMs) / ms) * ms);
-};
-
-// NOTE: If your customization is using different time-units than hours
-// and different boundaries than sharp hours, you need to modify these functions:
-// - findBookingUnitBoundaries (DST changes)
-// - findNextBoundary
-// - getSharpHours
-// - getStartHours
-// - getEndHours
-// - calculateQuantityFromHours
-
-// Helper function for exported function: getSharpHours
-// Recursively find boundaries for bookable time slots.
-const findBookingUnitBoundaries = params => {
-  const {
-    cumulatedResults,
-    currentBoundary,
-    startMoment,
-    endMoment,
-    nextBoundaryFn,
-    intl,
-    timeZone,
-  } = params;
-
-  if (moment(currentBoundary).isBetween(startMoment, endMoment, null, '[]')) {
-    const timeOfDay = localizeAndFormatTime(intl, timeZone, currentBoundary);
-    // Choose the previous (aka first) sharp hour boundary,
-    // if daylight saving time (DST) creates the same time of day two times.
-    const newBoundary =
-      cumulatedResults &&
-      cumulatedResults.length > 0 &&
-      cumulatedResults.slice(-1)[0].timeOfDay === timeOfDay
-        ? []
-        : [
-            {
-              timestamp: currentBoundary.valueOf(),
-              timeOfDay,
-            },
-          ];
-
-    return findBookingUnitBoundaries({
-      ...params,
-      cumulatedResults: [...cumulatedResults, ...newBoundary],
-      currentBoundary: moment(nextBoundaryFn(timeZone, currentBoundary)),
-    });
-  }
-  return cumulatedResults;
+export const isSameDay = (date1, date2, timeZone) => {
+  const d1 = timeZone ? moment(date1).tz(timeZone) : moment(date1);
+  const d2 = timeZone ? moment(date2).tz(timeZone) : moment(date2);
+  return d1.isSame(d2, 'day');
 };
 
 /**
- * Find the next sharp hour after the current moment.
+ * Check if the date is in the given range, start and end included.
+ * @param {Date} date to be checked
+ * @param {Date} start start of the range
+ * @param {Date} end end of the range
+ * @param {string} timeUnit scope of the range, e.g. 'day', 'hour', 'minute', can be also null
+ * @param {String} timeZone
  *
- * @param {String} timezone name. It should represent IANA timezone key.
- * @param {Moment|Date} Start point for looking next sharp hour.
- *
- * @returns {Array} an array of localized hours.
+ * @returns {boolean} is date in range
  */
-export const findNextBoundary = (timeZone, currentMomentOrDate) =>
-  moment(currentMomentOrDate)
-    .clone()
-    .tz(timeZone)
-    .add(timeSlotMinutes, 'minutes')
-    .startOfDuration(timeSlotMinutes, 'minutes')
-    .toDate();
-
-/**
- * Find sharp hours inside given time window. Returned strings are localized to given time zone.
- *
- * > getSharpHours(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
- * => [
- *    {
- *      "timestamp": 1568793600000,
- *      "timeOfDay": "11:00",
- *    },
- *    {
- *      "timestamp": 1568797200000,
- *      "timeOfDay": "12:00",
- *    },
- *    {
- *      "timestamp": 1568800800000,
- *      "timeOfDay": "13:00",
- *    },
- *    {
- *      "timestamp": 1568804400000,
- *      "timeOfDay": "14:00",
- *    },
- *  ]
- *
- * @param {Object} formatting options for Intl.DateTimeFormat.
- * @param {String} timezone name. It should represent IANA timezone key.
- * @param {Date} Start point of available time window.
- * @param {Date} End point of available time window.
- *
- * @returns {Array} an array of objects with keys timestamp and timeOfDay.
- */
-export const getSharpHours = (intl, timeZone, startTime, endTime) => {
-  if (!moment.tz.zone(timeZone)) {
-    throw new Error(
-      'Time zones are not loaded into moment-timezone. "getSharpHours" function uses time zones.'
-    );
-  }
-
-  // Select a moment before startTime to find next possible sharp hour.
-  // I.e. startTime might be a sharp hour.
-  const millisecondBeforeStartTime = new Date(startTime.getTime() - 1);
-  return findBookingUnitBoundaries({
-    currentBoundary: findNextBoundary(timeZone, millisecondBeforeStartTime),
-    startMoment: moment(startTime),
-    endMoment: moment(endTime),
-    nextBoundaryFn: findNextBoundary,
-    cumulatedResults: [],
-    intl,
-    timeZone,
-  });
+export const isInRange = (date, start, end, timeUnit, timeZone) => {
+  const dateMoment = timeZone ? moment(date).tz(timeZone) : moment(date);
+  // Range usually ends with 00:00, and with day timeUnit,
+  // this means that exclusive end is wrongly taken into range.
+  // Note about timeUnit with isBetween: in the event that the from and to parameters are the same,
+  // but the inclusivity parameters are different, false will preside.
+  // aka moment('2016-10-30').isBetween('2016-10-30', '2016-10-30', undefined, '(]'); //false
+  // => we need to use []
+  const millisecondBeforeEndTime = new Date(end.getTime() - 1);
+  return dateMoment.isBetween(start, millisecondBeforeEndTime, timeUnit, '[]');
 };
 
 /**
- * Find sharp start hours for bookable time units (hour) inside given time window.
- * Returned strings are localized to given time zone.
+ * Checks if time-range contains a day (moment)
+ * Returns true if the day is inside the range or if the time-range
+ * starts or ends between start and end of the day.
  *
- * > getStartHours(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
- * => [
- *    {
- *      "timestamp": 1568793600000,
- *      "timeOfDay": "11:00",
- *    },
- *    {
- *      "timestamp": 1568797200000,
- *      "timeOfDay": "12:00",
- *    },
- *    {
- *      "timestamp": 1568800800000,
- *      "timeOfDay": "13:00",
- *    },
- *  ]
+ * By default react-dates handles dates in the browser's timezone so
+ * we need to convert the value `day` to given timezone before comparing it
+ * to time-range.
  *
- * @param {Object} formatting options for Intl.DateTimeFormat.
- * @param {String} timezone name. It should represent IANA timezone key.
- * @param {Date} Start point of available time window.
- * @param {Date} End point of available time window.
+ * This is used with isDayBlocked in react-dates
  *
- * @returns {Array} an array of objects with keys timestamp and timeOfDay.
+ * @param {Moment} dayMoment to be checked
+ * @param {Date} start start of the range
+ * @param {Date} end end of the range
+ * @param {String} timeZone
+ *
+ * @returns {boolean} is day in range
  */
-export const getStartHours = (intl, timeZone, startTime, endTime) => {
-  const hours = getSharpHours(intl, timeZone, startTime, endTime);
-  return hours.length < 2 ? hours : hours.slice(0, -1);
-};
+export const isDayMomentInsideRange = (dayMoment, start, end, timeZone) => {
+  const startOfDay = moment.tz(dayMoment.toArray().slice(0, 3), timeZone);
 
-/**
- * Find sharp end hours for bookable time units (hour) inside given time window.
- * Returned strings are localized to given time zone.
- *
- * > getStartingHours(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
- * => [
- *    {
- *      "timestamp": 1568797200000,
- *      "timeOfDay": "12:00",
- *    },
- *    {
- *      "timestamp": 1568800800000,
- *      "timeOfDay": "13:00",
- *    },
- *    {
- *      "timestamp": 1568804400000,
- *      "timeOfDay": "14:00",
- *    },
- *  ]
- *
- * @param {Object} formatting options for Intl.DateTimeFormat.
- * @param {String} timezone name. It should represent IANA timezone key.
- * @param {Date} Start point of available time window.
- * @param {Date} End point of available time window.
- *
- * @returns {Array} an array of objects with keys timestamp and timeOfDay.
- */
-export const getEndHours = (intl, timeZone, startTime, endTime) => {
-  const hours = getSharpHours(intl, timeZone, startTime, endTime);
-  return hours.length < 2 ? [] : hours.slice(1);
+  // Removing 1 millisecond, solves the exclusivity issue.
+  // Because we are only using the date and not the exact time we can remove the
+  // 1ms from the end date.
+  // Note about timeUnit with isBetween: in the event that the from and to parameters are the same,
+  // but the inclusivity parameters are different, false will preside.
+  // => we need to use []
+  const inclusiveEndDate = moment.tz(new Date(end.getTime() - 1), timeZone);
+
+  return startOfDay.isBetween(start, inclusiveEndDate, 'day', '[]');
 };
 
 /**
@@ -381,6 +203,10 @@ export const timestampToDate = timestamp => {
   return new Date(Number.parseInt(timestamp, 10));
 };
 
+////////////////////////////////////////////////////////////////////
+// Manipulate time: time-of-day between different time zones etc. //
+////////////////////////////////////////////////////////////////////
+
 /**
  * Returns a new date, which indicates the same time of day in a given time zone
  * as given date is in local time zone
@@ -388,7 +214,7 @@ export const timestampToDate = timestamp => {
  * @param {Date} date
  * @param {String} timeZone
  *
- * @returns {Date} date in given timezone
+ * @returns {Date} date in given time zone
  */
 export const timeOfDayFromLocalToTimeZone = (date, timeZone) => {
   return moment.tz(moment(date).format('YYYY-MM-DD HH:mm:ss'), timeZone).toDate();
@@ -401,7 +227,7 @@ export const timeOfDayFromLocalToTimeZone = (date, timeZone) => {
  * @param {Date} date
  * @param {String} timeZone
  *
- * @returns {Date} date in given timezone
+ * @returns {Date} date in given time zone
  */
 export const timeOfDayFromTimeZoneToLocal = (date, timeZone) => {
   return moment(
@@ -412,24 +238,75 @@ export const timeOfDayFromTimeZoneToLocal = (date, timeZone) => {
 };
 
 /**
- * Calculate the number of nights between the given dates
+ * Get start of time unit (e.g. start of day)
  *
- * @param {Date} startDate start of the time period
- * @param {Date} endDate end of the time period
+ * @param {Date} date date instance to be converted
+ * @param {String} unit time-unit (e.g. "day")
+ * @param {String} timeZone time zone id
  *
- * @throws Will throw if the end date is before the start date
- * @returns {Number} number of nights between the given dates
+ * @returns {Date} date object converted to the start of given unit
  */
-export const nightsBetween = (startDate, endDate) => {
-  const nights = moment(endDate).diff(startDate, 'days');
-  if (nights < 0) {
-    throw new Error('End date cannot be before start date');
-  }
-  return nights;
+export const getStartOf = (date, unit, timeZone, offset = 0, offsetUnit = 'days') => {
+  const m = timeZone
+    ? moment(date)
+        .clone()
+        .tz(timeZone)
+    : moment(date).clone();
+
+  const startOfUnit = m.startOf(unit);
+  const startOfUnitWithOffset = offset === 0 ? startOfUnit : startOfUnit.add(offset, offsetUnit);
+  return startOfUnitWithOffset.toDate();
 };
 
 /**
- * Calculate the number of days between the given dates
+ * Adds time-units to the date
+ *
+ * @param {Date} date date to be manipulated
+ * @param {int} offset offset of time-units (e.g. "3" days)
+ * @param {String} unit time-unit (e.g. "days")
+ * @param {String} timeZone time zone name
+ *
+ * @returns {Date} date with given offset added
+ */
+export const addTime = (date, offset, unit, timeZone) => {
+  const m = timeZone
+    ? moment(date)
+        .clone()
+        .tz(timeZone)
+    : moment(date).clone();
+  return m.add(offset, unit).toDate();
+};
+
+/**
+ * Subtract time-units from the date
+ *
+ * @param {Date} date date to be manipulated
+ * @param {int} offset offset of time-units (e.g. "3" days)
+ * @param {String} unit time-unit (e.g. "days")
+ * @param {String} timeZone time zone name
+ *
+ * @returns {Date} date with given offset subtracted
+ */
+export const subtractTime = (date, offset, unit, timeZone) => {
+  const m = timeZone
+    ? moment(date)
+        .clone()
+        .tz(timeZone)
+    : moment(date).clone();
+  return m.subtract(offset, unit).toDate();
+};
+
+///////////////
+// Durations //
+///////////////
+
+/**
+ * Calculate the number of days between the given dates.
+ * This uses moment#diff and, therefore, it just checks,
+ * if there are 1000x60x60x24 milliseconds between date objects.
+ *
+ * Note: This should not be used for checking if the local date has
+ *       changed between "2021-04-07 23:00" and "2021-04-08 05:00".
  *
  * @param {Date} startDate start of the time period
  * @param {Date} endDate end of the time period. NOTE: with daily
@@ -449,21 +326,6 @@ export const daysBetween = (startDate, endDate) => {
 };
 
 /**
- * Check that the given dates are pointing to the same day.
- *
- * @param {Date} date1 first date object
- * @param {Date} date2 second date object
- * @param {String} timeZone (if omitted local time zone is used)
- *
- * @returns {boolean} true if Date objects are pointing to the same day on given time zone.
- */
-export const isSameDay = (date1, date2, timeZone) => {
-  const d1 = timeZone ? moment(date1).tz(timeZone) : moment(date1);
-  const d2 = timeZone ? moment(date2).tz(timeZone) : moment(date2);
-  return d1.isSame(d2, 'day');
-};
-
-/**
  * Count the number of minutes between the given Date objects.
  *
  * @param {Date} startDate start of the time period
@@ -477,150 +339,195 @@ export const minutesBetween = (startDate, endDate) => {
 };
 
 /**
- * Check if date is after another date.
- * @param {Date} date
- * @param {Date} compareToDate
+ * Calculate the difference between the given dates
  *
- * @returns {boolean} is the date same or after
+ * @param {Date} startDate start of the time period
+ * @param {Date} endDate end of the time period.
+ * @param {String} unit time unit. E.g. 'years'.
+ * @param {String} useFloat Should return floating point numbers?
+ *
+ * @returns {Number} time difference between the given Date objects using given unit
  */
-export const dateIsAfter = (date, compareToDate) => {
-  return moment(date).isSameOrAfter(compareToDate);
+export const diffInTime = (startDate, endDate, unit, useFloat = false) => {
+  return moment(startDate).diff(endDate, unit, useFloat);
+};
+
+////////////////////////////
+// Parsing and formatting //
+////////////////////////////
+
+const getTimeZoneMaybe = timeZone => {
+  if (timeZone) {
+    if (!isTimeZoneSupported()) {
+      throw new Error(`Your browser doesn't support time zones.`);
+    }
+
+    if (!isValidTimeZone(timeZone)) {
+      throw new Error(`Given time zone key (${timeZone}) is not valid.`);
+    }
+    return { timeZone };
+  }
+  return {};
 };
 
 /**
- * Check if the date is in the given range, start and end included.
- * @param {Date} date to be checked
- * @param {Date} start start of the range
- * @param {Date} end end of the range
- * @param {string} scope scope of the range, e.g. 'day', 'hour', 'minute', can be also null
+ * Format the given date. Printed string depends on how close the date is the current day.
+ * E.g. "Today, 9:10 PM", "Sun 6:02 PM", "Jul 20, 6:02 PM", "Jul 20 2020, 6:02 PM"
  *
- * @returns {boolean} is date in range
- */
-
-export const isInRange = (date, start, end, scope, timeZone) => {
-  // Range usually ends with 00:00, and with day scope,
-  // this means that exclusive end is wrongly taken into range.
-  const millisecondBeforeEndTime = new Date(end.getTime() - 1);
-  return timeZone
-    ? moment(date)
-        .tz(timeZone)
-        .isBetween(start, millisecondBeforeEndTime, scope, '[]')
-    : moment(date).isBetween(start, end, scope, '[)');
-};
-
-/**
- * Resets the date to 00:00:00
- *
- * @param {Date} date date to be reseted
- * @param {int} offset offset of days (e.g. add 1 day)
- * @param {String} timeZone
- *
- * @returns {Date} date with time 00:00:00 with given offset
- */
-export const resetToStartOfDay = (date, timeZone, offset = 0) => {
-  return moment(date)
-    .clone()
-    .tz(timeZone)
-    .startOf('day')
-    .add(offset, 'days')
-    .toDate();
-};
-
-/**
- * Format the given date to month id/string
- *
- * @param {Date} date to be formatted
- *
- * @returns {String} formatted month string
- */
-export const monthIdString = date => moment(date).format('YYYY-MM');
-
-/**
- * Not used with time-based process...
- * Format the given date to UTC month id/string
- *
- * @param {Date} date to be formatted
- *
- * @returns {String} formatted month string
- */
-export const monthIdStringInUTC = date =>
-  moment(date)
-    .utc()
-    .format('YYYY-MM');
-
-/**
- * Format the given date to a localized month id/string
- *
- * @param {Date} date to be formatted
- * @param {String} time zone.
- *
- * @returns {String} formatted month string
- */
-export const monthIdStringInTimeZone = (date, timeZone) =>
-  moment(date)
-    .tz(timeZone)
-    .format('YYYY-MM');
-
-/**
- * Format the given date
- *
+ * @param {Date} date Date to be formatted
  * @param {Object} intl Intl object from react-intl
  * @param {String} todayString translation for the current day
- * @param {Date} d Date to be formatted
+ * @param {Object} [opts] options. Can be used to pass in timeZone. It should represent IANA time zone key.
  *
  * @returns {String} formatted date
  */
-export const formatDate = (intl, todayString, d) => {
-  const paramsValid = intl && d instanceof Date && typeof todayString === 'string';
+export const formatDateWithProximity = (date, intl, todayString, opts = {}) => {
+  const paramsValid = intl && date instanceof Date && typeof todayString === 'string';
   if (!paramsValid) {
-    throw new Error(`Invalid params for formatDate: (${intl}, ${todayString}, ${d})`);
+    throw new Error(`Invalid params for formatDate: (${date}, ${intl}, ${todayString})`);
   }
+
+  // If timeZone parameter is set, use it as formatting option
+  const { timeZone } = opts;
+  const timeZoneMaybe = getTimeZoneMaybe(timeZone);
 
   // By default we can use moment() directly but in tests we need to use a specific dates.
-  // fakeIntl used in tests contains now() function wich returns predefined date
+  // Tests inject now() function to intl wich returns predefined date
   const now = intl.now ? moment(intl.now()) : moment();
-  const formattedTime = intl.formatTime(d);
-  let formattedDate;
 
-  if (now.isSame(d, 'day')) {
-    // e.g. "Today, 9:10pm"
-    formattedDate = todayString;
-  } else if (now.isSame(d, 'week')) {
-    // e.g. "Wed, 8:00pm"
-    formattedDate = intl.formatDate(d, {
-      weekday: 'short',
+  // isSame: if the two moments have different time zones, the time zone of the first moment will be used for the comparison.
+  const localizedNow = timeZoneMaybe.timeZone ? now.tz(timeZone) : now;
+
+  if (localizedNow.isSame(date, 'day')) {
+    // e.g. "Today, 9:10 PM"
+    const formattedTime = intl.formatDate(date, {
+      hour: 'numeric',
+      minute: 'numeric',
+      ...timeZoneMaybe,
     });
-  } else if (now.isSame(d, 'year')) {
-    // e.g. "Aug 22, 7:40pm"
-    formattedDate = intl.formatDate(d, {
+    return `${todayString}, ${formattedTime}`;
+  } else if (localizedNow.isSame(date, 'week')) {
+    // e.g.
+    // en-US: "Sun 6:02 PM"
+    // en-GB: "Sun 18:02"
+    // fr-FR: "dim. 18:02"
+    return intl.formatDate(date, {
+      weekday: 'short',
+      hour: 'numeric',
+      minute: 'numeric',
+      ...timeZoneMaybe,
+    });
+  } else if (localizedNow.isSame(date, 'year')) {
+    // e.g.
+    // en-US: "Jul 20, 6:02 PM"
+    // en-GB: "20 Jul, 18:02"
+    // fr-FR: "20 juil., 18:02"
+    return intl.formatDate(date, {
       month: 'short',
       day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      ...timeZoneMaybe,
     });
   } else {
-    // e.g. "Jul 17 2016, 6:02pm"
-    const date = intl.formatDate(d, {
+    // e.g.
+    // en-US: "Jul 20, 2020, 6:02 PM"
+    // en-GB: "20 Jul 2020, 18:02"
+    // fr-FR: "20 juil. 2020, 18:02"
+    return intl.formatDate(date, {
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      ...timeZoneMaybe,
     });
-    const year = intl.formatDate(d, {
-      year: 'numeric',
-    });
-    formattedDate = `${date} ${year}`;
   }
-
-  return `${formattedDate}, ${formattedTime}`;
 };
 
 /**
- * Converts string given in ISO8601 format to date object.
- * This is used e.g. when when dates are parsed form urlParams
+ * Formats date to into multiple different ways:
+ * - date "Mar 24"
+ * - time "8:07 PM"
+ * - dateAndTime: "Mar 24, 8:07 PM"
  *
- * @param {String} dateString in 'YYYY-MM-DD'format
+ * If date is on different year, it will show it.
  *
- * @returns {Date} parsed date object
+ * @param {Date} date to be formatted
+ * @param {Object} intl Intl object from react-intl
+ * @param {Object} [opts] options. Can be used to pass in timeZone. It should represent IANA time zone key.
+ *
+ * @returns {Object} "{ date, time, dateAndTime }"
  */
-export const parseDateFromISO8601 = dateString => {
-  return moment(dateString, 'YYYY-MM-DD').toDate();
+export const formatDateIntoPartials = (date, intl, opts = {}) => {
+  // If timeZone parameter is set, use it as formatting option
+  const { timeZone } = opts;
+  const timeZoneMaybe = getTimeZoneMaybe(timeZone);
+
+  // By default we can use moment() directly but in tests we need to use a specific dates.
+  // Tests inject now() function to intl wich returns predefined date
+  const now = intl.now ? moment(intl.now()) : moment();
+
+  // isSame: if the two moments have different time zones, the time zone of the first moment will be used for the comparison.
+  const localizedNow = timeZoneMaybe.timeZone ? now.tz(timeZone) : now;
+  const yearMaybe = localizedNow.isSame(date, 'year') ? {} : { year: 'numeric' };
+
+  return {
+    date: intl.formatDate(date, {
+      month: 'short',
+      day: 'numeric',
+      ...yearMaybe,
+      ...timeZoneMaybe,
+    }),
+    time: intl.formatDate(date, {
+      hour: 'numeric',
+      minute: 'numeric',
+      ...timeZoneMaybe,
+    }),
+    dateAndTime: intl.formatDate(date, {
+      ...yearMaybe,
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      ...timeZoneMaybe,
+    }),
+  };
+};
+
+/**
+ * Parses given date string in ISO8601 format('YYYY-MM-DD') to date in
+ * the given time zone.
+ *
+ * This is used in search when filtering by time-based availability.
+ *
+ * Example:
+ * ('2020-04-15', 'Etc/UTC') => new Date('2020-04-15T00:00:00.000Z')
+ * ('2020-04-15', 'Europe/Helsinki') => new Date('2020-04-14T21:00:00.000Z')
+ *
+ * @param {String} dateString in 'YYYY-MM-DD' format
+ * @param {String} [timeZone] time zone id, see:
+ *   https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+ *
+ * @returns {Date} date
+ */
+export const parseDateFromISO8601 = (dateString, timeZone = null) => {
+  return timeZone
+    ? moment.tz(dateString, timeZone).toDate()
+    : moment(dateString, 'YYYY-MM-DD').toDate();
+};
+
+/**
+ * Parses a date string that has format like "YYYY-MM-DD HH:mm" into localized date
+ * @param {String} dateTimeString
+ * @param {String} timeZone time zone id, see:
+ *   https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+ * @returns returns Date object
+ */
+export const parseDateTimeString = (dateTimeString, timeZone = null) => {
+  return timeZone
+    ? moment.tz(dateTimeString, timeZone).toDate()
+    : moment(dateTimeString, 'YYYY-MM-DD HH:mm').toDate();
 };
 
 /**
@@ -628,76 +535,254 @@ export const parseDateFromISO8601 = dateString => {
  * This string is used e.g. in urlParam.
  *
  * @param {Date} date
- *
- * @returns {String} string in 'YYYY-MM-DD'format
- */
-export const stringifyDateToISO8601 = date => {
-  return moment(date).format('YYYY-MM-DD');
-};
-
-/**
- * Not used with time-based process...
- * Formats string ('YYYY-MM-DD') to UTC format ('0000-00-00T00:00:00.000Z').
- * This is used in search query.
- *
- * @param {String} dateString in 'YYYY-MM-DD'format
- *
- * @returns {String} string in '0000-00-00T00:00:00.000Z' format
- */
-export const formatDateStringToUTC = dateString => {
-  return moment.utc(dateString).toDate();
-};
-
-/**
- * Format given date string ('YYYY-MM-DD') to a full date string in
- * the given time zone.
- *
- * This is used in search when filtering by time-based availability.
- *
- * Example:
- * ('2020-04-15', 'Etc/UTC') => '2020-04-15T00:00:00.000Z'
- * ('2020-04-15', 'Europe/Helsinki') => '2020-04-14T21:00:00.000Z'
- *
- * @param {String} dateString in 'YYYY-MM-DD' format
- * @param {String} timeZone time zone id, see:
+ * @param {String} [timeZone] time zone id, see:
  *   https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
  *
- * @returns {String} string in '0000-00-00T00:00:00.000Z' format
+ * @returns {String} string in 'YYYY-MM-DD' format
  */
-export const formatDateStringToTz = (dateString, timeZone) => {
-  return moment.tz(dateString, timeZone).toDate();
+export const stringifyDateToISO8601 = (date, timeZone = null) => {
+  return timeZone
+    ? moment(date)
+        .tz(timeZone)
+        .format('YYYY-MM-DD')
+    : moment(date).format('YYYY-MM-DD');
+};
+
+///////////////////////
+// Time unit helpers //
+///////////////////////
+
+// NOTE: If your customization is using different time-units than hours
+// and different boundaries than sharp hours, you need to modify these functions:
+// - findBookingUnitBoundaries (DST changes)
+// - findNextBoundary
+// - getSharpHours
+// - getStartHours
+// - getEndHours
+
+// Helper function for exported function: getSharpHours
+// Recursively find boundaries for bookable time slots.
+const findBookingUnitBoundaries = params => {
+  const {
+    cumulatedResults,
+    currentBoundary,
+    startMoment,
+    endMoment,
+    nextBoundaryFn,
+    intl,
+    timeZone,
+    timeUnit = 'hour',
+  } = params;
+
+  if (moment(currentBoundary).isBetween(startMoment, endMoment, null, '[]')) {
+    const timeOfDay = formatDateIntoPartials(currentBoundary, intl, { timeZone })?.time;
+
+    // Choose the previous (aka first) sharp hour boundary,
+    // if daylight saving time (DST) creates the same time of day two times.
+    const newBoundary =
+      cumulatedResults &&
+      cumulatedResults.length > 0 &&
+      cumulatedResults.slice(-1)[0].timeOfDay === timeOfDay
+        ? []
+        : [
+            {
+              timestamp: currentBoundary.valueOf(),
+              timeOfDay,
+            },
+          ];
+
+    return findBookingUnitBoundaries({
+      ...params,
+      cumulatedResults: [...cumulatedResults, ...newBoundary],
+      currentBoundary: moment(nextBoundaryFn(currentBoundary, timeUnit, timeZone)),
+    });
+  }
+  return cumulatedResults;
 };
 
 /**
- * Not used with time-based process...
- * Formats string ('YYYY-MM-DD') to UTC format ('0000-00-00T00:00:00.000Z') and adds one day.
+ * Find the next sharp hour after the current moment.
+ *
+ * @param {Moment|Date} Start point for looking next sharp hour.
+ * @param {String} timeUnit scope. e.g. 'hour', 'day'
+ * @param {String} timezone name. It should represent IANA timezone key.
+ *
+ * @returns {Array} an array of localized hours.
+ */
+export const findNextBoundary = (currentMomentOrDate, timeUnit, timeZone) =>
+  moment(currentMomentOrDate)
+    .clone()
+    .tz(timeZone)
+    .add(1, timeUnit)
+    .startOf(timeUnit)
+    .toDate();
+
+/**
+ * Find sharp hours inside given time window. Returned strings are localized to given time zone.
+ *
+ * > getSharpHours(new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'), 'Europe/Helsinki', intl);
+ * => [
+ *    {
+ *      "timestamp": 1568793600000,
+ *      "timeOfDay": "11:00",
+ *    },
+ *    {
+ *      "timestamp": 1568797200000,
+ *      "timeOfDay": "12:00",
+ *    },
+ *    {
+ *      "timestamp": 1568800800000,
+ *      "timeOfDay": "13:00",
+ *    },
+ *    {
+ *      "timestamp": 1568804400000,
+ *      "timeOfDay": "14:00",
+ *    },
+ *  ]
+ *
+ * @param {Date} Start point of available time window.
+ * @param {Date} End point of available time window.
+ * @param {String} timezone name. It should represent IANA timezone key.
+ * @param {Object} intl containing formatting options for Intl.DateTimeFormat.
+ *
+ * @returns {Array} an array of objects with keys timestamp and timeOfDay.
+ */
+export const getSharpHours = (startTime, endTime, timeZone, intl) => {
+  if (!moment.tz.zone(timeZone)) {
+    throw new Error(
+      'Time zones are not loaded into moment-timezone. "getSharpHours" function uses time zones.'
+    );
+  }
+
+  // Select a moment before startTime to find next possible sharp hour.
+  // I.e. startTime might be a sharp hour.
+  const millisecondBeforeStartTime = new Date(startTime.getTime() - 1);
+  return findBookingUnitBoundaries({
+    currentBoundary: findNextBoundary(millisecondBeforeStartTime, 'hour', timeZone),
+    startMoment: moment(startTime),
+    endMoment: moment(endTime),
+    nextBoundaryFn: findNextBoundary,
+    cumulatedResults: [],
+    intl,
+    timeZone,
+    timeUnit: 'hour',
+  });
+};
+
+/**
+ * Find sharp start hours for bookable time units (hour) inside given time window.
+ * Returned strings are localized to given time zone.
+ *
+ * > getStartHours(new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'), 'Europe/Helsinki', intl);
+ * => [
+ *    {
+ *      "timestamp": 1568793600000,
+ *      "timeOfDay": "11:00",
+ *    },
+ *    {
+ *      "timestamp": 1568797200000,
+ *      "timeOfDay": "12:00",
+ *    },
+ *    {
+ *      "timestamp": 1568800800000,
+ *      "timeOfDay": "13:00",
+ *    },
+ *  ]
+ *
+ * @param {Date} Start point of available time window.
+ * @param {Date} End point of available time window.
+ * @param {String} timezone name. It should represent IANA timezone key.
+ * @param {Object} intl containing formatting options for Intl.DateTimeFormat.
+ *
+ * @returns {Array} an array of objects with keys timestamp and timeOfDay.
+ */
+export const getStartHours = (startTime, endTime, timeZone, intl) => {
+  const hours = getSharpHours(startTime, endTime, timeZone, intl);
+  return hours.length < 2 ? hours : hours.slice(0, -1);
+};
+
+/**
+ * Find sharp end hours for bookable time units (hour) inside given time window.
+ * Returned strings are localized to given time zone.
+ *
+ * > getStartingHours(new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'), 'Europe/Helsinki', intl);
+ * => [
+ *    {
+ *      "timestamp": 1568797200000,
+ *      "timeOfDay": "12:00",
+ *    },
+ *    {
+ *      "timestamp": 1568800800000,
+ *      "timeOfDay": "13:00",
+ *    },
+ *    {
+ *      "timestamp": 1568804400000,
+ *      "timeOfDay": "14:00",
+ *    },
+ *  ]
+ *
+ * @param {Date} Start point of available time window.
+ * @param {Date} End point of available time window.
+ * @param {String} timezone name. It should represent IANA timezone key.
+ * @param {Object} intl containing formatting options for Intl.DateTimeFormat.
+ *
+ * @returns {Array} an array of objects with keys timestamp and timeOfDay.
+ */
+export const getEndHours = (startTime, endTime, timeZone, intl) => {
+  const hours = getSharpHours(startTime, endTime, timeZone, intl);
+  return hours.length < 2 ? [] : hours.slice(1);
+};
+
+//////////
+// Misc //
+//////////
+
+/**
+ * Return fucntion for react-dates that returns moment of correct initial visible month.
+ * The time-of-day is converted to given time zone, since timeSlot query is tied to it.
+ *
+ * Note:  The moment object we pass to react-dates is without time zone info.
+ * Otherwise, react-dates would start to behave erroneously.
+ *
+ * @param {Date} date
+ * @param {String} timeZone name. It should represent IANA timezone key.
+ * @returns {Moment} of correct month in the given time zone
+ */
+export const initialVisibleMonth = (date, timeZone) => () => {
+  return moment(
+    moment(date)
+      .tz(timeZone)
+      .format('YYYY-MM-DD HH:mm:ss')
+  );
+};
+
+/**
+ * Format the given date to month id/string: 'YYYY-MM'.
+ *
+ * @param {Date} date to be formatted
+ * @param {String} [timeZone] time zone name (optional parameter).
+ *
+ * @returns {String} formatted month string
+ */
+export const monthIdString = (date, timeZone = null) => {
+  return timeZone
+    ? moment(date)
+        .tz(timeZone)
+        .format('YYYY-MM')
+    : moment(date).format('YYYY-MM');
+};
+
+/**
+ * Formats string ('YYYY-MM-DD') in given time zone to format ('0000-00-00T00:00:00.000Z') and adds one day.
  * This is used as end date of the search query.
  * One day must be added because end of the availability is exclusive in API.
  *
- * @param {String} dateString in 'YYYY-MM-DD'format
+ * @param {String} string in 'YYYY-MM-DD'format
+ * @param {String} timeZone time zone name.
  *
  * @returns {String} string in '0000-00-00T00:00:00.000Z' format
  */
-export const getExclusiveEndDate = dateString => {
-  return moment
-    .utc(dateString)
-    .add(1, 'days')
-    .startOf('day')
-    .toDate();
-};
-
-/**
- * Format given date string ('YYYY-MM-DD') to a full date string in
- * the given time zone. Adds 1 day to work with the exlusive date
- * range in the API.
- *
- * @param {String} dateString in 'YYYY-MM-DD'format
- * @param {String} timeZone time zone id, see:
- *   https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
- *
- * @returns {String} string in '0000-00-00T00:00:00.000Z' format
- */
-export const getExclusiveEndDateWithTz = (dateString, timeZone) => {
+export const getExclusiveEndDate = (dateString, timeZone) => {
   return moment
     .tz(dateString, timeZone)
     .add(1, 'days')
@@ -706,145 +791,71 @@ export const getExclusiveEndDateWithTz = (dateString, timeZone) => {
 };
 
 /**
- * Return start of the month in given time zone.
- * If no time zone is given, local time zone is used.
- *
- * @param {Date} date object that marks timestamp inside desired month.
- *
- * @returns {Date} start of the month in given time zone
- */
-export const getMonthStartInTimeZone = (date, timeZone) => {
-  return timeZone
-    ? moment(date)
-        .tz(timeZone)
-        .startOf('month')
-        .toDate()
-    : moment(date)
-        .startOf('month')
-        .toDate();
-};
-
-/**
- * Return start of the previous month in given time zone.
- * If no time zone is given, local time zone is used.
- *
- * @param {Date} date object that marks timestamp inside "current" month.
- *
- * @returns {Date} start of the next month in given time zone
- */
-export const prevMonthFn = (date, timeZone) => {
-  return timeZone
-    ? moment(date)
-        .clone()
-        .tz(timeZone)
-        .subtract(1, 'months')
-        .startOf('month')
-        .toDate()
-    : moment(date)
-        .clone()
-        .subtract(1, 'months')
-        .startOf('month')
-        .toDate();
-};
-
-/**
- * Return start of the next month in given time zone.
- * If no time zone is given, local time zone is used.
- *
- * @param {Date} date object that marks timestamp inside "previous" month.
- *
- * @returns {Date} start of the next month in given time zone
- */
-export const nextMonthFn = (currentMoment, timeZone) => {
-  return timeZone
-    ? moment(currentMoment)
-        .clone()
-        .tz(timeZone)
-        .add(1, 'months')
-        .startOf('month')
-        .toDate()
-    : moment(currentMoment)
-        .clone()
-        .add(1, 'months')
-        .startOf('month')
-        .toDate();
-};
-
-/**
- * Formats Date object to localized strings mapped inside object literal:
- * { date, time, dateAndTime }
- *
- * @param {intl} intl
+ * Get the day (number) of the week (similar to "new Date().getDay()")
  * @param {Date} date
- * @param {String} timeZone optional IANA time zone key
- *
- * @returns {Object} containing date fromatted to date, time and dateAndTime strings
+ * @param {String} timeZone name. It should represent IANA timezone key.
+ * @returns the day of week number 0(Sun) ... 6(Sat)
  */
-export const formatDateToText = (intl, date, timeZone) => {
-  const tzMaybe = timeZone ? { timeZone } : {};
-  return {
-    date: intl.formatDate(date, {
-      month: 'short',
-      day: 'numeric',
-      ...tzMaybe,
-    }),
-    time: intl.formatDate(date, {
-      hour: 'numeric',
-      minute: 'numeric',
-      ...tzMaybe,
-    }),
-    dateAndTime: intl.formatTime(date, {
-      month: 'short',
-      day: 'numeric',
-      ...tzMaybe,
-    }),
-  };
+export const getDayOfWeek = (date, timeZone) => {
+  return timeZone
+    ? moment(date)
+        .tz(timeZone)
+        .day()
+    : moment(date).day();
 };
 
 /**
- * Calculate the quantity of hours between start and end dates.
- * If the length of the timeslot is something else than hour (e.g. 30 minutes)
- * you can change parameter 'hours' to 'minutes' and use that to calculate the
- * quantity of timeslots.
- *
- * See moment documentation about diff:
- * https://momentjs.com/docs/#/displaying/difference/
- *
- * @param {Date} startDate
- * @param {Date} endDate
- *
- * @returns {int} quantity of hours between start and end
- *
+ * Get the start of a week as a Momemnt instance.
+ * This is used by react-dates library (e.g. WeeklyCalendar)
+ * @param {Moment} dayMoment moment instance representing a day
+ * @param {String} timeZone name. It should represent IANA timezone key.
+ * @param {number} firstDayOfWeek (which weekday is the first day?)
+ * @returns return moment object representing the first moment of the week where dayMoment belongs to
  */
-export const calculateQuantityFromHours = (startDate, endDate) => {
-  return moment(endDate).diff(moment(startDate), 'hours', true);
+export const getStartOfWeekAsMoment = (dayMoment, timeZone, firstDayOfWeek) => {
+  const m = timeZone ? dayMoment.clone().tz(timeZone) : dayMoment.clone();
+  let d = m.startOf('day');
+  const diffToSunday = d.day();
+  const adjustOffset =
+    diffToSunday === 0 && firstDayOfWeek > 0 ? -7 + firstDayOfWeek : firstDayOfWeek;
+  const startOfWeek = d.date() - diffToSunday + adjustOffset; // adjust when day is sunday
+  return d.clone().date(startOfWeek);
 };
 
-// Checks if time-range contains a day (moment)
-// Returns true if the day is inside the range or if the time-range
-// starts or ends between start and end of the day.
-//
-// By default react-dates handles dates in the browser's timezone so
-// we need to convert the value `day` to given timezone before comparing it
-// to time-range.
-export const isDayMomentInsideRange = (dayMoment, start, end, timeZone) => {
-  const startOfDay = moment.tz(dayMoment.toArray().slice(0, 3), timeZone);
-  const endOfDay = startOfDay.clone().add(1, 'days');
-
-  const startDate = moment.tz(start, timeZone);
-
-  // Removing 1 millisecond, solves the exclusivity issue.
-  // Because we are only using the date and not the exact time we can remove the
-  // 1ms from the end date.
-  const inclusiveEndDate = moment.tz(new Date(end.getTime() - 1), timeZone);
-
-  if (startOfDay.isSameOrAfter(startDate) && inclusiveEndDate.isSameOrAfter(endOfDay)) {
-    return true;
-  } else if (startDate.isBetween(startOfDay, endOfDay, null, '[)')) {
-    return true;
-  } else if (inclusiveEndDate.isBetween(startOfDay, endOfDay, null, '[)')) {
-    return true;
-  }
-
-  return false;
+/**
+ * Get the end of a week as a Momemnt instance.
+ * This is used by react-dates library (e.g. WeeklyCalendar)
+ *
+ * @param {Moment} dayMoment moment instance representing a day
+ * @param {String} timeZone name. It should represent IANA timezone key.
+ * @param {number} firstDayOfWeek (which weekday is the first day?)
+ * @returns return moment object representing the end day of the week where dayMoment belongs to
+ */
+export const getEndOfWeekAsMoment = (dayMoment, timeZone, firstDayOfWeek) => {
+  const startOfWeek = getStartOfWeekAsMoment(dayMoment, timeZone, firstDayOfWeek);
+  const endOfWeek = startOfWeek.add(6, 'days').startOf('day');
+  return endOfWeek;
 };
+
+/**
+ * Get the start of a week as a Date instance.
+ * This is used by react-dates library (e.g. WeeklyCalendar)
+ * @param {Date} date instance
+ * @param {String} timeZone name. It should represent IANA timezone key.
+ * @param {number} firstDayOfWeek (which weekday is the first day?)
+ * @returns a Date object representing the first day of the week where given date belongs to
+ */
+export const getStartOfWeek = (date, timeZone, firstDayOfWeek) => {
+  return getStartOfWeekAsMoment(moment(date).tz(timeZone), timeZone, firstDayOfWeek).toDate();
+};
+
+/**
+ * Create moment instance from given Date object
+ * This is used by react-dates library (e.g. WeeklyCalendar)
+ *
+ * @param {Date} date instance
+ * @param {String} timeZone name. It should represent IANA timezone key.
+ * @returns moment instance
+ */
+export const getMomentFromDate = (date, timeZone) =>
+  timeZone ? moment(date).tz(timeZone) : moment(date);

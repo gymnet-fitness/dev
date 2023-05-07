@@ -7,20 +7,19 @@
  */
 
 import * as Sentry from '@sentry/browser';
-import config from '../config';
-import { responseApiErrorInfo } from './errors';
+import appSettings from '../config/settings';
 
 /**
  * Set up error handling. If a Sentry DSN is
  * provided a Sentry client will be installed.
  */
 export const setup = () => {
-  if (config.sentryDsn) {
+  if (appSettings.sentryDsn) {
     // Configures the Sentry client. Adds a handler for
     // any uncaught exception.
     Sentry.init({
-      dsn: config.sentryDsn,
-      environment: config.env,
+      dsn: appSettings.sentryDsn,
+      environment: appSettings.env,
     });
   }
 };
@@ -54,6 +53,17 @@ const printAPIErrorsAsConsoleTable = apiErrors => {
   }
 };
 
+const responseAPIErrors = error => {
+  return error && error.data && error.data.errors ? error.data.errors : [];
+};
+
+const responseApiErrorInfo = err =>
+  responseAPIErrors(err).map(e => ({
+    status: e.status,
+    code: e.code,
+    meta: e.meta,
+  }));
+
 /**
  * Logs an execption. If Sentry is configured
  * sends the error information there. Otherwise
@@ -65,7 +75,7 @@ const printAPIErrorsAsConsoleTable = apiErrors => {
  */
 export const error = (e, code, data) => {
   const apiErrors = responseApiErrorInfo(e);
-  if (config.sentryDsn) {
+  if (appSettings.sentryDsn) {
     const extra = { ...data, apiErrorData: apiErrors };
 
     Sentry.withScope(scope => {

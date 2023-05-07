@@ -2,12 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import classNames from 'classnames';
-import { NamedLink } from '../../components';
+import { H2, H3, H4, H5, NamedLink } from '../../components';
+
+import * as allExamples from '../../examples';
 
 import css from './StyleguidePage.module.css';
 
 const ALL = '*';
 const DEFAULT_GROUP = 'misc';
+const PREFIX_SEPARATOR = ':';
 
 const Example = props => {
   const {
@@ -24,7 +27,7 @@ const Example = props => {
   const desc = description ? <p className={css.withMargin}>Description: {description}</p> : null;
   return (
     <li className={css.example}>
-      <h3 className={css.withMargin}>
+      <H3 className={css.withMargin}>
         <NamedLink
           name="StyleguideComponent"
           params={{ component: componentName }}
@@ -40,7 +43,7 @@ const Example = props => {
         >
           {exampleName}
         </NamedLink>
-      </h3>
+      </H3>
       <span className={css.withMargin}>
         <NamedLink
           name="StyleguideComponentExampleRaw"
@@ -91,13 +94,17 @@ Example.propTypes = {
 // Renders the list of component example groups as clickable filters
 const Nav = props => {
   const { groups, selectedGroup } = props;
-  const toGroupLink = group => {
+  const toGroupLink = (group, linkableContent) => {
     const linkProps = {
       name: group === ALL ? 'Styleguide' : 'StyleguideGroup',
       params: group === ALL ? null : { group },
     };
 
-    const linkContent = group === ALL ? 'all components' : group;
+    const linkContent = linkableContent
+      ? linkableContent
+      : group === ALL
+      ? 'all components'
+      : group;
     const isSelected = selectedGroup && group === selectedGroup;
     const groupLink = classNames(css.link, { [css.selectedGroup]: isSelected });
     return (
@@ -110,20 +117,42 @@ const Nav = props => {
   };
 
   const filteredGroups = groups.filter(g => g !== ALL && g !== DEFAULT_GROUP);
-  const basicStylings = ['typography', 'colors'];
-  const basicStylingGroups = filteredGroups.filter(g => basicStylings.includes(g)).map(toGroupLink);
-  const componentGroups = filteredGroups.filter(g => !basicStylings.includes(g)).map(toGroupLink);
+  // Get prefixGroups => { elements: [], page: [], unprefixed: [] }
+  const prefixGroups = filteredGroups.reduce((acc, g) => {
+    const prefixIndex = g.indexOf(PREFIX_SEPARATOR);
+    const prefix = prefixIndex > 0 ? g.slice(0, prefixIndex) : null;
+
+    if (prefix) {
+      const prevGroupsWithPrefix = acc && acc[prefix] ? acc[prefix] : [];
+      return { ...acc, [prefix]: [...prevGroupsWithPrefix, g] };
+    }
+    const prevUnprefixedGroups = acc && acc.unprefixed ? acc.unprefixed : [];
+    return { ...acc, unprefixed: [...prevUnprefixedGroups, g] };
+  }, {});
+
+  const getGroupLinks = (prefixGroups, prefix) =>
+    prefix && prefixGroups[prefix]
+      ? prefixGroups[prefix].map(g => toGroupLink(g, g.slice(prefix.length + 1)))
+      : !prefix
+      ? prefixGroups.unprefixed.map(g => toGroupLink(g))
+      : [];
+
+  const designElementGroups = getGroupLinks(prefixGroups, 'elements');
+  const pageSubComponentGroups = getGroupLinks(prefixGroups, 'page');
+  const sharedComponentGroups = getGroupLinks(prefixGroups);
 
   return (
     <nav className={css.withMargin}>
       <ul>{toGroupLink(ALL)}</ul>
-      <h5>Basic styling</h5>
-      <ul className={css.groups}>{basicStylingGroups}</ul>
-      <h5>Component categories</h5>
+      <H5>Design elements</H5>
+      <ul className={css.groups}>{designElementGroups}</ul>
+      <H5>Shared components</H5>
       <ul className={css.groups}>
-        {componentGroups}
+        {sharedComponentGroups}
         {toGroupLink(DEFAULT_GROUP)}
       </ul>
+      <H5>Page-related components</H5>
+      <ul className={css.groups}>{pageSubComponentGroups}</ul>
     </nav>
   );
 };
@@ -166,17 +195,6 @@ const examplesFor = (examples, group, componentName, exampleName) => {
 };
 
 const StyleguidePage = props => {
-  // TODO: importing all the examples will affect the module bundling
-  // since examples call routeConfiguration without function wrapping
-  // Furthermore, it would be nice to exclude styleguide away from actual app
-  let allExamples = [];
-  try {
-    allExamples = require('../../examples');
-  } catch (e) {
-    console.error(e);
-    console.warn('require(): The file "../../examples.js" could not be loaded.');
-  }
-
   const { params, raw } = props;
   const group = params.group ? decodeURIComponent(params.group) : ALL;
   const componentName = params.component || ALL;
@@ -220,19 +238,28 @@ const StyleguidePage = props => {
       </p>
     );
 
+  const prefixIndex = selectedGroup ? selectedGroup.indexOf(PREFIX_SEPARATOR) : -1;
+  const selectedGroupWithoutPrefix =
+    prefixIndex > 0 ? selectedGroup.slice(prefixIndex + 1).trim() : selectedGroup;
   return (
     <section className={css.root}>
       <div className={css.navBar}>
-        <h1 className={css.withMargin}>
+        <H2 as="h1" className={css.withMargin}>
           <NamedLink name="Styleguide" className={css.link}>
             Styleguide
           </NamedLink>
-        </h1>
-        <h2 className={css.withMargin}>Select category:</h2>
+        </H2>
+        <H4 as="h2" className={css.withMargin}>
+          Select category:
+        </H4>
         <Nav groups={groups} selectedGroup={selectedGroup} />
       </div>
       <div className={css.main}>
-        <h2>Component examples:</h2>
+        <H2 className={css.contentHeading}>
+          {selectedGroupWithoutPrefix
+            ? `Selected category: ${selectedGroupWithoutPrefix}`
+            : `Component`}
+        </H2>
         {html}
       </div>
     </section>

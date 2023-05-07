@@ -33,9 +33,28 @@ import {
 } from 'prop-types';
 import Decimal from 'decimal.js';
 import { types as sdkTypes } from './sdkLoader';
-import { TRANSITIONS, TX_TRANSITION_ACTORS } from './transaction';
+import {
+  getAllTransitionsForEveryProcess,
+  TX_TRANSITION_ACTORS,
+} from '../transactions/transaction';
+// NOTE: This file imports ../transactions/transaction.js, which may lead to circular dependency
 
 const { UUID, LatLng, LatLngBounds, Money } = sdkTypes;
+const TRANSITIONS = getAllTransitionsForEveryProcess();
+
+// Supported schema types for custom fields added to extended data through configuration.
+export const SCHEMA_TYPE_ENUM = 'enum';
+export const SCHEMA_TYPE_MULTI_ENUM = 'multi-enum';
+export const SCHEMA_TYPE_TEXT = 'text';
+export const SCHEMA_TYPE_LONG = 'long';
+export const SCHEMA_TYPE_BOOLEAN = 'boolean';
+export const EXTENDED_DATA_SCHEMA_TYPES = [
+  SCHEMA_TYPE_ENUM,
+  SCHEMA_TYPE_MULTI_ENUM,
+  SCHEMA_TYPE_TEXT,
+  SCHEMA_TYPE_LONG,
+  SCHEMA_TYPE_BOOLEAN,
+];
 
 const propTypes = {};
 
@@ -79,6 +98,21 @@ propTypes.place = shape({
 propTypes.image = shape({
   id: propTypes.uuid.isRequired,
   type: propTypes.value('image').isRequired,
+  attributes: shape({
+    variants: objectOf(
+      shape({
+        width: number.isRequired,
+        height: number.isRequired,
+        url: string.isRequired,
+      })
+    ),
+  }),
+});
+
+// ImageAsset type from Asset Delivery API
+propTypes.imageAsset = shape({
+  id: string.isRequired,
+  type: propTypes.value('imageAsset').isRequired,
   attributes: shape({
     variants: objectOf(
       shape({
@@ -251,7 +285,6 @@ propTypes.booking = shape({
 });
 
 // A time slot that covers one day, having a start and end date.
-export const TIME_SLOT_DAY = 'time-slot/day';
 export const TIME_SLOT_TIME = 'time-slot/time';
 
 // Denormalised time slot object
@@ -259,7 +292,7 @@ propTypes.timeSlot = shape({
   id: propTypes.uuid.isRequired,
   type: propTypes.value('timeSlot').isRequired,
   attributes: shape({
-    type: oneOf([TIME_SLOT_DAY, TIME_SLOT_TIME]).isRequired,
+    type: oneOf([TIME_SLOT_TIME]).isRequired,
     end: instanceOf(Date).isRequired,
     start: instanceOf(Date).isRequired,
   }),
@@ -330,19 +363,26 @@ propTypes.defaultPaymentMethod = shape({
 
 export const LINE_ITEM_NIGHT = 'line-item/night';
 export const LINE_ITEM_DAY = 'line-item/day';
-export const LINE_ITEM_UNITS = 'line-item/units';
+export const LINE_ITEM_HOUR = 'line-item/hour';
+export const LINE_ITEM_ITEM = 'line-item/item';
 export const LINE_ITEM_CUSTOMER_COMMISSION = 'line-item/customer-commission';
 export const LINE_ITEM_PROVIDER_COMMISSION = 'line-item/provider-commission';
+export const LINE_ITEM_SHIPPING_FEE = 'line-item/shipping-fee';
+export const LINE_ITEM_PICKUP_FEE = 'line-item/pickup-fee';
 
 export const LINE_ITEMS = [
   LINE_ITEM_NIGHT,
   LINE_ITEM_DAY,
-  LINE_ITEM_UNITS,
+  LINE_ITEM_HOUR,
+  LINE_ITEM_ITEM,
   LINE_ITEM_CUSTOMER_COMMISSION,
   LINE_ITEM_PROVIDER_COMMISSION,
+  LINE_ITEM_SHIPPING_FEE,
+  LINE_ITEM_PICKUP_FEE,
 ];
+export const LISTING_UNIT_TYPES = [LINE_ITEM_NIGHT, LINE_ITEM_DAY, LINE_ITEM_HOUR, LINE_ITEM_ITEM];
 
-propTypes.bookingUnitType = oneOf([LINE_ITEM_NIGHT, LINE_ITEM_DAY, LINE_ITEM_UNITS]);
+propTypes.lineItemUnitType = oneOf(LISTING_UNIT_TYPES);
 
 const requiredLineItemPropType = (props, propName, componentName) => {
   const prop = props[propName];
@@ -355,30 +395,33 @@ const requiredLineItemPropType = (props, propName, componentName) => {
   }
 };
 
+propTypes.lineItems = arrayOf(
+  shape({
+    code: requiredLineItemPropType,
+    includeFor: arrayOf(oneOf(['customer', 'provider'])).isRequired,
+    quantity: instanceOf(Decimal),
+    unitPrice: propTypes.money.isRequired,
+    lineTotal: propTypes.money.isRequired,
+    reversal: bool.isRequired,
+  })
+);
+
 // Denormalised transaction object
 propTypes.transaction = shape({
   id: propTypes.uuid.isRequired,
   type: propTypes.value('transaction').isRequired,
   attributes: shape({
     createdAt: instanceOf(Date),
+    processName: string.isRequired,
     lastTransitionedAt: instanceOf(Date).isRequired,
     lastTransition: oneOf(TRANSITIONS).isRequired,
 
-    // An enquiry won't need a total sum nor a booking so these are
+    // An inquiry won't need a total sum nor a booking so these are
     // optional.
     payinTotal: propTypes.money,
     payoutTotal: propTypes.money,
 
-    lineItems: arrayOf(
-      shape({
-        code: requiredLineItemPropType,
-        includeFor: arrayOf(oneOf(['customer', 'provider'])).isRequired,
-        quantity: instanceOf(Decimal),
-        unitPrice: propTypes.money.isRequired,
-        lineTotal: propTypes.money.isRequired,
-        reversal: bool.isRequired,
-      })
-    ),
+    lineItems: propTypes.lineItems,
     transitions: arrayOf(propTypes.transition).isRequired,
   }),
   booking: propTypes.booking,
@@ -403,7 +446,6 @@ propTypes.message = shape({
 propTypes.pagination = shape({
   page: number.isRequired,
   perPage: number.isRequired,
-  paginationUnsupported: bool,
   totalItems: number,
   totalPages: number,
 });
@@ -418,6 +460,48 @@ propTypes.filterConfig = arrayOf(
     queryParamNames: arrayOf(string).isRequired,
     config: object,
   }).isRequired
+);
+
+// Default search filters definition
+propTypes.defaultFiltersConfig = arrayOf(
+  shape({
+    key: string.isRequired,
+    schemaType: oneOf(['price', 'text', 'dates']).isRequired,
+    min: number,
+    max: number,
+    step: number,
+  }).isRequired
+);
+// Extended data config
+propTypes.listingFieldsConfig = arrayOf(
+  shape({
+    key: string.isRequired,
+    scope: string,
+    includeForListingTypes: arrayOf(string),
+    schemaType: oneOf(EXTENDED_DATA_SCHEMA_TYPES).isRequired,
+    enumOptions: arrayOf(
+      shape({
+        option: oneOfType([string, number]).isRequired,
+        label: string.isRequired,
+      })
+    ),
+    filterConfig: shape({
+      indexForSearch: bool,
+      label: string.isRequired,
+      group: oneOf(['primary', 'secondary']),
+      filterType: string,
+    }),
+    showConfig: shape({
+      label: string.isRequired,
+      isDetail: bool,
+    }),
+    saveConfig: shape({
+      label: string.isRequired,
+      placeholderMessage: string,
+      isRequired: bool,
+      requiredMessage: string,
+    }).isRequired,
+  })
 );
 
 propTypes.sortConfig = shape({
@@ -442,6 +526,8 @@ export const ERROR_CODE_TRANSACTION_ALREADY_REVIEWED_BY_PROVIDER =
   'transaction-already-reviewed-by-provider';
 export const ERROR_CODE_TRANSACTION_BOOKING_TIME_NOT_AVAILABLE =
   'transaction-booking-time-not-available';
+export const ERROR_CODE_TRANSACTION_LISTING_INSUFFICIENT_STOCK =
+  'transaction-listing-insufficient-stock';
 export const ERROR_CODE_PAYMENT_FAILED = 'transaction-payment-failed';
 export const ERROR_CODE_CHARGE_ZERO_PAYIN = 'transaction-charge-zero-payin';
 export const ERROR_CODE_CHARGE_ZERO_PAYOUT = 'transaction-charge-zero-payout';
@@ -454,6 +540,7 @@ export const ERROR_CODE_VALIDATION_INVALID_VALUE = 'validation-invalid-value';
 export const ERROR_CODE_NOT_FOUND = 'not-found';
 export const ERROR_CODE_FORBIDDEN = 'forbidden';
 export const ERROR_CODE_MISSING_STRIPE_ACCOUNT = 'transaction-missing-stripe-account';
+export const ERROR_CODE_STOCK_OLD_TOTAL_MISMATCH = 'old-total-mismatch';
 
 const ERROR_CODES = [
   ERROR_CODE_TRANSACTION_LISTING_NOT_FOUND,
@@ -472,16 +559,23 @@ const ERROR_CODES = [
   ERROR_CODE_NOT_FOUND,
   ERROR_CODE_FORBIDDEN,
   ERROR_CODE_MISSING_STRIPE_ACCOUNT,
+  ERROR_CODE_STOCK_OLD_TOTAL_MISMATCH,
 ];
 
 // API error
-// TODO this is likely to change soonish
 propTypes.apiError = shape({
   id: propTypes.uuid.isRequired,
   status: number.isRequired,
   code: oneOf(ERROR_CODES).isRequired,
   title: string.isRequired,
   meta: object,
+});
+
+propTypes.assetDeliveryApiError = shape({
+  code: oneOf(ERROR_CODES).isRequired,
+  id: string.isRequired,
+  status: number.isRequired,
+  title: string.isRequired,
 });
 
 // Storable error prop type. (Error object should not be stored as it is.)
@@ -491,13 +585,14 @@ propTypes.error = shape({
   message: string,
   status: number,
   statusText: string,
-  apiErrors: arrayOf(propTypes.apiError),
+  apiErrors: arrayOf(oneOfType([propTypes.apiError, propTypes.assetDeliveryApiError])),
 });
 
-// Options for showing just date or date and time on BookingTimeInfo and BookingBreakdown
+// Options for showing just date or date and time on TimeRange and OrderBreakdown
 export const DATE_TYPE_DATE = 'date';
+export const DATE_TYPE_TIME = 'time';
 export const DATE_TYPE_DATETIME = 'datetime';
 
-propTypes.dateType = oneOf([DATE_TYPE_DATE, DATE_TYPE_DATETIME]);
+propTypes.dateType = oneOf([DATE_TYPE_DATE, DATE_TYPE_TIME, DATE_TYPE_DATETIME]);
 
 export { propTypes };

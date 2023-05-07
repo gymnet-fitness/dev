@@ -1,14 +1,23 @@
+/**
+ * Note: the order of the imports to these Styleguide examples is
+ * significant. We should import indepenedent simple components first,
+ * and more complex components later. The order of imports should also
+ * match the import order elsewhere to avoid conflicts in module
+ * bundling.
+ *
+ * This order mitigates problems that might arise when trying to import components
+ * that have circular dependencies to other components.
+ * Note: import-order also affects to the generated CSS bundle file.
+ *
+ * Read more:
+ * https://medium.com/visual-development/how-to-fix-nasty-circular-dependency-issues-once-and-for-all-in-javascript-typescript-a04c987cf0de
+ */
+
 // components
-import * as ActivityFeed from './components/ActivityFeed/ActivityFeed.example';
-import * as AddImages from './components/AddImages/AddImages.example';
 import * as Avatar from './components/Avatar/Avatar.example';
-import * as BookingBreakdown from './components/BookingBreakdown/BookingBreakdown.example';
-import * as BookingPanel from './components/BookingPanel/BookingPanel.example';
-import * as BookingDateRangeFilter from './components/BookingDateRangeFilter/BookingDateRangeFilter.example';
-import * as BookingTimeInfo from './components/BookingTimeInfo/BookingTimeInfo.example';
 import * as Button from './components/Button/Button.example';
 import * as ExpandingTextarea from './components/ExpandingTextarea/ExpandingTextarea.example';
-import * as FieldBirthdayInput from './components/FieldBirthdayInput/FieldBirthdayInput.example';
+import * as EstimatedCustomerBreakdownMaybe from './components/OrderPanel/EstimatedCustomerBreakdownMaybe.example';
 import * as FieldBoolean from './components/FieldBoolean/FieldBoolean.example';
 import * as FieldCheckbox from './components/FieldCheckbox/FieldCheckbox.example';
 import * as FieldCheckboxGroup from './components/FieldCheckboxGroup/FieldCheckboxGroup.example';
@@ -21,20 +30,19 @@ import * as FieldRadioButton from './components/FieldRadioButton/FieldRadioButto
 import * as FieldRangeSlider from './components/FieldRangeSlider/FieldRangeSlider.example';
 import * as FieldReviewRating from './components/FieldReviewRating/FieldReviewRating.example';
 import * as FieldSelect from './components/FieldSelect/FieldSelect.example';
-import * as FieldTimeZoneSelect from './components/FieldTimeZoneSelect/FieldTimeZoneSelect.example';
 import * as FieldTextInput from './components/FieldTextInput/FieldTextInput.example';
-import * as FilterPlain from './components/FilterPlain/FilterPlain.example';
-import * as FilterPopup from './components/FilterPopup/FilterPopup.example';
 import * as Footer from './components/Footer/Footer.example';
 import * as IconAdd from './components/IconAdd/IconAdd.example';
 import * as IconBannedUser from './components/IconBannedUser/IconBannedUser.example';
 import * as IconCheckmark from './components/IconCheckmark/IconCheckmark.example';
 import * as IconClose from './components/IconClose/IconClose.example';
+import * as IconDelete from './components/IconDelete/IconDelete.example';
+import * as IconDisputeOrder from './components/IconDisputeOrder/IconDisputeOrder.example';
 import * as IconEdit from './components/IconEdit/IconEdit.example';
 import * as IconEmailAttention from './components/IconEmailAttention/IconEmailAttention.example';
 import * as IconEmailSent from './components/IconEmailSent/IconEmailSent.example';
 import * as IconEmailSuccess from './components/IconEmailSuccess/IconEmailSuccess.example';
-import * as IconEnquiry from './components/IconEnquiry/IconEnquiry.example';
+import * as IconInquiry from './components/IconInquiry/IconInquiry.example';
 import * as IconKeys from './components/IconKeys/IconKeys.example';
 import * as IconKeysSuccess from './components/IconKeysSuccess/IconKeysSuccess.example';
 import * as IconReviewStar from './components/IconReviewStar/IconReviewStar.example';
@@ -45,27 +53,27 @@ import * as IconSocialMediaInstagram from './components/IconSocialMediaInstagram
 import * as IconSocialMediaTwitter from './components/IconSocialMediaTwitter/IconSocialMediaTwitter.example';
 import * as IconSpinner from './components/IconSpinner/IconSpinner.example';
 import * as IconSuccess from './components/IconSuccess/IconSuccess.example';
-import * as ImageCarousel from './components/ImageCarousel/ImageCarousel.example';
-import * as KeywordFilter from './components/KeywordFilter/KeywordFilter.example';
 import * as ListingCard from './components/ListingCard/ListingCard.example';
 import * as LocationAutocompleteInput from './components/LocationAutocompleteInput/LocationAutocompleteInput.example';
-import * as ManageListingCard from './components/ManageListingCard/ManageListingCard.example';
 import * as Map from './components/Map/Map.example';
 import * as Menu from './components/Menu/Menu.example';
 import * as Modal from './components/Modal/Modal.example';
 import * as ModalInMobile from './components/ModalInMobile/ModalInMobile.example';
 import * as NamedLink from './components/NamedLink/NamedLink.example';
+import * as OrderBreakdown from './components/OrderBreakdown/OrderBreakdown.example';
+import * as BookingDatesForm from './components/OrderPanel/BookingDatesForm/BookingDatesForm.example';
+import * as BookingTimeForm from './components/OrderPanel/BookingTimeForm/BookingTimeForm.example';
+import * as ProductOrderForm from './components/OrderPanel/ProductOrderForm/ProductOrderForm.example';
+import * as FieldDateAndTimeInput from './components/OrderPanel/BookingTimeForm/FieldDateAndTimeInput.example';
+import * as OrderPanel from './components/OrderPanel/OrderPanel.example';
 import * as OutsideClickHandler from './components/OutsideClickHandler/OutsideClickHandler.example';
 import * as PaginationLinks from './components/PaginationLinks/PaginationLinks.example';
-import * as PriceFilter from './components/PriceFilter/PriceFilter.example';
 import * as PropertyGroup from './components/PropertyGroup/PropertyGroup.example';
 import * as RangeSlider from './components/RangeSlider/RangeSlider.example';
 import * as ResponsiveImage from './components/ResponsiveImage/ResponsiveImage.example';
 import * as ReviewRating from './components/ReviewRating/ReviewRating.example';
 import * as Reviews from './components/Reviews/Reviews.example';
 import * as SavedCardDetails from './components/SavedCardDetails/SavedCardDetails.example';
-import * as SectionThumbnailLinks from './components/SectionThumbnailLinks/SectionThumbnailLinks.example';
-import * as SelectMultipleFilter from './components/SelectMultipleFilter/SelectMultipleFilter.example';
 import * as StripeBankAccountTokenInputField from './components/StripeBankAccountTokenInputField/StripeBankAccountTokenInputField.example';
 import * as TabNav from './components/TabNav/TabNav.example';
 import * as TabNavHorizontal from './components/TabNavHorizontal/TabNavHorizontal.example';
@@ -73,71 +81,86 @@ import * as Tabs from './components/Tabs/Tabs.example';
 import * as TimeRange from './components/TimeRange/TimeRange.example';
 import * as UserCard from './components/UserCard/UserCard.example';
 import * as UserDisplayName from './components/UserDisplayName/UserDisplayName.example';
+import * as LayoutComposer from './components/LayoutComposer/LayoutComposer.example';
 
-// forms
-import * as BookingTimeForm from './forms/BookingTimeForm/BookingTimeForm.example';
-import * as FieldDateAndTimeInput from './forms/BookingTimeForm/FieldDateAndTimeInput.example';
-import * as EditListingAvailabilityExceptionForm from './forms/EditListingAvailabilityExceptionForm/EditListingAvailabilityExceptionForm.example';
-import * as EditListingAvailabilityPlanForm from './forms/EditListingAvailabilityPlanForm/EditListingAvailabilityPlanForm.example';
-import * as EditListingDescriptionForm from './forms/EditListingDescriptionForm/EditListingDescriptionForm.example';
-import * as EditListingFeaturesForm from './forms/EditListingFeaturesForm/EditListingFeaturesForm.example';
-import * as EditListingLocationForm from './forms/EditListingLocationForm/EditListingLocationForm.example';
-import * as EditListingPhotosForm from './forms/EditListingPhotosForm/EditListingPhotosForm.example';
-import * as EditListingPoliciesForm from './forms/EditListingPoliciesForm/EditListingPoliciesForm.example';
-import * as EditListingPricingForm from './forms/EditListingPricingForm/EditListingPricingForm.example';
-import * as EmailVerificationForm from './forms/EmailVerificationForm/EmailVerificationForm.example';
-import * as EnquiryForm from './forms/EnquiryForm/EnquiryForm.example';
-import * as FilterForm from './forms/FilterForm/FilterForm.example';
-import * as LoginForm from './forms/LoginForm/LoginForm.example';
-import * as PasswordRecoveryForm from './forms/PasswordRecoveryForm/PasswordRecoveryForm.example';
-import * as PasswordResetForm from './forms/PasswordResetForm/PasswordResetForm.example';
-import * as ReviewForm from './forms/ReviewForm/ReviewForm.example';
-import * as SendMessageForm from './forms/SendMessageForm/SendMessageForm.example';
-import * as SignupForm from './forms/SignupForm/SignupForm.example';
-import * as StripePaymentForm from './forms/StripePaymentForm/StripePaymentForm.example';
+// components under containers
+import * as SignupForm from './containers/AuthenticationPage/SignupForm/SignupForm.example';
+import * as LoginForm from './containers/AuthenticationPage/LoginForm/LoginForm.example';
+import * as StripePaymentForm from './containers/CheckoutPage/StripePaymentForm/StripePaymentForm.example';
+import * as FieldTimeZoneSelect from './containers/EditListingPage/EditListingWizard/EditListingAvailabilityPanel/FieldTimeZoneSelect/FieldTimeZoneSelect.example';
+import * as EditListingAvailabilityPlanForm from './containers/EditListingPage/EditListingWizard/EditListingAvailabilityPanel/EditListingAvailabilityPlanForm/EditListingAvailabilityPlanForm.example';
+import * as EditListingAvailabilityExceptionForm from './containers/EditListingPage/EditListingWizard/EditListingAvailabilityPanel/EditListingAvailabilityExceptionForm/EditListingAvailabilityExceptionForm.example';
+import * as EditListingDetailsForm from './containers/EditListingPage/EditListingWizard/EditListingDetailsPanel/EditListingDetailsForm.example';
+import * as EditListingDeliveryForm from './containers/EditListingPage/EditListingWizard/EditListingDeliveryPanel/EditListingDeliveryForm.example';
+import * as EditListingLocationForm from './containers/EditListingPage/EditListingWizard/EditListingLocationPanel/EditListingLocationForm.example';
+import * as EditListingPhotosForm from './containers/EditListingPage/EditListingWizard/EditListingPhotosPanel/EditListingPhotosForm.example';
+import * as EditListingPricingForm from './containers/EditListingPage/EditListingWizard/EditListingPricingPanel/EditListingPricingForm.example';
+import * as EditListingPricingAndStockForm from './containers/EditListingPage/EditListingWizard/EditListingPricingAndStockPanel/EditListingPricingAndStockForm.example';
+import * as ActivityFeed from './containers/TransactionPage/ActivityFeed/ActivityFeed.example';
+import * as ReviewForm from './containers/TransactionPage/ReviewForm/ReviewForm.example';
+import * as SendMessageForm from './containers/TransactionPage/SendMessageForm/SendMessageForm.example';
+import * as PanelHeading from './containers/TransactionPage/TransactionPanel/PanelHeading.example';
+import * as SelectMultipleFilter from './containers/SearchPage/SelectMultipleFilter/SelectMultipleFilter.example';
+import * as BookingDateRangeFilter from './containers/SearchPage/BookingDateRangeFilter/BookingDateRangeFilter.example';
+import * as KeywordFilter from './containers/SearchPage/KeywordFilter/KeywordFilter.example';
+import * as PriceFilter from './containers/SearchPage/PriceFilter/PriceFilter.example';
+import * as FilterForm from './containers/SearchPage/FilterForm/FilterForm.example';
+import * as FilterPlain from './containers/SearchPage/FilterPlain/FilterPlain.example';
+import * as FilterPopup from './containers/SearchPage/FilterPopup/FilterPopup.example';
+import * as EmailVerificationForm from './containers/EmailVerificationPage/EmailVerificationForm/EmailVerificationForm.example';
+import * as InquiryForm from './containers/ListingPage/InquiryForm/InquiryForm.example';
+import * as ImageCarousel from './containers/ListingPage/ImageCarousel/ImageCarousel.example';
+import * as ListingImageGallery from './containers/ListingPage/ListingImageGallery/ListingImageGallery.example';
+import * as PasswordRecoveryForm from './containers/PasswordRecoveryPage/PasswordRecoveryForm/PasswordRecoveryForm.example';
+import * as PasswordResetForm from './containers/PasswordResetPage/PasswordResetForm/PasswordResetForm.example';
+import * as ManageListingCard from './containers/ManageListingsPage/ManageListingCard/ManageListingCard.example';
+import * as InboxPage from './containers/InboxPage/InboxPage.example';
 
 // containers
 import * as Colors from './containers/StyleguidePage/Colors.example';
 import * as Typography from './containers/StyleguidePage/Typography.example';
+import * as CMSSections from './containers/PageBuilder/SectionBuilder/SectionBuilder.example';
+import * as Markdown from './containers/PageBuilder/Markdown.example';
+import * as PageBuilder from './containers/PageBuilder/PageBuilder.example';
+import * as LandingPage from './containers/LandingPage/LandingPage.example';
 
 export {
   ActivityFeed,
-  AddImages,
   Avatar,
-  BookingBreakdown,
   BookingDateRangeFilter,
+  BookingDatesForm,
   BookingTimeForm,
-  BookingTimeInfo,
-  BookingPanel,
+  ProductOrderForm,
   Button,
   Colors,
-  EditListingAvailabilityExceptionForm,
+  CMSSections,
   EditListingAvailabilityPlanForm,
-  EditListingDescriptionForm,
-  EditListingFeaturesForm,
+  EditListingAvailabilityExceptionForm,
+  EditListingDetailsForm,
+  EditListingDeliveryForm,
   EditListingLocationForm,
   EditListingPhotosForm,
-  EditListingPoliciesForm,
   EditListingPricingForm,
+  EditListingPricingAndStockForm,
   EmailVerificationForm,
-  EnquiryForm,
+  InquiryForm,
+  EstimatedCustomerBreakdownMaybe,
   ExpandingTextarea,
-  FieldBirthdayInput,
   FieldBoolean,
   FieldCheckbox,
   FieldCheckboxGroup,
   FieldCurrencyInput,
+  FieldDateAndTimeInput,
   FieldDateRangeController,
   FieldDateInput,
-  FieldDateAndTimeInput,
   FieldDateRangeInput,
   FieldPhoneNumberInput,
   FieldRadioButton,
   FieldRangeSlider,
   FieldReviewRating,
   FieldSelect,
-  FieldTimeZoneSelect,
   FieldTextInput,
+  FieldTimeZoneSelect,
   FilterForm,
   FilterPlain,
   FilterPopup,
@@ -146,11 +169,13 @@ export {
   IconBannedUser,
   IconCheckmark,
   IconClose,
+  IconDelete,
+  IconDisputeOrder,
   IconEdit,
   IconEmailAttention,
   IconEmailSent,
   IconEmailSuccess,
-  IconEnquiry,
+  IconInquiry,
   IconKeys,
   IconKeysSuccess,
   IconReviewStar,
@@ -161,19 +186,28 @@ export {
   IconSocialMediaTwitter,
   IconSpinner,
   IconSuccess,
+  InboxPage,
   ImageCarousel,
   KeywordFilter,
+  LandingPage,
+  LayoutComposer,
   ListingCard,
+  ListingImageGallery,
   LocationAutocompleteInput,
   LoginForm,
   ManageListingCard,
   Map,
+  Markdown,
   Menu,
   Modal,
   ModalInMobile,
   NamedLink,
+  OrderBreakdown,
+  OrderPanel,
   OutsideClickHandler,
+  PageBuilder,
   PaginationLinks,
+  PanelHeading,
   PasswordRecoveryForm,
   PasswordResetForm,
   PriceFilter,
@@ -184,7 +218,6 @@ export {
   ReviewRating,
   Reviews,
   SavedCardDetails,
-  SectionThumbnailLinks,
   SelectMultipleFilter,
   SendMessageForm,
   SignupForm,

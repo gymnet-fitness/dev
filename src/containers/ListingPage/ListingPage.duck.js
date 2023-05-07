@@ -1,17 +1,17 @@
 import pick from 'lodash/pick';
-import config from '../../config';
-import { types as sdkTypes } from '../../util/sdkLoader';
+
+import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
 import { storableError } from '../../util/errors';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { transactionLineItems } from '../../util/api';
 import * as log from '../../util/log';
 import { denormalisedResponseEntities } from '../../util/data';
-import { findNextBoundary, nextMonthFn, monthIdStringInTimeZone } from '../../util/dates';
-import { TRANSITION_ENQUIRE } from '../../util/transaction';
+import { findNextBoundary, getStartOf, monthIdString } from '../../util/dates';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
 } from '../../util/urlHelpers';
+import { getProcess, isBookingProcessAlias } from '../../transactions/transaction';
 import { fetchCurrentUser, fetchCurrentUserHasOrdersSuccess } from '../../ducks/user.duck';
 
 const { UUID } = sdkTypes;
@@ -35,9 +35,9 @@ export const FETCH_LINE_ITEMS_REQUEST = 'app/ListingPage/FETCH_LINE_ITEMS_REQUES
 export const FETCH_LINE_ITEMS_SUCCESS = 'app/ListingPage/FETCH_LINE_ITEMS_SUCCESS';
 export const FETCH_LINE_ITEMS_ERROR = 'app/ListingPage/FETCH_LINE_ITEMS_ERROR';
 
-export const SEND_ENQUIRY_REQUEST = 'app/ListingPage/SEND_ENQUIRY_REQUEST';
-export const SEND_ENQUIRY_SUCCESS = 'app/ListingPage/SEND_ENQUIRY_SUCCESS';
-export const SEND_ENQUIRY_ERROR = 'app/ListingPage/SEND_ENQUIRY_ERROR';
+export const SEND_INQUIRY_REQUEST = 'app/ListingPage/SEND_INQUIRY_REQUEST';
+export const SEND_INQUIRY_SUCCESS = 'app/ListingPage/SEND_INQUIRY_SUCCESS';
+export const SEND_INQUIRY_ERROR = 'app/ListingPage/SEND_INQUIRY_ERROR';
 
 // ================ Reducer ================ //
 
@@ -47,7 +47,7 @@ const initialState = {
   reviews: [],
   fetchReviewsError: null,
   monthlyTimeSlots: {
-    // '2019-12': {
+    // '2022-03': {
     //   timeSlots: [],
     //   fetchTimeSlotsError: null,
     //   fetchTimeSlotsInProgress: null,
@@ -56,9 +56,9 @@ const initialState = {
   lineItems: null,
   fetchLineItemsInProgress: false,
   fetchLineItemsError: null,
-  sendEnquiryInProgress: false,
-  sendEnquiryError: null,
-  enquiryModalOpenForListingId: null,
+  sendInquiryInProgress: false,
+  sendInquiryError: null,
+  inquiryModalOpenForListingId: null,
 };
 
 const listingPageReducer = (state = initialState, action = {}) => {
@@ -122,12 +122,12 @@ const listingPageReducer = (state = initialState, action = {}) => {
     case FETCH_LINE_ITEMS_ERROR:
       return { ...state, fetchLineItemsInProgress: false, fetchLineItemsError: payload };
 
-    case SEND_ENQUIRY_REQUEST:
-      return { ...state, sendEnquiryInProgress: true, sendEnquiryError: null };
-    case SEND_ENQUIRY_SUCCESS:
-      return { ...state, sendEnquiryInProgress: false };
-    case SEND_ENQUIRY_ERROR:
-      return { ...state, sendEnquiryInProgress: false, sendEnquiryError: payload };
+    case SEND_INQUIRY_REQUEST:
+      return { ...state, sendInquiryInProgress: true, sendInquiryError: null };
+    case SEND_INQUIRY_SUCCESS:
+      return { ...state, sendInquiryInProgress: false };
+    case SEND_INQUIRY_ERROR:
+      return { ...state, sendInquiryInProgress: false, sendInquiryError: payload };
 
     default:
       return state;
@@ -187,46 +187,59 @@ export const fetchLineItemsError = error => ({
   payload: error,
 });
 
-export const sendEnquiryRequest = () => ({ type: SEND_ENQUIRY_REQUEST });
-export const sendEnquirySuccess = () => ({ type: SEND_ENQUIRY_SUCCESS });
-export const sendEnquiryError = e => ({ type: SEND_ENQUIRY_ERROR, error: true, payload: e });
+export const sendInquiryRequest = () => ({ type: SEND_INQUIRY_REQUEST });
+export const sendInquirySuccess = () => ({ type: SEND_INQUIRY_SUCCESS });
+export const sendInquiryError = e => ({ type: SEND_INQUIRY_ERROR, error: true, payload: e });
 
 // ================ Thunks ================ //
 
-export const showListing = (listingId, isOwn = false) => (dispatch, getState, sdk) => {
+export const showListing = (listingId, config, isOwn = false) => (dispatch, getState, sdk) => {
+  const {
+    aspectWidth = 1,
+    aspectHeight = 1,
+    variantPrefix = 'listing-card',
+  } = config.layout.listingImage;
+  const aspectRatio = aspectHeight / aspectWidth;
+
   dispatch(showListingRequest(listingId));
   dispatch(fetchCurrentUser());
   const params = {
     id: listingId,
-    include: ['author', 'author.profileImage', 'images'],
+    include: ['author', 'author.profileImage', 'images', 'currentStock'],
     'fields.image': [
-      // Listing page
-      'variants.landscape-crop',
-      'variants.landscape-crop2x',
-      'variants.landscape-crop4x',
-      'variants.landscape-crop6x',
-
-      // Social media
-      'variants.facebook',
-      'variants.twitter',
-
-      // Image carousel
+      // Scaled variants for large images
       'variants.scaled-small',
       'variants.scaled-medium',
       'variants.scaled-large',
       'variants.scaled-xlarge',
 
+      // Cropped variants for listing thumbnail images
+      `variants.${variantPrefix}`,
+      `variants.${variantPrefix}-2x`,
+      `variants.${variantPrefix}-4x`,
+      `variants.${variantPrefix}-6x`,
+
+      // Social media
+      'variants.facebook',
+      'variants.twitter',
+
       // Avatars
       'variants.square-small',
       'variants.square-small2x',
     ],
+    ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-4x`, 1600, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-6x`, 2400, aspectRatio),
   };
 
   const show = isOwn ? sdk.ownListings.show(params) : sdk.listings.show(params);
 
   return show
     .then(data => {
-      dispatch(addMarketplaceEntities(data));
+      const listingFields = config?.listing?.listingFields;
+      const sanitizeConfig = { listingFields };
+      dispatch(addMarketplaceEntities(data, sanitizeConfig));
       return data;
     })
     .catch(e => {
@@ -259,13 +272,13 @@ const timeSlotsRequest = params => (dispatch, getState, sdk) => {
 };
 
 export const fetchTimeSlots = (listingId, start, end, timeZone) => (dispatch, getState, sdk) => {
-  const monthId = monthIdStringInTimeZone(start, timeZone);
+  const monthId = monthIdString(start, timeZone);
 
   dispatch(fetchTimeSlotsRequest(monthId));
 
   // The maximum pagination page size for timeSlots is 500
   const extraParams = {
-    per_page: 500,
+    perPage: 500,
     page: 1,
   };
 
@@ -278,11 +291,25 @@ export const fetchTimeSlots = (listingId, start, end, timeZone) => (dispatch, ge
     });
 };
 
-export const sendEnquiry = (listingId, message) => (dispatch, getState, sdk) => {
-  dispatch(sendEnquiryRequest());
+export const sendInquiry = (listing, message) => (dispatch, getState, sdk) => {
+  dispatch(sendInquiryRequest());
+  const processAlias = listing?.attributes?.publicData?.transactionProcessAlias;
+  if (!processAlias) {
+    const error = new Error('No transaction process attached to listing');
+    log.error(error, 'listing-process-missing', {
+      listingId: listing?.id?.uuid,
+    });
+    dispatch(sendInquiryError(storableError(error)));
+    return Promise.reject(error);
+  }
+
+  const listingId = listing?.id;
+  const [processName, alias] = processAlias.split('/');
+  const transitions = getProcess(processName)?.transitions;
+
   const bodyParams = {
-    transition: TRANSITION_ENQUIRE,
-    processAlias: config.bookingProcessAlias,
+    transition: transitions.INQUIRE,
+    processAlias,
     params: { listingId },
   };
   return sdk.transactions
@@ -292,13 +319,13 @@ export const sendEnquiry = (listingId, message) => (dispatch, getState, sdk) => 
 
       // Send the message to the created transaction
       return sdk.messages.send({ transactionId, content: message }).then(() => {
-        dispatch(sendEnquirySuccess());
+        dispatch(sendInquirySuccess());
         dispatch(fetchCurrentUserHasOrdersSuccess(true));
         return transactionId;
       });
     })
     .catch(e => {
-      dispatch(sendEnquiryError(storableError(e)));
+      dispatch(sendInquiryError(storableError(e)));
       throw e;
     });
 };
@@ -314,10 +341,11 @@ const fetchMonthlyTimeSlots = (dispatch, listing) => {
   // Fetch time-zones on client side only.
   if (hasWindow && listing.id && hasTimeZone) {
     const tz = listing.attributes.availabilityPlan.timezone;
-    const nextBoundary = findNextBoundary(tz, new Date());
+    const timeUnit = 'day';
+    const nextBoundary = findNextBoundary(new Date(), timeUnit, tz);
 
-    const nextMonth = nextMonthFn(nextBoundary, tz);
-    const nextAfterNextMonth = nextMonthFn(nextMonth, tz);
+    const nextMonth = getStartOf(nextBoundary, 'month', tz, 1, 'months');
+    const nextAfterNextMonth = getStartOf(nextMonth, 'month', tz, 1, 'months');
 
     return Promise.all([
       dispatch(fetchTimeSlots(listing.id, nextBoundary, nextMonth, tz)),
@@ -329,9 +357,9 @@ const fetchMonthlyTimeSlots = (dispatch, listing) => {
   return Promise.all([]);
 };
 
-export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing }) => dispatch => {
+export const fetchTransactionLineItems = ({ orderData, listingId, isOwnListing }) => dispatch => {
   dispatch(fetchLineItemsRequest());
-  transactionLineItems({ bookingData, listingId, isOwnListing })
+  transactionLineItems({ orderData, listingId, isOwnListing })
     .then(response => {
       const lineItems = response.data;
       dispatch(fetchLineItemsSuccess(lineItems));
@@ -340,30 +368,34 @@ export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing
       dispatch(fetchLineItemsError(storableError(e)));
       log.error(e, 'fetching-line-items-failed', {
         listingId: listingId.uuid,
-        bookingData: bookingData,
+        orderData,
       });
     });
 };
 
-export const loadData = (params, search) => dispatch => {
+export const loadData = (params, search, config) => dispatch => {
   const listingId = new UUID(params.id);
+
+  // Clear old line-items
+  dispatch(setInitialValues({ lineItems: null }));
 
   const ownListingVariants = [LISTING_PAGE_DRAFT_VARIANT, LISTING_PAGE_PENDING_APPROVAL_VARIANT];
   if (ownListingVariants.includes(params.variant)) {
-    return dispatch(showListing(listingId, true));
+    return dispatch(showListing(listingId, config, true));
   }
 
-  return Promise.all([dispatch(showListing(listingId)), dispatch(fetchReviews(listingId))]).then(
-    responses => {
-      if (responses[0] && responses[0].data && responses[0].data.data) {
-        const listing = responses[0].data.data;
-
-        // Fetch timeSlots.
-        // This can happen parallel to loadData.
-        // We are not interested to return them from loadData call.
-        fetchMonthlyTimeSlots(dispatch, listing);
-      }
-      return responses;
+  return Promise.all([
+    dispatch(showListing(listingId, config)),
+    dispatch(fetchReviews(listingId)),
+  ]).then(response => {
+    const listing = response[0].data.data;
+    const transactionProcessAlias = listing?.attributes?.publicData?.transactionProcessAlias || '';
+    if (isBookingProcessAlias(transactionProcessAlias)) {
+      // Fetch timeSlots.
+      // This can happen parallel to loadData.
+      // We are not interested to return them from loadData call.
+      fetchMonthlyTimeSlots(dispatch, listing);
     }
-  );
+    return response;
+  });
 };

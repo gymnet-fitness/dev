@@ -2,21 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+
 import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
-import { isScrollingDisabled } from '../../ducks/UI.duck';
-import {
-  LayoutSideNavigation,
-  LayoutWrapperMain,
-  LayoutWrapperAccountSettingsSideNav,
-  LayoutWrapperTopbar,
-  LayoutWrapperFooter,
-  Footer,
-  Page,
-  UserNav,
-} from '../../components';
-import { PasswordChangeForm } from '../../forms';
-import { TopbarContainer } from '../../containers';
+import { isScrollingDisabled } from '../../ducks/ui.duck';
+
+import { Footer, Page, UserNav, H3, LayoutSideNavigation } from '../../components';
+
+import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+
+import PasswordChangeForm from './PasswordChangeForm/PasswordChangeForm';
 
 import { changePassword, changePasswordClear, resetPassword } from './PasswordChangePage.duck';
 import css from './PasswordChangePage.module.css';
@@ -56,27 +51,28 @@ export const PasswordChangePageComponent = props => {
 
   return (
     <Page title={title} scrollingDisabled={scrollingDisabled}>
-      <LayoutSideNavigation>
-        <LayoutWrapperTopbar>
-          <TopbarContainer
-            currentPage="PasswordChangePage"
-            desktopClassName={css.desktopTopbar}
-            mobileClassName={css.mobileTopbar}
-          />
-          <UserNav selectedPageName="PasswordChangePage" />
-        </LayoutWrapperTopbar>
-        <LayoutWrapperAccountSettingsSideNav currentTab="PasswordChangePage" />
-        <LayoutWrapperMain>
-          <div className={css.content}>
-            <h1 className={css.title}>
-              <FormattedMessage id="PasswordChangePage.heading" />
-            </h1>
-            {changePasswordForm}
-          </div>
-        </LayoutWrapperMain>
-        <LayoutWrapperFooter>
-          <Footer />
-        </LayoutWrapperFooter>
+      <LayoutSideNavigation
+        topbar={
+          <>
+            <TopbarContainer
+              currentPage="PasswordChangePage"
+              desktopClassName={css.desktopTopbar}
+              mobileClassName={css.mobileTopbar}
+            />
+            <UserNav currentPage="PasswordChangePage" />
+          </>
+        }
+        sideNav={null}
+        useAccountSettingsNav
+        currentPage="PasswordChangePage"
+        footer={<Footer />}
+      >
+        <div className={css.content}>
+          <H3 as="h1">
+            <FormattedMessage id="PasswordChangePage.heading" />
+          </H3>
+          {changePasswordForm}
+        </div>
       </LayoutSideNavigation>
     </Page>
   );

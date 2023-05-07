@@ -16,15 +16,49 @@ export const parseSelectFilterOptions = uriComponentValue => {
 };
 
 /**
- * Check if any of the filters (defined by filterIds) have currently active query parameter in URL.
+ * Create the name of the query parameter.
+ *
+ * @param {String} key Key extracted from listingExtendData config.
+ * @param {String} scope Scope extracted from listingExtendData config.
  */
-export const isAnyFilterActive = (filterIds, urlQueryParams, filterConfigs) => {
-  const getQueryParamKeysOfGivenFilters = (keys, config) => {
-    const isFilterIncluded = filterIds.includes(config.id);
-    const addedQueryParamNamesMaybe = isFilterIncluded ? config.queryParamNames : [];
-    return [...keys, ...addedQueryParamNamesMaybe];
+const constructQueryParamName = (key, scope) => {
+  const prefixedKey = scope === 'meta' ? `meta_${key}` : `pub_${key}`;
+  return prefixedKey.replace(/\s/g, '_');
+};
+
+/**
+ * Get parameter names for search query. Extract those from config.
+ * The configuration of default filters has key, which is 1-on-1 mapping
+ * with the name of the query parameter. E.g. 'price'.
+ *
+ * @param {Object} listingFieldsConfig Custom filters are checked agains extended data config of a listing entity.
+ * @param {Object} defaultFiltersConfig Configuration of default filters.
+ */
+export const getQueryParamNames = (listingFieldsConfig, defaultFiltersConfig) => {
+  const queryParamKeysOfDefaultFilters = defaultFiltersConfig.map(config => config.key);
+  const queryParamKeysOfListingFields = listingFieldsConfig.reduce((params, config) => {
+    const param = constructQueryParamName(config.key, config.scope);
+    return config.filterConfig?.indexForSearch ? [...params, param] : params;
+  }, []);
+  return [...queryParamKeysOfDefaultFilters, ...queryParamKeysOfListingFields];
+};
+/**
+ * Check if any of the filters (defined by filterKeys) have currently active query parameter in URL.
+ */
+export const isAnyFilterActive = (
+  filterKeys,
+  urlQueryParams,
+  listingFieldsConfig,
+  defaultFiltersConfig
+) => {
+  const queryParamKeys = getQueryParamNames(listingFieldsConfig, defaultFiltersConfig);
+
+  const getQueryParamKeysOfGivenFilters = (pickedKeys, key) => {
+    const isFilterIncluded = filterKeys.includes(key);
+    const addedQueryParamNamesMaybe = isFilterIncluded ? [key] : [];
+    return [...pickedKeys, ...addedQueryParamNamesMaybe];
   };
-  const queryParamKeysOfGivenFilters = filterConfigs.reduce(getQueryParamKeysOfGivenFilters, []);
+  const queryParamKeysOfGivenFilters = queryParamKeys.reduce(getQueryParamKeysOfGivenFilters, []);
 
   const paramEntries = Object.entries(urlQueryParams);
   const activeKey = paramEntries.find(entry => {
@@ -35,9 +69,25 @@ export const isAnyFilterActive = (filterIds, urlQueryParams, filterConfigs) => {
 };
 
 /**
- * Check if the filter is currently active.
+ * Check if the main search type is 'keywords'
  */
-export const findOptionsForSelectFilter = (filterId, filters) => {
-  const filter = filters.find(f => f.id === filterId);
-  return filter && filter.config && filter.config.options ? filter.config.options : [];
+export const isMainSearchTypeKeywords = config =>
+  config.search?.mainSearch?.searchType === 'keywords';
+
+/**
+ * Check if the origin parameter is currently active.
+ */
+export const isOriginInUse = config =>
+  config.search?.mainSearch?.searchType === 'location' && config.maps?.search?.sortSearchByDistance;
+
+/**
+ * Check if the stock management is currently active.
+ */
+export const isStockInUse = config => {
+  const listingTypes = config.listing.listingTypes;
+  const hasItems = !!listingTypes.find(conf => conf.transactionType.unitType === 'item');
+
+  // TODO: if there are multiple processes with both products and bookings,
+  // sdk.listings.query needs more thinking on SearchPage. (bookings have stock=0)
+  return hasItems && listingTypes.length === 1;
 };

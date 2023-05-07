@@ -4,15 +4,14 @@ import classNames from 'classnames';
 import css from './StyleguidePage.module.css';
 
 const Font = props => {
-  const { component: TextComponent, description, styling } = props;
+  const { component: TextComponent, description } = props;
   return (
     <div className={css.fontCard}>
       <div className={css.element}>
         <TextComponent />
       </div>
       <div className={css.description}>
-        <p>{description}</p>
-        <pre className={css.tinyFont}>{styling}</pre>
+        <pre className={css.descriptionInfo}>{description}</pre>
       </div>
     </div>
   );
@@ -23,118 +22,9 @@ const { func, string } = PropTypes;
 Font.propTypes = {
   component: func.isRequired,
   description: string.isRequired,
-  styling: string.isRequired,
 };
 
 const Fonts = () => {
-  const heroTitleFontStyling = `Mobile styles:
-  font-size: 48px;
-  line-height: 54px;
-  margin-top: 25px;
-  margin-bottom: 29px;
-
-  Desktop styles:
-  font-size: 90px;
-  line-height: 96px;
-  margin-top: 25px;
-  margin-bottom: 31px;`;
-
-  const h1FontStyling = `Mobile styles:
-  font-size: 30px;
-  line-height: 36px;
-  margin-top: 18px;
-  margin-bottom: 18px;
-
-  Desktop styles:
-  font-size: 48px;
-  line-height: 56px;
-  margin-top: 24px;
-  margin-bottom: 24px;`;
-
-  const h2FontStyling = `Mobile styles:
-  font-size: 24px;
-  line-height: 30px;
-  margin-top: 21px;
-  margin-bottom: 17px;
-
-  Desktop styles:
-  font-size: 24px;
-  line-height: 32px;
-  margin-top: 21px;
-  margin-bottom: 19px;`;
-
-  const h3FontStyling = `Mobile styles:
-  font-size: 20px;
-  line-height: 24px;
-  margin-top: 16px;
-  margin-bottom: 14px;
-
-  Desktop styles:
-  font-size: 20px;
-  line-height: 24px;
-  margin-top: 16px;
-  margin-bottom: 16px;`;
-
-  const h4FontStyling = `Mobile styles:
-  font-size: 16px;
-  line-height: 24px;
-  margin-top: 12px;
-  margin-bottom: 12px;
-
-  Desktop styles:
-  font-size: 16px;
-  line-height: 24px;
-  margin-top: 17px;
-  margin-bottom: 15px;`;
-
-  const h5FontStyling = `Mobile styles:
-  font-size: 14px;
-  line-height: 18px;
-  margin-top: 10px;
-  margin-bottom: 8px;
-
-  Desktop styles:
-  font-size: 14px;
-  line-height: 16px;
-  margin-top: 10px;
-  margin-bottom: 14px;`;
-
-  const h6FontStyling = `Mobile styles:
-  font-size: 12px;
-  line-height: 18px;
-  margin-top: 10px;
-  margin-bottom: 8px;
-
-  Desktop styles:
-  font-size: 12px;
-  line-height: 16px;
-  margin-top: 10px;
-  margin-bottom: 6px;`;
-
-  const bodyFontStyling = `Mobile styles:
-  font-size: 18px;
-  line-height: 24px;
-  margin-top: 12px;
-  margin-bottom: 12px;
-
-  Desktop styles:
-  font-size: 20px;
-  line-height: 32px;
-  margin-top: 16px;
-  margin-bottom: 16px;`;
-
-  const tinyFontStyling = `Mobile styles:
-  font-size: 13px;
-  line-height: 18px;
-  margin-top: 9.5px;
-  margin-bottom: 8.5px;
-
-  Desktop styles:
-  font-size: 13px;
-  line-height: 18px;
-  margin-top: 10.5px;
-  margin-bottom: 13.5px;`;
-
   const fontsContainerClasses = classNames(css.fontsContainer, css.baselines);
 
   return (
@@ -150,41 +40,60 @@ const Fonts = () => {
       </p>
       <div className={fontsContainerClasses}>
         <Font
-          component={() => <p className={css.heroTitle}>Hello beautiful world.</p>}
-          description="--marketplaceHeroTitleFontStyles: Biggest font style. Used in the hero in landingPage. Works as a site title."
-          styling={heroTitleFontStyling}
+          component={() => <h1>H1 heading</h1>}
+          description={`<H1>H1 heading</H1>
+
+Rendered HTML element can be
+changed with 'as' prop.
+<H1 as="h2">H1 heading</H1>
+`}
         />
         <Font
-          component={() => <h1>Listing + Page title</h1>}
-          description="H1 / --marketplaceH1FontStyles: Works as a page title. Inline component using --marketplaceH1FontStyles can be aligned with .h1Font to the same baseline by dropping it 18px (e.g. with margin-top)."
-          styling={h1FontStyling}
+          component={() => <h2>H2 heading</h2>}
+          description={`<H2>H2 heading</H2>
+
+Rendered HTML element can be
+changed with 'as' prop.
+<H2 as="h1">H1 heading</H2>
+`}
         />
         <Font
-          component={() => <h2>This many listings found in here</h2>}
-          description="H2 / --marketplaceH2FontStyles: Works as a page subtitle and in sidebar menu link."
-          styling={h2FontStyling}
+          component={() => <h3>H3 heading</h3>}
+          description={`<H3>H3 heading</H3>
+
+Rendered HTML element can be
+changed with 'as' prop.
+<H3 as="h2">H1 heading</H3>
+`}
         />
         <Font
-          component={() => <h3>About this listing</h3>}
-          description="H3 / --marketplaceH3FontStyles: Works as a paragraph subtitle."
-          styling={h3FontStyling}
-        />
-        <Font
-          component={() => <h4>H4 (--marketplaceH4FontStyles): Lorem ipsum dolor sit amet</h4>}
-          description="Can be used as a subtitle and also as a label font for form inputs."
-          styling={h4FontStyling}
+          component={() => <h4>H4: Lorem ipsum dolor sit amet</h4>}
+          description={`<H4>H4 heading</H4>
+
+Rendered HTML element can be
+changed with 'as' prop.
+<HH41 as="h2">H1 heading</H4>
+`}
         />
         <Font
           component={() => (
-            <h5>You will only be charged if your request is accepted by the provider.</h5>
+            <h5>H5: You will only be charged if your request is accepted by the provider.</h5>
           )}
-          description="H5 / --marketplaceH5FontStyles: Can be used as a fine print text."
-          styling={h5FontStyling}
+          description={`<H5>H5 heading</H5>
+
+Rendered HTML element can be
+changed with 'as' prop.
+<H5 as="h2">H1 heading</H5>
+`}
         />
         <Font
-          component={() => <h6>Close</h6>}
-          description="H6 / --marketplaceH6FontStyles: Works as a close text."
-          styling={h6FontStyling}
+          component={() => <h6>H6: Close</h6>}
+          description={`<H6>H6: Close</H6>
+
+Rendered element can be
+changed with 'as' prop.
+<H6 as="h2">H6: Close</H6>
+`}
         />
         <Font
           component={() => (
@@ -195,13 +104,16 @@ const Fonts = () => {
               elit.
             </p>
           )}
-          description="--marketplaceBodyFontStyles, p, button, etc: Paragraphs and other body texts."
-          styling={bodyFontStyling}
+          description={`<p>, <button>, etc.
+.myClass {
+  composes: p from global;
+}`}
         />
         <Font
           component={() => <p className={css.tinyFont}>Hosted by user</p>}
-          description="--marketplaceTinyFontStyles: Very small print."
-          styling={tinyFontStyling}
+          description={`.myClass {
+  composes: marketplaceTinyFontStyles from global;
+}`}
         />
       </div>
     </div>
@@ -211,5 +123,5 @@ const Fonts = () => {
 export const Typography = {
   component: Fonts,
   props: {},
-  group: 'typography',
+  group: 'elements:typography',
 };

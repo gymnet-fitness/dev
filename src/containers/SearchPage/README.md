@@ -1,11 +1,10 @@
 # SearchPage
 
-> **Note:** _certificate_ and _yogaStyle_ filters are not actually filtering anything by default.
-> They are tied to [extended data](https://www.sharetribe.com/docs/references/extended-data/), which
-> is likely to be customized in every marketplace. You can add public data to listing entity in your
-> client app, but to make it work as a search filter, we need to manually add
-> [a schema](https://www.sharetribe.com/docs/references/extended-data/#data-schema) for it - so that
-> search engine understands what is the nature of a given data key.
+> **Note:** _category_ and _amenities_ filters are not actually filtering anything by default. They
+> are tied to [extended data](https://www.sharetribe.com/docs/references/extended-data/), which is
+> likely to be customized in every marketplace. You can add public data to listing entity in your
+> client app, but to make it work as a search filter, see this article:
+> https://www.sharetribe.com/docs/flex-cli/manage-search-schemas-with-flex-cli/
 
 ## Structure
 
@@ -37,12 +36,7 @@ possible for Topbar to take current filters into account.
 ## MainPanel
 
 MainPanel has two functions: showing searchResults and showing filters. Filters are primarily added,
-removed, reordered and configured through _marketplace-custom-config.js_
-
-```shell
-└── src
-    └── marketplace-custom-config.js
-```
+removed, reordered and configured through _marketplace-custom-config.js_.
 
 There you can set some filters to be primary filters. They are shown always on top of SearchResults
 as dropdown-selections on Desktop layout. We recommend that only 1 - 3 primary filters are passed in

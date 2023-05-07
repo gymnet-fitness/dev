@@ -1,5 +1,3 @@
-import config from '../config';
-
 const ensureOpenGraphLocale = locale => {
   switch (locale) {
     case 'en':
@@ -14,26 +12,24 @@ const ensureOpenGraphLocale = locale => {
  */
 export const openGraphMetaProps = data => {
   const {
-    canonicalRootURL,
-    contentType,
-    description,
-    facebookAppId,
-    facebookImages,
-    locale,
+    openGraphType,
+    socialSharingTitle,
+    socialSharingDescription,
     published,
-    siteTitle,
-    tags,
-    title,
     updated,
     url,
+    locale,
+    facebookImages,
+    facebookAppId,
+    marketplaceName,
   } = data;
 
-  if (!(title && description && contentType && url && facebookImages && canonicalRootURL)) {
+  if (!(socialSharingTitle && socialSharingDescription && openGraphType && url && facebookImages)) {
     /* eslint-disable no-console */
     if (console && console.warn) {
       console.warn(
         `Can't create Open Graph meta tags:
-        title, description, contentType, url, facebookImages, and canonicalRootURL are needed.`
+        socialSharingTitle, socialSharingDescription, openGraphType, url, and facebookImages are needed.`
       );
     }
     /* eslint-enable no-console */
@@ -41,9 +37,9 @@ export const openGraphMetaProps = data => {
   }
 
   const openGraphMeta = [
-    { property: 'og:description', content: description },
-    { property: 'og:title', content: title },
-    { property: 'og:type', content: contentType },
+    { property: 'og:description', content: socialSharingDescription },
+    { property: 'og:title', content: socialSharingTitle },
+    { property: 'og:type', content: openGraphType },
     { property: 'og:url', content: url },
     { property: 'og:locale', content: ensureOpenGraphLocale(locale) },
   ];
@@ -62,8 +58,8 @@ export const openGraphMetaProps = data => {
     });
   }
 
-  if (siteTitle) {
-    openGraphMeta.push({ property: 'og:site_name', content: siteTitle });
+  if (marketplaceName) {
+    openGraphMeta.push({ property: 'og:site_name', content: marketplaceName });
   }
 
   if (facebookAppId) {
@@ -78,10 +74,6 @@ export const openGraphMetaProps = data => {
     openGraphMeta.push({ property: 'article:modified_time', content: updated });
   }
 
-  if (tags) {
-    openGraphMeta.push({ property: 'article:tag', content: tags });
-  }
-
   return openGraphMeta;
 };
 
@@ -90,21 +82,21 @@ export const openGraphMetaProps = data => {
  */
 export const twitterMetaProps = data => {
   const {
-    canonicalRootURL,
-    description,
-    siteTwitterHandle,
-    title,
+    socialSharingTitle,
+    socialSharingDescription,
     twitterHandle,
     twitterImages,
     url,
+    marketplaceRootURL,
+    siteTwitterHandle,
   } = data;
 
-  if (!(title && description && siteTwitterHandle && url)) {
+  if (!(socialSharingTitle && socialSharingDescription && url)) {
     /* eslint-disable no-console */
     if (console && console.warn) {
       console.warn(
         `Can't create twitter card meta tags:
-        title, description, siteTwitterHandle, and url are needed.`
+        socialSharingTitle, socialSharingDescription, and url are needed.`
       );
     }
     /* eslint-enable no-console */
@@ -113,13 +105,16 @@ export const twitterMetaProps = data => {
 
   const twitterMeta = [
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: title },
-    { name: 'twitter:description', content: description },
-    { name: 'twitter:site', content: siteTwitterHandle },
+    { name: 'twitter:title', content: socialSharingTitle },
+    { name: 'twitter:description', content: socialSharingDescription },
     { name: 'twitter:url', content: url },
   ];
 
-  if (canonicalRootURL && twitterImages && twitterImages.length > 0) {
+  if (siteTwitterHandle) {
+    twitterMeta.push({ name: 'twitter:site', content: siteTwitterHandle });
+  }
+
+  if (twitterImages && twitterImages.length > 0) {
     twitterImages.forEach(i => {
       twitterMeta.push({
         name: 'twitter:image',
@@ -134,8 +129,8 @@ export const twitterMetaProps = data => {
     twitterMeta.push({ name: 'twitter:creator', content: twitterHandle });
   }
 
-  if (canonicalRootURL) {
-    twitterMeta.push({ name: 'twitter:domain', content: canonicalRootURL });
+  if (marketplaceRootURL) {
+    twitterMeta.push({ name: 'twitter:domain', content: marketplaceRootURL });
   }
 
   return twitterMeta;
@@ -145,10 +140,10 @@ export const twitterMetaProps = data => {
  * These will be used with Helmet <meta {...metaTagProps} />
  * Creates data for Open Graph and Twitter meta tags.
  */
-export const metaTagProps = tagData => {
-  const { canonicalRootURL, facebookAppId, siteTitle, siteTwitterHandle } = config;
+export const metaTagProps = (tagData, config) => {
+  const { marketplaceRootURL, facebookAppId, marketplaceName, siteTwitterHandle } = config;
 
-  const author = tagData.author || siteTitle;
+  const author = tagData.author || marketplaceName;
   const defaultMeta = [
     { name: 'description', content: tagData.description },
     { name: 'author', content: author },
@@ -156,14 +151,13 @@ export const metaTagProps = tagData => {
 
   const openGraphMeta = openGraphMetaProps({
     ...tagData,
-    canonicalRootURL,
     facebookAppId,
-    siteTitle,
+    marketplaceName,
   });
 
   const twitterMeta = twitterMetaProps({
     ...tagData,
-    canonicalRootURL,
+    marketplaceRootURL,
     siteTwitterHandle,
   });
 

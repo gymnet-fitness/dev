@@ -1,6 +1,6 @@
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { fetchCurrentUser } from '../../ducks/user.duck';
-import { types as sdkTypes } from '../../util/sdkLoader';
+import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
 import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 
@@ -124,13 +124,23 @@ export const queryReviewsError = e => ({
 
 // ================ Thunks ================ //
 
-export const queryUserListings = userId => (dispatch, getState, sdk) => {
+export const queryUserListings = (userId, config) => (dispatch, getState, sdk) => {
   dispatch(queryListingsRequest(userId));
+
+  const {
+    aspectWidth = 1,
+    aspectHeight = 1,
+    variantPrefix = 'listing-card',
+  } = config.layout.listingImage;
+  const aspectRatio = aspectHeight / aspectWidth;
+
   return sdk.listings
     .query({
       author_id: userId,
       include: ['author', 'images'],
-      'fields.image': ['variants.landscape-crop', 'variants.landscape-crop2x'],
+      'fields.image': [`variants.${variantPrefix}`, `variants.${variantPrefix}-2x`],
+      ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
+      ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
     })
     .then(response => {
       // Pick only the id and type properties from the response listings
@@ -173,7 +183,7 @@ export const showUser = userId => (dispatch, getState, sdk) => {
     .catch(e => dispatch(showUserError(storableError(e))));
 };
 
-export const loadData = params => (dispatch, getState, sdk) => {
+export const loadData = (params, search, config) => (dispatch, getState, sdk) => {
   const userId = new UUID(params.id);
 
   // Clear state so that previously loaded data is not visible
@@ -183,7 +193,7 @@ export const loadData = params => (dispatch, getState, sdk) => {
   return Promise.all([
     dispatch(fetchCurrentUser()),
     dispatch(showUser(userId)),
-    dispatch(queryUserListings(userId)),
+    dispatch(queryUserListings(userId, config)),
     dispatch(queryUserReviews(userId)),
   ]);
 };

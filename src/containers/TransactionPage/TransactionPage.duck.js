@@ -1,17 +1,10 @@
 import pick from 'lodash/pick';
 import pickBy from 'lodash/pickBy';
 import isEmpty from 'lodash/isEmpty';
-import config from '../../config';
-import { types as sdkTypes } from '../../util/sdkLoader';
+
+import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
+import { findNextBoundary, getStartOf, monthIdString } from '../../util/dates';
 import { isTransactionsTransitionInvalidTransition, storableError } from '../../util/errors';
-import {
-  txIsEnquired,
-  getReview1Transition,
-  getReview2Transition,
-  txIsInFirstReviewBy,
-  TRANSITION_ACCEPT,
-  TRANSITION_DECLINE,
-} from '../../util/transaction';
 import { transactionLineItems } from '../../util/api';
 import * as log from '../../util/log';
 import {
@@ -19,14 +12,19 @@ import {
   denormalisedEntities,
   denormalisedResponseEntities,
 } from '../../util/data';
-import { findNextBoundary, nextMonthFn, monthIdStringInTimeZone } from '../../util/dates';
+import {
+  resolveLatestProcessName,
+  getProcess,
+  isBookingProcess,
+} from '../../transactions/transaction';
+
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { fetchCurrentUserNotifications } from '../../ducks/user.duck';
 
 const { UUID } = sdkTypes;
 
 const MESSAGES_PAGE_SIZE = 100;
-const CUSTOMER = 'customer';
+const REVIEW_TX_INCLUDES = ['reviews', 'reviews.author', 'reviews.subject'];
 
 // ================ Action types ================ //
 
@@ -40,13 +38,9 @@ export const FETCH_TRANSITIONS_REQUEST = 'app/TransactionPage/FETCH_TRANSITIONS_
 export const FETCH_TRANSITIONS_SUCCESS = 'app/TransactionPage/FETCH_TRANSITIONS_SUCCESS';
 export const FETCH_TRANSITIONS_ERROR = 'app/TransactionPage/FETCH_TRANSITIONS_ERROR';
 
-export const ACCEPT_SALE_REQUEST = 'app/TransactionPage/ACCEPT_SALE_REQUEST';
-export const ACCEPT_SALE_SUCCESS = 'app/TransactionPage/ACCEPT_SALE_SUCCESS';
-export const ACCEPT_SALE_ERROR = 'app/TransactionPage/ACCEPT_SALE_ERROR';
-
-export const DECLINE_SALE_REQUEST = 'app/TransactionPage/DECLINE_SALE_REQUEST';
-export const DECLINE_SALE_SUCCESS = 'app/TransactionPage/DECLINE_SALE_SUCCESS';
-export const DECLINE_SALE_ERROR = 'app/TransactionPage/DECLINE_SALE_ERROR';
+export const TRANSITION_REQUEST = 'app/TransactionPage/MARK_RECEIVED_REQUEST';
+export const TRANSITION_SUCCESS = 'app/TransactionPage/TRANSITION_SUCCESS';
+export const TRANSITION_ERROR = 'app/TransactionPage/TRANSITION_ERROR';
 
 export const FETCH_MESSAGES_REQUEST = 'app/TransactionPage/FETCH_MESSAGES_REQUEST';
 export const FETCH_MESSAGES_SUCCESS = 'app/TransactionPage/FETCH_MESSAGES_SUCCESS';
@@ -74,10 +68,8 @@ const initialState = {
   fetchTransactionInProgress: false,
   fetchTransactionError: null,
   transactionRef: null,
-  acceptInProgress: false,
-  acceptSaleError: null,
-  declineInProgress: false,
-  declineSaleError: null,
+  transitionInProgress: null,
+  transitionError: null,
   fetchMessagesInProgress: false,
   fetchMessagesError: null,
   totalMessages: 0,
@@ -91,7 +83,7 @@ const initialState = {
   sendReviewInProgress: false,
   sendReviewError: null,
   monthlyTimeSlots: {
-    // '2019-12': {
+    // '2022-03': {
     //   timeSlots: [],
     //   fetchTimeSlotsError: null,
     //   fetchTimeSlotsInProgress: null,
@@ -114,7 +106,7 @@ const mergeEntityArrays = (a, b) => {
   return a.filter(aEntity => !b.find(bEntity => aEntity.id.uuid === bEntity.id.uuid)).concat(b);
 };
 
-export default function checkoutPageReducer(state = initialState, action = {}) {
+export default function transactionPageReducer(state = initialState, action = {}) {
   const { type, payload } = action;
   switch (type) {
     case SET_INITIAL_VALUES:
@@ -138,19 +130,20 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
       console.error(payload); // eslint-disable-line
       return { ...state, fetchTransitionsInProgress: false, fetchTransitionsError: payload };
 
-    case ACCEPT_SALE_REQUEST:
-      return { ...state, acceptInProgress: true, acceptSaleError: null, declineSaleError: null };
-    case ACCEPT_SALE_SUCCESS:
-      return { ...state, acceptInProgress: false };
-    case ACCEPT_SALE_ERROR:
-      return { ...state, acceptInProgress: false, acceptSaleError: payload };
-
-    case DECLINE_SALE_REQUEST:
-      return { ...state, declineInProgress: true, declineSaleError: null, acceptSaleError: null };
-    case DECLINE_SALE_SUCCESS:
-      return { ...state, declineInProgress: false };
-    case DECLINE_SALE_ERROR:
-      return { ...state, declineInProgress: false, declineSaleError: payload };
+    case TRANSITION_REQUEST:
+      return {
+        ...state,
+        transitionInProgress: payload,
+        transitionError: null,
+      };
+    case TRANSITION_SUCCESS:
+      return { ...state, transitionInProgress: null };
+    case TRANSITION_ERROR:
+      return {
+        ...state,
+        transitionInProgress: null,
+        transitionError: payload,
+      };
 
     case FETCH_MESSAGES_REQUEST:
       return { ...state, fetchMessagesInProgress: true, fetchMessagesError: null };
@@ -240,8 +233,8 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
 
 // ================ Selectors ================ //
 
-export const acceptOrDeclineInProgress = state => {
-  return state.TransactionPage.acceptInProgress || state.TransactionPage.declineInProgress;
+export const transitionInProgress = state => {
+  return state.TransactionPage.transitionInProgress;
 };
 
 // ================ Action creators ================ //
@@ -264,13 +257,9 @@ const fetchTransitionsSuccess = response => ({
 });
 const fetchTransitionsError = e => ({ type: FETCH_TRANSITIONS_ERROR, error: true, payload: e });
 
-const acceptSaleRequest = () => ({ type: ACCEPT_SALE_REQUEST });
-const acceptSaleSuccess = () => ({ type: ACCEPT_SALE_SUCCESS });
-const acceptSaleError = e => ({ type: ACCEPT_SALE_ERROR, error: true, payload: e });
-
-const declineSaleRequest = () => ({ type: DECLINE_SALE_REQUEST });
-const declineSaleSuccess = () => ({ type: DECLINE_SALE_SUCCESS });
-const declineSaleError = e => ({ type: DECLINE_SALE_ERROR, error: true, payload: e });
+const transitionRequest = transitionName => ({ type: TRANSITION_REQUEST, payload: transitionName });
+const transitionSuccess = () => ({ type: TRANSITION_SUCCESS });
+const transitionError = e => ({ type: TRANSITION_ERROR, error: true, payload: e });
 
 const fetchMessagesRequest = () => ({ type: FETCH_MESSAGES_REQUEST });
 const fetchMessagesSuccess = (messages, pagination) => ({
@@ -321,13 +310,13 @@ const timeSlotsRequest = params => (dispatch, getState, sdk) => {
 };
 
 export const fetchTimeSlots = (listingId, start, end, timeZone) => (dispatch, getState, sdk) => {
-  const monthId = monthIdStringInTimeZone(start, timeZone);
+  const monthId = monthIdString(start, timeZone);
 
   dispatch(fetchTimeSlotsRequest(monthId));
 
   // The maximum pagination page size for timeSlots is 500
   const extraParams = {
-    per_page: 500,
+    perPage: 500,
     page: 1,
   };
 
@@ -340,7 +329,7 @@ export const fetchTimeSlots = (listingId, start, end, timeZone) => (dispatch, ge
     });
 };
 
-// Helper function for fetchTransaction call.
+// Helper function for loadData call.
 const fetchMonthlyTimeSlots = (dispatch, listing) => {
   const hasWindow = typeof window !== 'undefined';
   const attributes = listing.attributes;
@@ -351,10 +340,10 @@ const fetchMonthlyTimeSlots = (dispatch, listing) => {
   // Fetch time-zones on client side only.
   if (hasWindow && listing.id && hasTimeZone) {
     const tz = listing.attributes.availabilityPlan.timezone;
-    const nextBoundary = findNextBoundary(tz, new Date());
+    const nextBoundary = findNextBoundary(new Date(), 'hour', tz);
 
-    const nextMonth = nextMonthFn(nextBoundary, tz);
-    const nextAfterNextMonth = nextMonthFn(nextMonth, tz);
+    const nextMonth = getStartOf(nextBoundary, 'month', tz, 1, 'months');
+    const nextAfterNextMonth = getStartOf(nextMonth, 'month', tz, 1, 'months');
 
     return Promise.all([
       dispatch(fetchTimeSlots(listing.id, nextBoundary, nextMonth, tz)),
@@ -366,11 +355,30 @@ const fetchMonthlyTimeSlots = (dispatch, listing) => {
   return Promise.all([]);
 };
 
+// Helper to fetch correct image variants for different thunk calls
+const getImageVariants = listingImageConfig => {
+  const { aspectWidth = 1, aspectHeight = 1, variantPrefix = 'listing-card' } = listingImageConfig;
+  const aspectRatio = aspectHeight / aspectWidth;
+  return {
+    'fields.image': [
+      // Profile images
+      'variants.square-small',
+      'variants.square-small2x',
+
+      // Listing images:
+      `variants.${variantPrefix}`,
+      `variants.${variantPrefix}-2x`,
+    ],
+    ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+  };
+};
+
 const listingRelationship = txResponse => {
   return txResponse.data.data.relationships.listing.data;
 };
 
-export const fetchTransaction = (id, txRole) => (dispatch, getState, sdk) => {
+export const fetchTransaction = (id, txRole, config) => (dispatch, getState, sdk) => {
   dispatch(fetchTransactionRequest());
   let txResponse = null;
 
@@ -384,12 +392,13 @@ export const fetchTransaction = (id, txRole) => (dispatch, getState, sdk) => {
           'provider',
           'provider.profileImage',
           'listing',
+          'listing.currentStock',
           'booking',
           'reviews',
           'reviews.author',
           'reviews.subject',
         ],
-        ...IMAGE_VARIANTS,
+        ...getImageVariants(config.layout.listingImage),
       },
       { expand: true }
     )
@@ -402,16 +411,20 @@ export const fetchTransaction = (id, txRole) => (dispatch, getState, sdk) => {
       const denormalised = denormalisedEntities(entities, [listingRef, transactionRef]);
       const listing = denormalised[0];
       const transaction = denormalised[1];
+      const processName = resolveLatestProcessName(transaction.attributes.processName);
+      try {
+        const process = getProcess(processName);
+        const isInquiry = process.getState(transaction) === process.states.INQUIRY;
 
-      // Fetch time slots for transactions that are in enquired state
-      const canFetchTimeslots =
-        txRole === 'customer' &&
-        config.enableAvailability &&
-        transaction &&
-        txIsEnquired(transaction);
+        // Fetch time slots for transactions that are in inquired state
+        const canFetchTimeslots =
+          txRole === 'customer' && isBookingProcess(processName) && isInquiry;
 
-      if (canFetchTimeslots) {
-        fetchMonthlyTimeSlots(dispatch, listing);
+        if (canFetchTimeslots) {
+          fetchMonthlyTimeSlots(dispatch, listing);
+        }
+      } catch (error) {
+        console.log(`transaction process (${processName}) was not recognized`);
       }
 
       const canFetchListing = listing && listing.attributes && !listing.attributes.deleted;
@@ -419,15 +432,18 @@ export const fetchTransaction = (id, txRole) => (dispatch, getState, sdk) => {
         return sdk.listings.show({
           id: listingId,
           include: ['author', 'author.profileImage', 'images'],
-          ...IMAGE_VARIANTS,
+          ...getImageVariants(config.layout.listingImage),
         });
       } else {
         return response;
       }
     })
     .then(response => {
-      dispatch(addMarketplaceEntities(txResponse));
-      dispatch(addMarketplaceEntities(response));
+      const listingFields = config?.listing?.listingFields;
+      const sanitizeConfig = { listingFields };
+
+      dispatch(addMarketplaceEntities(txResponse, sanitizeConfig));
+      dispatch(addMarketplaceEntities(response, sanitizeConfig));
       dispatch(fetchTransactionSuccess(txResponse));
       return response;
     })
@@ -437,63 +453,50 @@ export const fetchTransaction = (id, txRole) => (dispatch, getState, sdk) => {
     });
 };
 
-export const acceptSale = id => (dispatch, getState, sdk) => {
-  if (acceptOrDeclineInProgress(getState())) {
-    return Promise.reject(new Error('Accept or decline already in progress'));
+export const makeTransition = (txId, transitionName, params) => (dispatch, getState, sdk) => {
+  if (transitionInProgress(getState())) {
+    return Promise.reject(new Error('Transition already in progress'));
   }
-  dispatch(acceptSaleRequest());
+  dispatch(transitionRequest(transitionName));
 
   return sdk.transactions
-    .transition({ id, transition: TRANSITION_ACCEPT, params: {} }, { expand: true })
+    .transition({ id: txId, transition: transitionName, params }, { expand: true })
     .then(response => {
       dispatch(addMarketplaceEntities(response));
-      dispatch(acceptSaleSuccess());
+      dispatch(transitionSuccess());
       dispatch(fetchCurrentUserNotifications());
+
+      // There could be automatic transitions after this transition
+      // For example mark-received-from-purchased > auto-complete.
+      // Here, we make one delayed update to tx.
+      // This way "leave a review" link should show up for the customer.
+      window.setTimeout(() => {
+        sdk.transactions.show({ id: txId }, { expand: true }).then(response => {
+          dispatch(addMarketplaceEntities(response));
+        });
+      }, 3000);
+
       return response;
     })
     .catch(e => {
-      dispatch(acceptSaleError(storableError(e)));
-      log.error(e, 'accept-sale-failed', {
-        txId: id,
-        transition: TRANSITION_ACCEPT,
+      dispatch(transitionError(storableError(e)));
+      log.error(e, `${transitionName}-failed`, {
+        txId,
+        transition: transitionName,
       });
       throw e;
     });
 };
 
-export const declineSale = id => (dispatch, getState, sdk) => {
-  if (acceptOrDeclineInProgress(getState())) {
-    return Promise.reject(new Error('Accept or decline already in progress'));
-  }
-  dispatch(declineSaleRequest());
-
-  return sdk.transactions
-    .transition({ id, transition: TRANSITION_DECLINE, params: {} }, { expand: true })
-    .then(response => {
-      dispatch(addMarketplaceEntities(response));
-      dispatch(declineSaleSuccess());
-      dispatch(fetchCurrentUserNotifications());
-      return response;
-    })
-    .catch(e => {
-      dispatch(declineSaleError(storableError(e)));
-      log.error(e, 'reject-sale-failed', {
-        txId: id,
-        transition: TRANSITION_DECLINE,
-      });
-      throw e;
-    });
-};
-
-const fetchMessages = (txId, page) => (dispatch, getState, sdk) => {
-  const paging = { page, per_page: MESSAGES_PAGE_SIZE };
+const fetchMessages = (txId, page, config) => (dispatch, getState, sdk) => {
+  const paging = { page, perPage: MESSAGES_PAGE_SIZE };
   dispatch(fetchMessagesRequest());
 
   return sdk.messages
     .query({
       transaction_id: txId,
       include: ['sender', 'sender.profileImage'],
-      ...IMAGE_VARIANTS,
+      ...getImageVariants(config.layout.listingImage),
       ...paging,
     })
     .then(response => {
@@ -510,7 +513,7 @@ const fetchMessages = (txId, page) => (dispatch, getState, sdk) => {
       // TODO if there're more than 100 incoming messages,
       // this should loop through most recent pages instead of fetching just the first one.
       if (totalItems > totalMessages && page > 1) {
-        dispatch(fetchMessages(txId, 1))
+        dispatch(fetchMessages(txId, 1, config))
           .then(() => {
             // Original fetch was enough as a response for user action,
             // this just includes new incoming messages
@@ -526,7 +529,7 @@ const fetchMessages = (txId, page) => (dispatch, getState, sdk) => {
     });
 };
 
-export const fetchMoreMessages = txId => (dispatch, getState, sdk) => {
+export const fetchMoreMessages = (txId, config) => (dispatch, getState, sdk) => {
   const state = getState();
   const { oldestMessagePageFetched, totalMessagePages } = state.TransactionPage;
   const hasMoreOldMessages = totalMessagePages > oldestMessagePageFetched;
@@ -534,10 +537,10 @@ export const fetchMoreMessages = txId => (dispatch, getState, sdk) => {
   // In case there're no more old pages left we default to fetching the current cursor position
   const nextPage = hasMoreOldMessages ? oldestMessagePageFetched + 1 : oldestMessagePageFetched;
 
-  return dispatch(fetchMessages(txId, nextPage));
+  return dispatch(fetchMessages(txId, nextPage, config));
 };
 
-export const sendMessage = (txId, message) => (dispatch, getState, sdk) => {
+export const sendMessage = (txId, message, config) => (dispatch, getState, sdk) => {
   dispatch(sendMessageRequest());
 
   return sdk.messages
@@ -549,7 +552,7 @@ export const sendMessage = (txId, message) => (dispatch, getState, sdk) => {
       // and update possible incoming messages too.
       // TODO if there're more than 100 incoming messages,
       // this should loop through most recent pages instead of fetching just the first one.
-      return dispatch(fetchMessages(txId, 1))
+      return dispatch(fetchMessages(txId, 1, config))
         .then(() => {
           dispatch(sendMessageSuccess());
           return messageId;
@@ -564,28 +567,16 @@ export const sendMessage = (txId, message) => (dispatch, getState, sdk) => {
     });
 };
 
-const REVIEW_TX_INCLUDES = ['reviews', 'reviews.author', 'reviews.subject'];
-const IMAGE_VARIANTS = {
-  'fields.image': [
-    // Profile images
-    'variants.square-small',
-    'variants.square-small2x',
-
-    // Listing images:
-    'variants.landscape-crop',
-    'variants.landscape-crop2x',
-  ],
-};
-
 // If other party has already sent a review, we need to make transition to
-// TRANSITION_REVIEW_2_BY_<CUSTOMER/PROVIDER>
-const sendReviewAsSecond = (id, params, role, dispatch, sdk) => {
-  const transition = getReview2Transition(role === CUSTOMER);
-
+// transitions.REVIEW_2_BY_<CUSTOMER/PROVIDER>
+const sendReviewAsSecond = (txId, transition, params, dispatch, sdk, config) => {
   const include = REVIEW_TX_INCLUDES;
 
   return sdk.transactions
-    .transition({ id, transition, params }, { expand: true, include, ...IMAGE_VARIANTS })
+    .transition(
+      { id: txId, transition, params },
+      { expand: true, include, ...getImageVariants(config.layout.listingImage) }
+    )
     .then(response => {
       dispatch(addMarketplaceEntities(response));
       dispatch(sendReviewSuccess());
@@ -601,16 +592,18 @@ const sendReviewAsSecond = (id, params, role, dispatch, sdk) => {
 };
 
 // If other party has not yet sent a review, we need to make transition to
-// TRANSITION_REVIEW_1_BY_<CUSTOMER/PROVIDER>
+// transitions.REVIEW_1_BY_<CUSTOMER/PROVIDER>
 // However, the other party might have made the review after previous data synch point.
 // So, error is likely to happen and then we must try another state transition
 // by calling sendReviewAsSecond().
-const sendReviewAsFirst = (id, params, role, dispatch, sdk) => {
-  const transition = getReview1Transition(role === CUSTOMER);
+const sendReviewAsFirst = (txId, transition, params, dispatch, sdk, config) => {
   const include = REVIEW_TX_INCLUDES;
 
   return sdk.transactions
-    .transition({ id, transition, params }, { expand: true, include, ...IMAGE_VARIANTS })
+    .transition(
+      { id: txId, transition, params },
+      { expand: true, include, ...getImageVariants(config.layout.listingImage) }
+    )
     .then(response => {
       dispatch(addMarketplaceEntities(response));
       dispatch(sendReviewSuccess());
@@ -630,16 +623,17 @@ const sendReviewAsFirst = (id, params, role, dispatch, sdk) => {
     });
 };
 
-export const sendReview = (role, tx, reviewRating, reviewContent) => (dispatch, getState, sdk) => {
-  const params = { reviewRating, reviewContent };
-
-  const txStateOtherPartyFirst = txIsInFirstReviewBy(tx, role !== CUSTOMER);
-
+export const sendReview = (tx, transitionOptionsInfo, params, config) => (
+  dispatch,
+  getState,
+  sdk
+) => {
+  const { reviewAsFirst, reviewAsSecond, hasOtherPartyReviewedFirst } = transitionOptionsInfo;
   dispatch(sendReviewRequest());
 
-  return txStateOtherPartyFirst
-    ? sendReviewAsSecond(tx.id, params, role, dispatch, sdk)
-    : sendReviewAsFirst(tx.id, params, role, dispatch, sdk);
+  return hasOtherPartyReviewedFirst
+    ? sendReviewAsSecond(tx?.id, reviewAsSecond, params, dispatch, sdk, config)
+    : sendReviewAsFirst(tx?.id, reviewAsFirst, params, dispatch, sdk, config);
 };
 
 const isNonEmpty = value => {
@@ -659,9 +653,9 @@ export const fetchNextTransitions = id => (dispatch, getState, sdk) => {
     });
 };
 
-export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing }) => dispatch => {
+export const fetchTransactionLineItems = ({ orderData, listingId, isOwnListing }) => dispatch => {
   dispatch(fetchLineItemsRequest());
-  transactionLineItems({ bookingData, listingId, isOwnListing })
+  transactionLineItems({ orderData, listingId, isOwnListing })
     .then(response => {
       const lineItems = response.data;
       dispatch(fetchLineItemsSuccess(lineItems));
@@ -670,14 +664,14 @@ export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing
       dispatch(fetchLineItemsError(storableError(e)));
       log.error(e, 'fetching-line-items-failed', {
         listingId: listingId.uuid,
-        bookingData: bookingData,
+        orderData,
       });
     });
 };
 
 // loadData is a collection of async calls that need to be made
 // before page has all the info it needs to render itself
-export const loadData = params => (dispatch, getState) => {
+export const loadData = (params, search, config) => (dispatch, getState) => {
   const txId = new UUID(params.id);
   const state = getState().TransactionPage;
   const txRef = state.transactionRef;
@@ -691,8 +685,8 @@ export const loadData = params => (dispatch, getState) => {
 
   // Sale / order (i.e. transaction entity in API)
   return Promise.all([
-    dispatch(fetchTransaction(txId, txRole)),
-    dispatch(fetchMessages(txId, 1)),
+    dispatch(fetchTransaction(txId, txRole, config)),
+    dispatch(fetchMessages(txId, 1, config)),
     dispatch(fetchNextTransitions(txId)),
   ]);
 };

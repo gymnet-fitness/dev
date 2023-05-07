@@ -1,20 +1,18 @@
 import React from 'react';
-import { AvatarLarge, AvatarMedium } from '../../components';
+import { NamedLink, AvatarLarge, AvatarMedium } from '../../components';
 
 import css from './ListingPage.module.css';
 
 const SectionAvatar = props => {
-  const { user } = props;
+  const { user, params } = props;
   return (
     <div className={css.sectionAvatar}>
-      <AvatarLarge
-        user={user}
-        className={css.avatarDesktop}
-        initialsClassName={css.initialsDesktop}
-        disableProfileLink
-      />
-
-      <AvatarMedium user={user} className={css.avatarMobile} disableProfileLink />
+      <NamedLink name="ListingPage" params={params} to={{ hash: '#author' }}>
+        <AvatarLarge user={user} className={css.avatarDesktop} disableProfileLink />
+      </NamedLink>
+      <NamedLink name="ListingPage" params={params} to={{ hash: '#author' }}>
+        <AvatarMedium user={user} className={css.avatarMobile} disableProfileLink />
+      </NamedLink>
     </div>
   );
 };

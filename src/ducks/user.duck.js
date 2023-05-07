@@ -1,9 +1,10 @@
 import { denormalisedResponseEntities, ensureOwnListing } from '../util/data';
 import { storableError } from '../util/errors';
-import { transitionsToRequested } from '../util/transaction';
 import { LISTING_STATE_DRAFT } from '../util/types';
 import * as log from '../util/log';
-import { authInfo } from './Auth.duck';
+import { getTransitionsNeedingProviderAttention } from '../transactions/transaction';
+
+import { authInfo } from './auth.duck';
 import { stripeAccountCreateSuccess } from './stripeConnectAccount.duck';
 import { util as sdkUtil } from '../util/sdkLoader';
 
@@ -66,8 +67,6 @@ const initialState = {
   currentUserHasOrdersError: null,
   sendVerificationEmailInProgress: false,
   sendVerificationEmailError: null,
-  currentUserListing: null,
-  currentUserListingFetched: false,
 };
 
 export default function reducer(state = initialState, action = {}) {
@@ -91,19 +90,12 @@ export default function reducer(state = initialState, action = {}) {
         currentUserHasListingsError: null,
         currentUserNotificationCount: 0,
         currentUserNotificationCountError: null,
-        currentUserListing: null,
-        currentUserListingFetched: false,
       };
 
     case FETCH_CURRENT_USER_HAS_LISTINGS_REQUEST:
       return { ...state, currentUserHasListingsError: null };
     case FETCH_CURRENT_USER_HAS_LISTINGS_SUCCESS:
-      return {
-        ...state,
-        currentUserHasListings: payload.hasListings,
-        currentUserListing: payload.listing,
-        currentUserListingFetched: true,
-      };
+      return { ...state, currentUserHasListings: payload.hasListings };
     case FETCH_CURRENT_USER_HAS_LISTINGS_ERROR:
       console.error(payload); // eslint-disable-line
       return { ...state, currentUserHasListingsError: payload };
@@ -184,9 +176,9 @@ const fetchCurrentUserHasListingsRequest = () => ({
   type: FETCH_CURRENT_USER_HAS_LISTINGS_REQUEST,
 });
 
-export const fetchCurrentUserHasListingsSuccess = (hasListings, listing) => ({
+export const fetchCurrentUserHasListingsSuccess = hasListings => ({
   type: FETCH_CURRENT_USER_HAS_LISTINGS_SUCCESS,
-  payload: { hasListings, listing },
+  payload: { hasListings },
 });
 
 const fetchCurrentUserHasListingsError = e => ({
@@ -254,19 +246,18 @@ export const fetchCurrentUserHasListings = () => (dispatch, getState, sdk) => {
     // Since we are only interested in if the user has
     // listings, we only need at most one result.
     page: 1,
-    per_page: 1,
+    perPage: 1,
   };
 
   return sdk.ownListings
     .query(params)
     .then(response => {
       const hasListings = response.data.data && response.data.data.length > 0;
-      const listing = hasListings ? response.data.data[0] : null;
 
       const hasPublishedListings =
         hasListings &&
         ensureOwnListing(response.data.data[0]).attributes.state !== LISTING_STATE_DRAFT;
-      dispatch(fetchCurrentUserHasListingsSuccess(!!hasPublishedListings, listing));
+      dispatch(fetchCurrentUserHasListingsSuccess(!!hasPublishedListings));
     })
     .catch(e => dispatch(fetchCurrentUserHasListingsError(storableError(e))));
 };
@@ -282,7 +273,7 @@ export const fetchCurrentUserHasOrders = () => (dispatch, getState, sdk) => {
   const params = {
     only: 'order',
     page: 1,
-    per_page: 1,
+    perPage: 1,
   };
 
   return sdk.transactions
@@ -298,15 +289,20 @@ export const fetchCurrentUserHasOrders = () => (dispatch, getState, sdk) => {
 const NOTIFICATION_PAGE_SIZE = 100;
 
 export const fetchCurrentUserNotifications = () => (dispatch, getState, sdk) => {
-  dispatch(fetchCurrentUserNotificationsRequest());
+  const transitionsNeedingAttention = getTransitionsNeedingProviderAttention();
+  if (transitionsNeedingAttention.length === 0) {
+    // Don't update state, if there's no need to draw user's attention after last transitions.
+    return;
+  }
 
   const apiQueryParams = {
     only: 'sale',
-    last_transitions: transitionsToRequested,
+    last_transitions: transitionsNeedingAttention,
     page: 1,
-    per_page: NOTIFICATION_PAGE_SIZE,
+    perPage: NOTIFICATION_PAGE_SIZE,
   };
 
+  dispatch(fetchCurrentUserNotificationsRequest());
   sdk.transactions
     .query(apiQueryParams)
     .then(response => {
@@ -318,7 +314,7 @@ export const fetchCurrentUserNotifications = () => (dispatch, getState, sdk) => 
 
 export const fetchCurrentUser = (params = null) => (dispatch, getState, sdk) => {
   dispatch(currentUserShowRequest());
-  const { isAuthenticated } = getState().Auth;
+  const { isAuthenticated } = getState().auth;
 
   if (!isAuthenticated) {
     // Make sure current user is null

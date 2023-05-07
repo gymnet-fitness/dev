@@ -4,8 +4,8 @@
 }
 
 .pageRoot {
-  display: flex;
   padding-bottom: 90px;
+
   @media (--viewportLarge) {
     padding-bottom: 0;
   }
@@ -16,43 +16,41 @@
 }
 
 .errorText {
-  color: var(--failColor);
+  color: var(--colorFail);
   margin: 24px;
 }
 
-.sectionImages {
-}
-
-.threeToTwoWrapper {
-  /* Layout */
-  display: block;
-  width: 100%;
+.sectionHero {
   position: relative;
-}
-
-/* Firefox doesn't support image aspect ratio inside flexbox */
-.aspectWrapper {
-  position: relative; /* allow positioning own listing action bar */
-  padding-bottom: 66.6667%; /* 3:2 Aspect Ratio */
-  background-color: var(--matterColorNegative); /* Loading BG color */
-
-  /* Image carousel can be opened from the image, therefore we should show a pointer */
-  cursor: pointer;
+  margin: 0 0 36px 0;
 
   @media (--viewportMedium) {
-    padding-bottom: 0; /* No fixed aspect on desktop layouts */
+    margin: 0;
   }
 }
 
+.heroHeight {
+  @media (--viewportMedium) {
+    height: calc(0.41 * 100vw);
+    max-height: 50vh;
+    overflow-y: hidden;
+  }
+}
+
+.imageWrapperForSectionHero {
+  composes: heroHeight;
+  background-color: var(--colorGrey100); /* Loading BG color */
+
+  /* Image carousel can be opened from the image, therefore we should show a pointer */
+  cursor: pointer;
+}
+
 .actionBar {
-  position: absolute;
   display: flex;
   justify-content: space-between;
-  top: 13px;
-  left: 13px;
-  width: calc(100% - 26px);
-  color: var(--matterColorNegative);
-  background-color: var(--matterColor);
+  width: 100%;
+  color: var(--colorGrey100);
+  background-color: var(--colorGrey700);
   z-index: 1; /* bring on top of mobile image */
 
   /* Action bar prevents the image click events going to the parent and
@@ -62,17 +60,42 @@
   border-radius: var(--borderRadius);
 }
 
+.actionBarForProductLayout {
+  margin: 24px;
+  width: calc(100% - 48px);
+
+  @media (--viewportMedium) {
+    margin: 24px 0 24px 0;
+    width: 100%;
+  }
+
+  @media (--viewportLarge) {
+    margin: 0 0 24px 0;
+  }
+}
+
+.actionBarForHeroLayout {
+  position: absolute;
+  top: 13px;
+  left: 13px;
+  width: calc(100% - 26px);
+
+  /* Action bar prevents the image click events going to the parent and
+   should not show a pointer */
+  cursor: initial;
+}
+
 .ownListingText {
-  composes: h4 from global;
+  composes: h5 from global;
   margin: 14px 12px 11px 24px;
 
   @media (--viewportMedium) {
-    margin: 25px 12px 22px 24px;
+    margin: 24px 12px 24px 24px;
   }
 }
 
 .ownListingTextPendingApproval {
-  color: var(--attentionColor);
+  color: var(--colorAttention);
 }
 
 .closedListingText {
@@ -87,22 +110,22 @@
 }
 
 .editListingLink {
-  composes: h4 from global;
+  composes: h5 from global;
   flex-shrink: 0;
   margin: 0;
   padding: 14px 24px 11px 12px;
-  color: var(--matterColorNegative);
+  color: var(--colorGrey100);
 
   transition: var(--transitionStyleButton);
 
   &:hover {
-    color: var(--matterColorLight);
+    color: var(--colorWhite);
     text-decoration: none;
   }
 
   @media (--viewportMedium) {
     margin: 0;
-    padding: 25px 24px 22px 12px;
+    padding: 30px 24px 24px 12px;
   }
 }
 
@@ -111,24 +134,11 @@
 }
 
 .rootForImage {
-  /* Layout - image will take space defined by aspect ratio wrapper */
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  composes: heroHeight;
   width: 100%;
-
   transition: var(--transitionStyleButton);
 
   @media (--viewportMedium) {
-    position: static;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    height: calc(0.41 * 100vw);
-    max-height: 50vh;
     object-fit: cover;
     border-radius: var(--borderRadius);
 
@@ -151,7 +161,7 @@
   padding: 8px 13px 6px 13px;
 
   /* Colors */
-  background-color: var(--matterColorLight);
+  background-color: var(--colorWhite);
 
   /* Borders */
   border: none;
@@ -162,7 +172,7 @@
 
   &:hover {
     background-color: var(--marketplaceColor);
-    color: var(--matterColorLight);
+    color: var(--colorWhite);
   }
 
   @media (--viewportMedium) {
@@ -181,9 +191,10 @@
   height: 100%;
 }
 
-.contentContainer {
+.contentWrapperForHeroLayout {
   @media (--viewportMedium) {
-    max-width: 1056px;
+    width: 100%;
+    max-width: var(--contentMaxWidth);
     margin: 0 auto;
     padding: 0 24px;
     display: flex;
@@ -191,18 +202,60 @@
   }
 
   @media (--viewportLarge) {
-    max-width: 1128px;
+    max-width: calc(var(--contentMaxWidth) + 72px);
     padding: 0 36px;
     margin: 0 auto 117px;
   }
 
   @media (--viewportXLarge) {
-    max-width: 1056px;
+    max-width: var(--contentMaxWidth);
     padding: 0;
   }
 }
 
-.mainContent {
+.mainColumnForProductLayout {
+  @media (--viewportMedium) {
+  }
+  @media (--viewportLarge) {
+    /* contentContainer's full width - (orderColumn + paddings + margin) */
+    max-width: calc(100% - 360px);
+    flex-basis: calc(100% - 360px);
+    flex-shrink: 0;
+    flex-grow: 1;
+  }
+}
+
+.orderColumnForProductLayout {
+  @media (--viewportMedium) {
+  }
+  @media (--viewportLarge) {
+    display: block;
+    margin-left: 48px;
+    flex-basis: 312px;
+    flex-shrink: 0;
+  }
+}
+
+.contentWrapperForProductLayout {
+  margin: 0 0 56px 0;
+
+  @media (--viewportMedium) {
+    width: 100%;
+    max-width: var(--contentMaxWidth);
+    padding: 0 24px 0 24px;
+    margin: 0 auto 56px auto;
+  }
+
+  @media (--viewportLarge) {
+    display: flex;
+    flex-direction: row;
+    max-width: calc(var(--contentMaxWidth) + 72px);
+    padding: 64px 36px 0 36px;
+    margin: 0 auto 117px auto;
+  }
+}
+
+.mainColumnForHeroLayout {
   flex-basis: 100%;
   margin-bottom: 23px;
 
@@ -213,9 +266,9 @@
   }
 
   @media (--viewportLarge) {
-    margin-top: 50px;
+    margin-top: 80px;
     margin-bottom: 0px;
-    /* contentContainer's full width - (bookingColumn + two paddings + margin + border) */
+    /* contentContainer's full width - (orderColumn + two paddings + margin + border) */
     max-width: calc(100% - 433px);
     flex-basis: calc(100% - 433px);
     flex-shrink: 0;
@@ -223,27 +276,54 @@
   }
 }
 
-.bookingPanel {
+.orderColumnForHeroLayout {
+  @media (--viewportMedium) {
+  }
   @media (--viewportLarge) {
     display: block;
-    margin-top: 79px;
+    margin-top: 80px;
     margin-left: 60px;
-    border-left-style: solid;
-    border-left-width: 1px;
-    border-left-color: var(--matterColorNegative);
-
+    border-left: 1px solid var(--colorGrey100);
     padding-left: 60px;
-
-    /* The calendar needs 312px */
     flex-basis: 312px;
     flex-shrink: 0;
   }
 }
 
+.orderPanel {
+  /* Note: panel height might be too much on small viewport - hence min-height */
+  @media (--viewportLarge) and (min-height: 950px) {
+    position: sticky;
+    top: 108px;
+  }
+}
+
+.productOrderPanel {
+  @media (--viewportLarge) {
+    display: block;
+    margin-top: 24px;
+  }
+  /* Note: panel height might be too much on small viewport - hence min-height */
+  @media (--viewportLarge) and (min-height: 950px) {
+    position: sticky;
+    top: 108px;
+  }
+}
+
+.orderPanelTitle {
+  /* Font */
+  font-weight: var(--fontWeightBold);
+
+  /* Layout */
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .sectionAvatar {
   /* Position (over the listing image)*/
   margin-left: 24px;
-  margin-top: -72px;
+  margin-top: -31px;
 
   /* Rendering context to the same lavel as listing image */
   position: relative;
@@ -253,7 +333,7 @@
 
   @media (--viewportMedium) {
     position: absolute;
-    top: -112px;
+    top: -49px;
     margin-left: 0;
     margin-top: 0;
   }
@@ -261,8 +341,6 @@
 
 .avatarMobile {
   display: flex;
-  width: 96px;
-  height: 96px;
 
   @media (--viewportMedium) {
     display: none; /* Hide the medium avatar from the bigger screens */
@@ -271,29 +349,12 @@
 
 .avatarDesktop {
   display: none; /* Hide the large avatar from the smaller screens */
-  width: 152px;
-  height: 152px;
 
   @media (--viewportMedium) {
     display: flex;
   }
 }
 
-.initialsDesktop {
-  font-size: 48px;
-  font-weight: var(--fontWeightBold);
-  padding-bottom: 8px;
-}
-
-.sectionHeading {
-  margin-top: 22px;
-  margin-bottom: 34px;
-
-  @media (--viewportMedium) {
-    display: flex;
-    margin-bottom: 31px;
-  }
-}
 .desktopPriceContainer {
   display: none;
 
@@ -322,7 +383,7 @@
 .desktopPerUnit {
   /* Font */
   composes: h5 from global;
-  color: var(--matterColor);
+  color: var(--colorGrey700);
 
   @media (--viewportMedium) {
     margin-top: 0;
@@ -343,7 +404,7 @@
 .title {
   /* Font */
   composes: marketplaceModalTitleStyles from global;
-  color: var(--matterColor);
+  color: var(--colorGrey700);
 
   /* Layout */
   width: 100%;
@@ -365,12 +426,13 @@
   @media (--viewportMedium) {
     margin-top: 0;
     margin-bottom: 0;
-    color: var(--matterColor);
+    color: var(--colorGrey700);
   }
 }
 
 .authorNameLink {
-  color: var(--matterColor);
+  composes: textSmall from global;
+  color: var(--colorGrey700);
 }
 
 .contactWrapper {
@@ -415,62 +477,72 @@
   }
 }
 
-.sectionDescription {
+.sectionText {
   padding: 0 24px;
-  margin-bottom: 35px;
+  margin-bottom: 36px;
 
   @media (--viewportMedium) {
     padding: 0;
-    margin-bottom: 36px;
+    margin-bottom: 40px;
   }
 }
 
-.descriptionTitle {
-  /* Font */
-  composes: h3 from global;
-  color: var(--matterColorAnti);
+.sectionHeading,
+.sectionHeadingWithExtraMargin {
+  /* Font for sections titles */
+  composes: p from global;
+  padding: 0;
+  font-weight: var(--fontWeightBold);
 
   margin-top: 0;
-  margin-bottom: 13px;
+  margin-bottom: 12px;
+
   @media (--viewportMedium) {
     margin-top: 0;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 }
 
-.sectionFeatures {
-  padding: 0 24px;
-  margin-bottom: 32px;
-
+.sectionHeadingWithExtraMargin {
   @media (--viewportMedium) {
-    padding: 0;
-    margin-bottom: 52px;
+    margin-bottom: 16px;
   }
 }
 
-.featuresTitle {
-  /* Font */
-  composes: h3 from global;
-  color: var(--matterColorAnti);
-
-  margin-top: 0;
-  margin-bottom: 16px;
-  @media (--viewportMedium) {
-    margin-top: 0;
-    margin-bottom: 12px;
-  }
-}
-
-.description {
-  margin-top: 0;
-  margin-bottom: 0;
+.text {
+  font-weight: var(--fontWeightRegular);
+  padding: 1px 0 5px 0;
+  margin: 0;
 
   /* Preserve newlines, but collapse other whitespace */
   white-space: pre-line;
 
   @media (--viewportMedium) {
-    margin-top: 0;
-    margin-bottom: 0;
+    padding: 3px 0 5px 0;
+    margin: 0;
+  }
+}
+
+.ingress {
+  composes: p from global;
+  margin: 0;
+
+  /* Preserve newlines, but collapse other whitespace */
+  white-space: pre-line;
+
+  @media (--viewportMedium) {
+    margin: 0;
+  }
+}
+
+.sectionDetails,
+.sectionMultiEnum {
+  padding: 0 24px;
+  margin-bottom: 32px;
+
+  @media (--viewportMedium) {
+    padding: 0;
+    margin-bottom: 40px;
   }
 }
 
@@ -484,78 +556,55 @@
   }
 }
 
-.locationTitle {
-  /* Font */
-  composes: h3 from global;
-  color: var(--matterColorAnti);
-
-  margin-top: 0;
-  margin-bottom: 20px;
-  @media (--viewportMedium) {
-    margin-top: 0;
-    margin-bottom: 28px;
-  }
-}
-
-.sectionReviews {
+.sectionReviews,
+.sectionAuthor {
   padding: 0 24px;
-  margin-bottom: 5px;
+  margin-top: 42px;
 
   @media (--viewportMedium) {
     padding: 0;
+    margin-top: 40px;
   }
   @media (--viewportLarge) {
-    margin-bottom: 3px;
+    padding: 8px 0;
   }
 }
 
-.reviewsHeading {
-  composes: h3 from global;
-  color: var(--matterColorAnti);
+.details {
+  padding-bottom: 1px;
+  margin: 0;
+}
 
-  margin: 52px 0 20px 0;
+.detailsRow {
+  display: inline-flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1px 0 4px 0;
+  line-height: 36px;
+  list-style: none;
+  font-weight: var(--fontWeightRegular);
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--colorGrey100);
+  }
 
   @media (--viewportMedium) {
-    margin: 53px 0 27px 0;
-  }
-  @media (--viewportLarge) {
-    margin: 50px 0 26px 0;
+    padding: 5px 0 2px 0;
+    line-height: 32px;
   }
 }
 
-.sectionHost {
-  position: relative;
-  padding: 0 24px;
-  margin-bottom: 5px;
-
-  @media (--viewportMedium) {
-    padding: 0;
-  }
-  @media (--viewportLarge) {
-    margin-bottom: 3px;
-  }
+.detailLabel {
+  font-weight: var(--fontWeightSemiBold);
+  letter-spacing: -0.09px;
 }
 
-.yourHostHeading {
-  composes: h3 from global;
-  color: var(--matterColorAnti);
-
-  margin: 54px 0 23px 0;
-
-  @media (--viewportMedium) {
-    margin: 53px 0 27px 0;
-  }
-  @media (--viewportLarge) {
-    margin: 53px 0 27px 0;
-  }
-}
-
-.enquiryModalContent {
+.inquiryModalContent {
   flex-grow: 1;
   display: flex;
 }
 
-.enquiryForm {
+.inquiryForm {
   flex-grow: 1;
   margin: 70px 0 100px 0;
 
@@ -567,13 +616,13 @@
   }
 }
 
-.enquirySubmitButtonWrapper {
+.inquirySubmitButtonWrapper {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   padding: 24px;
-  background-color: var(--matterColorLight);
+  background-color: var(--colorWhite);
 
   @media (--viewportMedium) {
     position: static;
@@ -601,6 +650,7 @@
 
   @media (--viewportLarge) {
     height: 417px;
+    margin-bottom: 7px;
   }
 }
 
@@ -610,4 +660,49 @@
   /* use break-word if available */
   word-break: break-word;
   hyphens: auto;
+}
+
+.productGallery {
+  margin: 0 0 36px 0;
+
+  @media (--viewportMedium) {
+    margin: 24px 0 48px 0;
+  }
+  @media (--viewportLarge) {
+    margin: 0 0 40px 0;
+    padding-bottom: 4px;
+  }
+}
+
+.mobileHeading {
+  margin: 0 24px 24px 24px;
+
+  @media (--viewportMedium) {
+    margin: 0 0 24px 0;
+  }
+
+  @media (--viewportLarge) {
+    display: none;
+  }
+}
+
+.productDesktopHeading {
+  display: none;
+  @media (--viewportLarge) {
+    display: block;
+  }
+}
+
+.productSideContent {
+}
+
+.productBookingPanel {
+  @media (--viewportLarge) {
+    display: block;
+    margin-top: 24px;
+
+    /* The calendar needs 312px */
+    flex-basis: 312px;
+    flex-shrink: 0;
+  }
 }

@@ -1,35 +1,59 @@
-import React from 'react';
-import { array, arrayOf, bool, func, object, oneOf, shape, string, number } from 'prop-types';
+import React, { useState } from 'react';
+import { array, arrayOf, bool, func, number, object, oneOf, shape, string } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
+
+import { useConfiguration } from '../../context/configurationContext';
+import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
 import { createResourceLocatorString, findRouteByRouteName } from '../../util/routes';
-import routeConfiguration from '../../routeConfiguration';
-import { propTypes } from '../../util/types';
-import { ensureListing, ensureTransaction } from '../../util/data';
-import { timestampToDate, calculateQuantityFromHours } from '../../util/dates';
-import { createSlug } from '../../util/urlHelpers';
-import { txIsPaymentPending } from '../../util/transaction';
-import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
-import { isScrollingDisabled, manageDisableScrolling } from '../../ducks/UI.duck';
-import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
 import {
-  NamedRedirect,
-  TransactionPanel,
-  Page,
-  LayoutSingleColumn,
-  LayoutWrapperTopbar,
-  LayoutWrapperMain,
-  LayoutWrapperFooter,
-  Footer,
-} from '../../components';
-import { TopbarContainer } from '../../containers';
+  DATE_TYPE_DATE,
+  DATE_TYPE_DATETIME,
+  LISTING_UNIT_TYPES,
+  LINE_ITEM_HOUR,
+  LINE_ITEM_ITEM,
+  propTypes,
+} from '../../util/types';
+import { timestampToDate } from '../../util/dates';
+import { createSlug } from '../../util/urlHelpers';
+import {
+  TX_TRANSITION_ACTOR_CUSTOMER as CUSTOMER,
+  TX_TRANSITION_ACTOR_PROVIDER as PROVIDER,
+  resolveLatestProcessName,
+  getProcess,
+  isBookingProcess,
+} from '../../transactions/transaction';
+
+import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
+import { isScrollingDisabled, manageDisableScrolling } from '../../ducks/ui.duck';
+import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
 
 import {
-  acceptSale,
-  declineSale,
+  H4,
+  IconSpinner,
+  NamedLink,
+  NamedRedirect,
+  Page,
+  Footer,
+  UserDisplayName,
+  OrderBreakdown,
+  OrderPanel,
+  LayoutSingleColumn,
+} from '../../components';
+
+import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+
+import { getStateData } from './TransactionPage.stateData';
+import ActivityFeed from './ActivityFeed/ActivityFeed';
+import DisputeModal from './DisputeModal/DisputeModal';
+import ReviewModal from './ReviewModal/ReviewModal';
+import TransactionPanel from './TransactionPanel/TransactionPanel';
+
+import {
+  makeTransition,
   sendMessage,
   sendReview,
   fetchMoreMessages,
@@ -38,11 +62,33 @@ import {
 } from './TransactionPage.duck';
 import css from './TransactionPage.module.css';
 
-const PROVIDER = 'provider';
-const CUSTOMER = 'customer';
+// Submit dispute and close the review modal
+const onDisputeOrder = (
+  currentTransactionId,
+  transitionName,
+  onTransition,
+  setDisputeSubmitted
+) => values => {
+  const { disputeReason } = values;
+  const params = disputeReason ? { protectedData: { disputeReason } } : {};
+  onTransition(currentTransactionId, transitionName, params)
+    .then(r => {
+      return setDisputeSubmitted(true);
+    })
+    .catch(e => {
+      // Do nothing.
+    });
+};
 
 // TransactionPage handles data loading for Sale and Order views to transaction pages in Inbox.
 export const TransactionPageComponent = props => {
+  const [isDisputeModalOpen, setDisputeModalOpen] = useState(false);
+  const [disputeSubmitted, setDisputeSubmitted] = useState(false);
+  const [isReviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+  const config = useConfiguration();
+  const routeConfiguration = useRouteConfiguration();
   const {
     currentUser,
     initialMessageFailedToTransaction,
@@ -55,7 +101,6 @@ export const TransactionPageComponent = props => {
     history,
     intl,
     messages,
-    onFetchTimeSlots,
     onManageDisableScrolling,
     onSendMessage,
     onSendReview,
@@ -68,14 +113,12 @@ export const TransactionPageComponent = props => {
     sendReviewInProgress,
     transaction,
     transactionRole,
-    acceptInProgress,
-    acceptSaleError,
-    declineInProgress,
-    declineSaleError,
-    onAcceptSale,
-    onDeclineSale,
+    transitionInProgress,
+    transitionError,
+    onTransition,
     monthlyTimeSlots,
-    processTransitions,
+    onFetchTimeSlots,
+    nextTransitions,
     callSetInitialValues,
     onInitializeCardPaymentData,
     onFetchTransactionLineItems,
@@ -84,15 +127,26 @@ export const TransactionPageComponent = props => {
     fetchLineItemsError,
   } = props;
 
-  const currentTransaction = ensureTransaction(transaction);
-  const currentListing = ensureListing(currentTransaction.listing);
+  const { listing, provider, customer, booking } = transaction || {};
+  const txTransitions = transaction?.attributes?.transitions || [];
   const isProviderRole = transactionRole === PROVIDER;
   const isCustomerRole = transactionRole === CUSTOMER;
 
-  const redirectToCheckoutPageWithInitialValues = (initialValues, listing) => {
-    const routes = routeConfiguration();
+  const processName = resolveLatestProcessName(transaction?.attributes?.processName);
+  let process = null;
+  try {
+    process = processName ? getProcess(processName) : null;
+  } catch (error) {
+    // Process was not recognized!
+  }
+
+  const isTxOnPaymentPending = tx => {
+    return process ? process.getState(tx) === process.states.PENDING_PAYMENT : null;
+  };
+
+  const redirectToCheckoutPageWithInitialValues = (initialValues, currentListing) => {
     // Customize checkout page state with current listing and selected bookingDates
-    const { setInitialValues } = findRouteByRouteName('CheckoutPage', routes);
+    const { setInitialValues } = findRouteByRouteName('CheckoutPage', routeConfiguration);
     callSetInitialValues(setInitialValues, initialValues);
 
     // Clear previous Stripe errors from store if there is any
@@ -102,7 +156,7 @@ export const TransactionPageComponent = props => {
     history.push(
       createResourceLocatorString(
         'CheckoutPage',
-        routes,
+        routeConfiguration,
         { id: currentListing.id.uuid, slug: createSlug(currentListing.attributes.title) },
         {}
       )
@@ -111,80 +165,142 @@ export const TransactionPageComponent = props => {
 
   // If payment is pending, redirect to CheckoutPage
   if (
-    txIsPaymentPending(currentTransaction) &&
+    transaction?.id &&
+    isTxOnPaymentPending(transaction) &&
     isCustomerRole &&
-    currentTransaction.attributes.lineItems
+    transaction.attributes.lineItems
   ) {
-    const currentBooking = ensureListing(currentTransaction.booking);
+    // Note: we don't need to pass orderData since those are already saved to transaction.
+    //       However, we could do that by extracting the values from transaction entity.
+    //
+    // const bookingMaybe = booking?.id ? { bookingDates: { bookingStart: booking?.attributes?.start, bookingEnd: booking?.attributes?.end } } : {};
+    // const purchaseLineItem = transaction.attributes.lineItems.find(item => item.code === LINE_ITEM_ITEM);
+    // const quantity = purchaseLineItem?.quantity?.toNumber();
+    // const quantityMaybe = quantity ? { quantity } : {};
 
     const initialValues = {
-      listing: currentListing,
+      listing,
       // Transaction with payment pending should be passed to CheckoutPage
-      transaction: currentTransaction,
-      // Original bookingData content is not available,
-      // but it is already used since booking is created.
-      // (E.g. quantity is used when booking is created.)
-      bookingData: {},
-      bookingDates: {
-        bookingStart: currentBooking.attributes.start,
-        bookingEnd: currentBooking.attributes.end,
-      },
+      transaction,
+      // Original orderData content is not available,
+      // but it is already saved since tx is in state: payment-pending.
+      orderData: {},
     };
 
-    redirectToCheckoutPageWithInitialValues(initialValues, currentListing);
+    redirectToCheckoutPageWithInitialValues(initialValues, listing);
   }
 
-  // Customer can create a booking, if the tx is in "enquiry" state.
-  const handleSubmitBookingRequest = values => {
-    const { bookingStartTime, bookingEndTime, ...restOfValues } = values;
-    const bookingStart = timestampToDate(bookingStartTime);
-    const bookingEnd = timestampToDate(bookingEndTime);
+  // Customer can create a booking, if the tx is in "inquiry" state.
+  const handleSubmitOrderRequest = values => {
+    const {
+      bookingDates,
+      bookingStartTime,
+      bookingEndTime,
+      quantity: quantityRaw,
+      deliveryMethod,
+      ...otherOrderData
+    } = values;
 
-    const bookingData = {
-      quantity: calculateQuantityFromHours(bookingStart, bookingEnd),
-      ...restOfValues,
-    };
+    const bookingMaybe = bookingDates
+      ? {
+          bookingDates: {
+            bookingStart: bookingDates.startDate,
+            bookingEnd: bookingDates.endDate,
+          },
+        }
+      : bookingStartTime && bookingEndTime
+      ? {
+          bookingDates: {
+            bookingStart: timestampToDate(bookingStartTime),
+            bookingEnd: timestampToDate(bookingEndTime),
+          },
+        }
+      : {};
+
+    const quantity = Number.parseInt(quantityRaw, 10);
+    const quantityMaybe = Number.isInteger(quantity) ? { quantity } : {};
+    const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
 
     const initialValues = {
-      listing: currentListing,
-      // enquired transaction should be passed to CheckoutPage
-      transaction: currentTransaction,
-      bookingData,
-      bookingDates: {
-        bookingStart,
-        bookingEnd,
+      listing,
+      // inquired transaction should be passed to CheckoutPage
+      transaction,
+      orderData: {
+        ...bookingMaybe,
+        ...quantityMaybe,
+        ...deliveryMethodMaybe,
+        ...otherOrderData,
       },
       confirmPaymentError: null,
     };
 
-    redirectToCheckoutPageWithInitialValues(initialValues, currentListing);
+    redirectToCheckoutPageWithInitialValues(initialValues, listing);
+  };
+
+  // Open review modal
+  // This is called from ActivityFeed and from action buttons
+  const onOpenReviewModal = () => {
+    setReviewModalOpen(true);
+  };
+
+  // Submit review and close the review modal
+  const onSubmitReview = values => {
+    const { reviewRating, reviewContent } = values;
+    const rating = Number.parseInt(reviewRating, 10);
+    const { states, transitions } = process;
+    const transitionOptions =
+      transactionRole === CUSTOMER
+        ? {
+            reviewAsFirst: transitions.REVIEW_1_BY_CUSTOMER,
+            reviewAsSecond: transitions.REVIEW_2_BY_CUSTOMER,
+            hasOtherPartyReviewedFirst: process
+              .getTransitionsToStates([states.REVIEWED_BY_PROVIDER])
+              .includes(transaction.attributes.lastTransition),
+          }
+        : {
+            reviewAsFirst: transitions.REVIEW_1_BY_PROVIDER,
+            reviewAsSecond: transitions.REVIEW_2_BY_PROVIDER,
+            hasOtherPartyReviewedFirst: process
+              .getTransitionsToStates([states.REVIEWED_BY_CUSTOMER])
+              .includes(transaction.attributes.lastTransition),
+          };
+    const params = { reviewRating: rating, reviewContent };
+
+    onSendReview(transaction, transitionOptions, params, config)
+      .then(r => {
+        setReviewModalOpen(false);
+        setReviewSubmitted(true);
+      })
+      .catch(e => {
+        // Do nothing.
+      });
+  };
+
+  // Open dispute modal
+  const onOpenDisputeModal = () => {
+    setDisputeModalOpen(true);
   };
 
   const deletedListingTitle = intl.formatMessage({
     id: 'TransactionPage.deletedListing',
   });
-  const listingTitle = currentListing.attributes.deleted
-    ? deletedListingTitle
-    : currentListing.attributes.title;
+  const listingDeleted = listing?.attributes?.deleted;
+  const listingTitle = listingDeleted ? deletedListingTitle : listing?.attributes?.title;
 
   // Redirect users with someone else's direct link to their own inbox/sales or inbox/orders page.
   const isDataAvailable =
+    process &&
     currentUser &&
-    currentTransaction.id &&
-    currentTransaction.id.uuid === params.id &&
-    currentTransaction.attributes.lineItems &&
-    currentTransaction.customer &&
-    currentTransaction.provider &&
+    transaction?.id &&
+    transaction?.id?.uuid === params.id &&
+    transaction?.attributes?.lineItems &&
+    transaction.customer &&
+    transaction.provider &&
     !fetchTransactionError;
 
-  const isOwnSale =
-    isDataAvailable &&
-    isProviderRole &&
-    currentUser.id.uuid === currentTransaction.provider.id.uuid;
+  const isOwnSale = isDataAvailable && isProviderRole && currentUser.id.uuid === provider?.id?.uuid;
   const isOwnOrder =
-    isDataAvailable &&
-    isCustomerRole &&
-    currentUser.id.uuid === currentTransaction.customer.id.uuid;
+    isDataAvailable && isCustomerRole && currentUser.id.uuid === customer?.id?.uuid;
 
   if (isDataAvailable && isProviderRole && !isOwnSale) {
     // eslint-disable-next-line no-console
@@ -209,17 +325,91 @@ export const TransactionPageComponent = props => {
     <p className={css.error}>
       <FormattedMessage id={`${fetchErrorMessage}`} />
     </p>
+  ) : transaction && !process ? (
+    <div className={css.error}>
+      <FormattedMessage id="TransactionPage.unknownTransactionProcess" />
+    </div>
   ) : (
-    <p className={css.loading}>
+    <div className={css.loading}>
       <FormattedMessage id={`${loadingMessage}`} />
-    </p>
+      <IconSpinner />
+    </div>
   );
 
   const initialMessageFailed = !!(
     initialMessageFailedToTransaction &&
-    currentTransaction.id &&
-    initialMessageFailedToTransaction.uuid === currentTransaction.id.uuid
+    initialMessageFailedToTransaction.uuid === transaction?.id?.uuid
   );
+
+  const otherUserDisplayName = isOwnOrder ? (
+    <UserDisplayName user={provider} intl={intl} />
+  ) : (
+    <UserDisplayName user={customer} intl={intl} />
+  );
+
+  const stateData = isDataAvailable
+    ? getStateData(
+        {
+          transaction,
+          transactionRole,
+          nextTransitions,
+          transitionInProgress,
+          transitionError,
+          sendReviewInProgress,
+          sendReviewError,
+          onTransition,
+          onOpenReviewModal,
+          intl,
+        },
+        process
+      )
+    : {};
+
+  const hasLineItems = transaction?.attributes?.lineItems?.length > 0;
+  const unitLineItem = hasLineItems
+    ? transaction.attributes?.lineItems?.find(
+        item => LISTING_UNIT_TYPES.includes(item.code) && !item.reversal
+      )
+    : null;
+
+  const formatLineItemUnitType = (transaction, listing) => {
+    // unitType should always be saved to transaction's protected data
+    const unitTypeInProtectedData = transaction?.attributes?.protectedData?.unitType;
+    // If unitType is not found (old or mutated data), we check listing's publicData
+    // Note: this might have changed over time
+    const unitTypeInListingPublicData = listing?.attributes?.publicData?.unitType;
+    return `line-item/${unitTypeInProtectedData || unitTypeInListingPublicData}`;
+  };
+
+  const lineItemUnitType = unitLineItem
+    ? unitLineItem.code
+    : isDataAvailable
+    ? formatLineItemUnitType(transaction, listing)
+    : null;
+
+  const timeZone = listing?.attributes?.availabilityPlan?.timezone;
+  const dateType = lineItemUnitType === LINE_ITEM_HOUR ? DATE_TYPE_DATETIME : DATE_TYPE_DATE;
+
+  const txBookingMaybe = booking?.id ? { booking, dateType, timeZone } : {};
+  const orderBreakdownMaybe = hasLineItems
+    ? {
+        orderBreakdown: (
+          <OrderBreakdown
+            className={css.breakdown}
+            userRole={transactionRole}
+            transaction={transaction}
+            {...txBookingMaybe}
+            currency={config.currency}
+            marketplaceName={config.marketplaceName}
+          />
+        ),
+      }
+    : {};
+
+  // The location of the booking can be shown if fuzzy location
+  const showBookingLocation =
+    isBookingProcess(stateData.processName) &&
+    process?.hasPassedState(process?.states?.ACCEPTED, transaction);
 
   // TransactionPanel is presentational component
   // that currently handles showing everything inside layout's main view area.
@@ -227,37 +417,76 @@ export const TransactionPageComponent = props => {
     <TransactionPanel
       className={detailsClassName}
       currentUser={currentUser}
-      transaction={currentTransaction}
-      fetchMessagesInProgress={fetchMessagesInProgress}
-      totalMessagePages={totalMessagePages}
-      oldestMessagePageFetched={oldestMessagePageFetched}
+      transactionId={transaction?.id}
+      listing={listing}
+      customer={customer}
+      provider={provider}
+      hasTransitions={txTransitions.length > 0}
+      protectedData={transaction?.attributes?.protectedData}
       messages={messages}
       initialMessageFailed={initialMessageFailed}
       savePaymentMethodFailed={savePaymentMethodFailed}
       fetchMessagesError={fetchMessagesError}
       sendMessageInProgress={sendMessageInProgress}
       sendMessageError={sendMessageError}
-      sendReviewInProgress={sendReviewInProgress}
-      sendReviewError={sendReviewError}
-      onFetchTimeSlots={onFetchTimeSlots}
-      onManageDisableScrolling={onManageDisableScrolling}
-      onShowMoreMessages={onShowMoreMessages}
       onSendMessage={onSendMessage}
-      onSendReview={onSendReview}
+      onOpenDisputeModal={onOpenDisputeModal}
+      stateData={stateData}
       transactionRole={transactionRole}
-      onAcceptSale={onAcceptSale}
-      onDeclineSale={onDeclineSale}
-      acceptInProgress={acceptInProgress}
-      declineInProgress={declineInProgress}
-      acceptSaleError={acceptSaleError}
-      declineSaleError={declineSaleError}
-      nextTransitions={processTransitions}
-      onSubmitBookingRequest={handleSubmitBookingRequest}
-      monthlyTimeSlots={monthlyTimeSlots}
-      onFetchTransactionLineItems={onFetchTransactionLineItems}
-      lineItems={lineItems}
-      fetchLineItemsInProgress={fetchLineItemsInProgress}
-      fetchLineItemsError={fetchLineItemsError}
+      showBookingLocation={showBookingLocation}
+      activityFeed={
+        <ActivityFeed
+          messages={messages}
+          transaction={transaction}
+          stateData={stateData}
+          intl={intl}
+          currentUser={currentUser}
+          hasOlderMessages={
+            totalMessagePages > oldestMessagePageFetched && !fetchMessagesInProgress
+          }
+          onOpenReviewModal={onOpenReviewModal}
+          onShowOlderMessages={() => onShowMoreMessages(transaction.id, config)}
+          fetchMessagesInProgress={fetchMessagesInProgress}
+        />
+      }
+      config={config}
+      {...orderBreakdownMaybe}
+      orderPanel={
+        <OrderPanel
+          className={css.orderPanel}
+          titleClassName={css.orderTitle}
+          listing={listing}
+          isOwnListing={isOwnSale}
+          lineItemUnitType={lineItemUnitType}
+          title={listingTitle}
+          titleDesktop={
+            <H4 as="h2" className={css.orderPanelTitle}>
+              {listingDeleted ? (
+                listingTitle
+              ) : (
+                <NamedLink
+                  name="ListingPage"
+                  params={{ id: listing.id?.uuid, slug: createSlug(listingTitle) }}
+                >
+                  {listingTitle}
+                </NamedLink>
+              )}
+            </H4>
+          }
+          author={provider}
+          onSubmit={handleSubmitOrderRequest}
+          onManageDisableScrolling={onManageDisableScrolling}
+          onFetchTimeSlots={onFetchTimeSlots}
+          monthlyTimeSlots={monthlyTimeSlots}
+          onFetchTransactionLineItems={onFetchTransactionLineItems}
+          lineItems={lineItems}
+          fetchLineItemsInProgress={fetchLineItemsInProgress}
+          fetchLineItemsError={fetchLineItemsError}
+          marketplaceCurrency={config.currency}
+          dayCountAvailableForBooking={config.stripe.dayCountAvailableForBooking}
+          marketplaceName={config.marketplaceName}
+        />
+      }
     />
   ) : (
     loadingOrFailedFetching
@@ -265,19 +494,40 @@ export const TransactionPageComponent = props => {
 
   return (
     <Page
-      title={intl.formatMessage({ id: 'TransactionPage.title' }, { title: listingTitle })}
+      title={intl.formatMessage({ id: 'TransactionPage.schemaTitle' }, { title: listingTitle })}
       scrollingDisabled={scrollingDisabled}
     >
-      <LayoutSingleColumn>
-        <LayoutWrapperTopbar>
-          <TopbarContainer />
-        </LayoutWrapperTopbar>
-        <LayoutWrapperMain>
-          <div className={css.root}>{panel}</div>
-        </LayoutWrapperMain>
-        <LayoutWrapperFooter className={css.footer}>
-          <Footer />
-        </LayoutWrapperFooter>
+      <LayoutSingleColumn topbar={<TopbarContainer />} footer={<Footer />}>
+        <div className={css.root}>{panel}</div>
+        <ReviewModal
+          id="ReviewOrderModal"
+          isOpen={isReviewModalOpen}
+          onCloseModal={() => setReviewModalOpen(false)}
+          onManageDisableScrolling={onManageDisableScrolling}
+          onSubmitReview={onSubmitReview}
+          revieweeName={otherUserDisplayName}
+          reviewSent={reviewSubmitted}
+          sendReviewInProgress={sendReviewInProgress}
+          sendReviewError={sendReviewError}
+          marketplaceName={config.marketplaceName}
+        />
+        {process?.transitions?.DISPUTE ? (
+          <DisputeModal
+            id="DisputeOrderModal"
+            isOpen={isDisputeModalOpen}
+            onCloseModal={() => setDisputeModalOpen(false)}
+            onManageDisableScrolling={onManageDisableScrolling}
+            onDisputeOrder={onDisputeOrder(
+              transaction?.id,
+              process.transitions.DISPUTE,
+              onTransition,
+              setDisputeSubmitted
+            )}
+            disputeSubmitted={disputeSubmitted}
+            disputeInProgress={transitionInProgress === process.transitions.DISPUTE}
+            disputeError={transitionError}
+          />
+        ) : null}
       </LayoutSingleColumn>
     </Page>
   );
@@ -286,14 +536,15 @@ export const TransactionPageComponent = props => {
 TransactionPageComponent.defaultProps = {
   currentUser: null,
   fetchTransactionError: null,
-  acceptSaleError: null,
-  declineSaleError: null,
+  transitionInProgress: null,
+  transitionError: null,
   transaction: null,
   fetchMessagesError: null,
   initialMessageFailedToTransaction: null,
   savePaymentMethodFailed: false,
   sendMessageError: null,
   monthlyTimeSlots: null,
+  fetchTimeSlotsError: null,
   lineItems: null,
   fetchLineItemsError: null,
 };
@@ -303,12 +554,9 @@ TransactionPageComponent.propTypes = {
   transactionRole: oneOf([PROVIDER, CUSTOMER]).isRequired,
   currentUser: propTypes.currentUser,
   fetchTransactionError: propTypes.error,
-  acceptSaleError: propTypes.error,
-  declineSaleError: propTypes.error,
-  acceptInProgress: bool.isRequired,
-  declineInProgress: bool.isRequired,
-  onAcceptSale: func.isRequired,
-  onDeclineSale: func.isRequired,
+  transitionInProgress: string,
+  transitionError: propTypes.error,
+  onTransition: func.isRequired,
   scrollingDisabled: bool.isRequired,
   transaction: propTypes.transaction,
   fetchMessagesError: propTypes.error,
@@ -355,10 +603,8 @@ TransactionPageComponent.propTypes = {
 const mapStateToProps = state => {
   const {
     fetchTransactionError,
-    acceptSaleError,
-    declineSaleError,
-    acceptInProgress,
-    declineInProgress,
+    transitionInProgress,
+    transitionError,
     transactionRef,
     fetchMessagesInProgress,
     fetchMessagesError,
@@ -385,10 +631,8 @@ const mapStateToProps = state => {
   return {
     currentUser,
     fetchTransactionError,
-    acceptSaleError,
-    declineSaleError,
-    acceptInProgress,
-    declineInProgress,
+    transitionInProgress,
+    transitionError,
     scrollingDisabled: isScrollingDisabled(state),
     transaction,
     fetchMessagesInProgress,
@@ -403,7 +647,7 @@ const mapStateToProps = state => {
     sendReviewInProgress,
     sendReviewError,
     monthlyTimeSlots,
-    processTransitions,
+    nextTransitions: processTransitions,
     lineItems,
     fetchLineItemsInProgress,
     fetchLineItemsError,
@@ -412,20 +656,20 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAcceptSale: transactionId => dispatch(acceptSale(transactionId)),
-    onDeclineSale: transactionId => dispatch(declineSale(transactionId)),
-    onShowMoreMessages: txId => dispatch(fetchMoreMessages(txId)),
-    onSendMessage: (txId, message) => dispatch(sendMessage(txId, message)),
+    onTransition: (txId, transitionName, params) =>
+      dispatch(makeTransition(txId, transitionName, params)),
+    onShowMoreMessages: (txId, config) => dispatch(fetchMoreMessages(txId, config)),
+    onSendMessage: (txId, message, config) => dispatch(sendMessage(txId, message, config)),
     onManageDisableScrolling: (componentId, disableScrolling) =>
       dispatch(manageDisableScrolling(componentId, disableScrolling)),
-    onSendReview: (role, tx, reviewRating, reviewContent) =>
-      dispatch(sendReview(role, tx, reviewRating, reviewContent)),
+    onSendReview: (tx, transitionOptions, params, config) =>
+      dispatch(sendReview(tx, transitionOptions, params, config)),
     callSetInitialValues: (setInitialValues, values) => dispatch(setInitialValues(values)),
     onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
+    onFetchTransactionLineItems: (orderData, listingId, isOwnListing) =>
+      dispatch(fetchTransactionLineItems(orderData, listingId, isOwnListing)),
     onFetchTimeSlots: (listingId, start, end, timeZone) =>
       dispatch(fetchTimeSlots(listingId, start, end, timeZone)),
-    onFetchTransactionLineItems: (bookingData, listingId, isOwnListing) =>
-      dispatch(fetchTransactionLineItems(bookingData, listingId, isOwnListing)),
   };
 };
 

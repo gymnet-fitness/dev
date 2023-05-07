@@ -1,22 +1,22 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
+import { arrayOf, bool, func, object, shape, string } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import routeConfiguration from '../../routeConfiguration';
+import { useHistory } from 'react-router-dom';
+
+import { useConfiguration } from '../../context/configurationContext';
+import { useRouteConfiguration } from '../../context/routeConfigurationContext';
+import { FormattedMessage, useIntl, intlShape } from '../../util/reactIntl';
+import { propTypes } from '../../util/types';
 import { createResourceLocatorString } from '../../util/routes';
-import { isScrollingDisabled } from '../../ducks/UI.duck';
-import {
-  Page,
-  LayoutSingleColumn,
-  LayoutWrapperTopbar,
-  LayoutWrapperMain,
-  LayoutWrapperFooter,
-  Footer,
-} from '../../components';
-import { LocationSearchForm } from '../../forms';
-import { TopbarContainer } from '../../containers';
+import { isMainSearchTypeKeywords } from '../../util/search';
+import { isScrollingDisabled } from '../../ducks/ui.duck';
+
+import { Heading, Page, Footer, LayoutSingleColumn } from '../../components';
+
+import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+
+import SearchForm from './SearchForm/SearchForm';
 
 import css from './NotFoundPage.module.css';
 
@@ -31,44 +31,46 @@ export class NotFoundPageComponent extends Component {
   }
 
   render() {
-    const { history, intl, scrollingDisabled } = this.props;
+    const {
+      history,
+      routeConfiguration,
+      marketplaceName,
+      isKeywordSearch,
+      intl,
+      scrollingDisabled,
+    } = this.props;
 
     const title = intl.formatMessage({
       id: 'NotFoundPage.title',
     });
 
     const handleSearchSubmit = values => {
-      const { search, selectedPlace } = values.location;
-      const { origin, bounds } = selectedPlace;
-      const searchParams = { address: search, origin, bounds };
-      history.push(
-        createResourceLocatorString('SearchPage', routeConfiguration(), {}, searchParams)
-      );
+      const { keywords, location } = values;
+      const { search, selectedPlace } = location || {};
+      const { origin, bounds } = selectedPlace || {};
+      const searchParams = keywords ? { keywords } : { address: search, origin, bounds };
+      history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
     };
 
     return (
       <Page title={title} scrollingDisabled={scrollingDisabled}>
-        <LayoutSingleColumn>
-          <LayoutWrapperTopbar>
-            <TopbarContainer />
-          </LayoutWrapperTopbar>
-          <LayoutWrapperMain>
-            <div className={css.root}>
-              <div className={css.content}>
-                <div className={css.number}>404</div>
-                <h1 className={css.heading}>
-                  <FormattedMessage id="NotFoundPage.heading" />
-                </h1>
-                <p className={css.description}>
-                  <FormattedMessage id="NotFoundPage.description" />
-                </p>
-                <LocationSearchForm className={css.searchForm} onSubmit={handleSearchSubmit} />
-              </div>
+        <LayoutSingleColumn topbar={<TopbarContainer />} footer={<Footer />}>
+          <div className={css.root}>
+            <div className={css.content}>
+              <div className={css.number}>404</div>
+              <Heading as="h1" rootClassName={css.heading}>
+                <FormattedMessage id="NotFoundPage.heading" />
+              </Heading>
+              <p className={css.description}>
+                <FormattedMessage id="NotFoundPage.description" values={{ marketplaceName }} />
+              </p>
+              <SearchForm
+                className={css.searchForm}
+                isKeywordSearch={isKeywordSearch}
+                onSubmit={handleSearchSubmit}
+              />
             </div>
-          </LayoutWrapperMain>
-          <LayoutWrapperFooter>
-            <Footer />
-          </LayoutWrapperFooter>
+          </div>
         </LayoutSingleColumn>
       </Page>
     );
@@ -79,21 +81,42 @@ NotFoundPageComponent.defaultProps = {
   staticContext: {},
 };
 
-const { bool, func, object, shape } = PropTypes;
-
 NotFoundPageComponent.propTypes = {
   scrollingDisabled: bool.isRequired,
+  marketplaceName: string.isRequired,
+  isKeywordSearch: bool.isRequired,
 
   // context object from StaticRouter, injected by the withRouter wrapper
   staticContext: object,
 
-  // from injectIntl
+  // from useIntl
   intl: intlShape.isRequired,
 
-  // from withRouter
+  // from useRouteConfiguration
+  routeConfiguration: arrayOf(propTypes.route).isRequired,
+
+  // from useHistory
   history: shape({
     push: func.isRequired,
   }).isRequired,
+};
+
+const EnhancedNotFoundPage = props => {
+  const routeConfiguration = useRouteConfiguration();
+  const config = useConfiguration();
+  const history = useHistory();
+  const intl = useIntl();
+
+  return (
+    <NotFoundPageComponent
+      routeConfiguration={routeConfiguration}
+      marketplaceName={config.marketplaceName}
+      isKeywordSearch={isMainSearchTypeKeywords(config)}
+      history={history}
+      intl={intl}
+      {...props}
+    />
+  );
 };
 
 const mapStateToProps = state => {
@@ -108,10 +131,6 @@ const mapStateToProps = state => {
 // lifecycle hook.
 //
 // See: https://github.com/ReactTraining/react-router/issues/4671
-const NotFoundPage = compose(
-  withRouter,
-  connect(mapStateToProps),
-  injectIntl
-)(NotFoundPageComponent);
+const NotFoundPage = compose(connect(mapStateToProps))(EnhancedNotFoundPage);
 
 export default NotFoundPage;

@@ -1,202 +1,241 @@
 import React from 'react';
-import { renderShallow, renderDeep } from '../../util/test-helpers';
-import {
-  fakeIntl,
-  createCurrentUser,
-  createUser,
-  createTransaction,
-  createOwnListing,
-  createBooking,
-} from '../../util/test-data';
-import { InboxPageComponent, InboxItem, txState } from './InboxPage';
-import { TRANSITION_CONFIRM_PAYMENT } from '../../util/transaction';
-import { LINE_ITEM_NIGHT } from '../../util/types';
+import '@testing-library/jest-dom';
+import Decimal from 'decimal.js';
 
+import { types as sdkTypes } from '../../util/sdkLoader';
+import { LINE_ITEM_ITEM, LINE_ITEM_PROVIDER_COMMISSION } from '../../util/types';
+import {
+  createUser,
+  createCurrentUser,
+  createListing,
+  fakeIntl,
+  createTransaction,
+} from '../../util/testData';
+import { renderWithProviders as render, testingLibrary } from '../../util/testHelpers';
+
+import {
+  TX_TRANSITION_ACTOR_CUSTOMER,
+  TX_TRANSITION_ACTOR_PROVIDER,
+  getProcess,
+} from '../../transactions/transaction';
+
+import { getStateData } from './InboxPage.stateData';
+import { InboxPageComponent, InboxItem } from './InboxPage';
+
+const { Money } = sdkTypes;
+const { screen, within } = testingLibrary;
 const noop = () => null;
 
+const transitions = getProcess('default-purchase')?.transitions;
+
 describe('InboxPage', () => {
-  it('matches snapshot', () => {
-    const provider = createUser('provider-user-id');
-    const customer = createUser('customer-user-id');
-    const currentUserProvider = createCurrentUser('provider-user-id');
-    const currentUserCustomer = createCurrentUser('customer-user-id');
+  const provider = createUser('provider-user-id');
+  const customer = createUser('customer-user-id');
+  const currentUserProvider = createCurrentUser('provider-user-id');
+  const currentUserCustomer = createCurrentUser('customer-user-id');
+  const listing = createListing('ItemX', {
+    publicData: {
+      listingType: 'sell-bikes',
+      transactionProcessAlias: 'default-purchase',
+      unitType: 'item',
+    },
+  });
 
-    const startBooking1 = new Date(Date.UTC(2017, 1, 15));
-    const endBooking1 = new Date(Date.UTC(2017, 1, 16));
+  const lineItems = [
+    {
+      code: LINE_ITEM_ITEM,
+      includeFor: ['customer', 'provider'],
+      quantity: new Decimal(1),
+      unitPrice: new Money(1000, 'USD'),
+      lineTotal: new Money(1000, 'USD'),
+      reversal: false,
+    },
+    {
+      code: LINE_ITEM_PROVIDER_COMMISSION,
+      includeFor: ['provider'],
+      unitPrice: new Money(100 * -1, 'USD'),
+      lineTotal: new Money(100 * -1, 'USD'),
+      reversal: false,
+    },
+  ];
 
-    const booking1 = createBooking('booking1', {
-      start: startBooking1,
-      end: endBooking1,
-      displayStart: startBooking1,
-      displayEnd: endBooking1,
+  const ordersProps = {
+    location: { search: '' },
+    history: {
+      push: () => console.log('HistoryPush called'),
+    },
+    params: {
+      tab: 'orders',
+    },
+    authInProgress: false,
+    currentUser: currentUserProvider,
+    currentUserHasListings: false,
+    isAuthenticated: false,
+    fetchInProgress: false,
+    onLogout: noop,
+    onManageDisableScrolling: noop,
+    transactions: [
+      createTransaction({
+        id: 'order-1',
+        lastTransition: transitions.CONFIRM_PAYMENT,
+        customer,
+        provider,
+        listing,
+        lastTransitionedAt: new Date(Date.UTC(2017, 0, 15)),
+        lineItems,
+      }),
+      createTransaction({
+        id: 'order-2',
+        lastTransition: transitions.CONFIRM_PAYMENT,
+        customer,
+        provider,
+        listing,
+        lastTransitionedAt: new Date(Date.UTC(2016, 0, 15)),
+        lineItems,
+      }),
+    ],
+    intl: fakeIntl,
+    scrollingDisabled: false,
+    sendVerificationEmailInProgress: false,
+    onResendVerificationEmail: noop,
+  };
+
+  const salesProps = {
+    location: { search: '' },
+    history: {
+      push: () => console.log('HistoryPush called'),
+    },
+    params: {
+      tab: 'sales',
+    },
+    authInProgress: false,
+    currentUser: currentUserCustomer,
+    currentUserHasListings: false,
+    isAuthenticated: false,
+    fetchInProgress: false,
+    onLogout: noop,
+    onManageDisableScrolling: noop,
+    transactions: [
+      createTransaction({
+        id: 'sale-1',
+        lastTransition: transitions.CONFIRM_PAYMENT,
+        customer,
+        provider,
+        listing,
+        lastTransitionedAt: new Date(Date.UTC(2017, 0, 15)),
+        lineItems,
+      }),
+      createTransaction({
+        id: 'sale-2',
+        lastTransition: transitions.CONFIRM_PAYMENT,
+        customer,
+        provider,
+        listing,
+        lastTransitionedAt: new Date(Date.UTC(2016, 0, 15)),
+        lineItems,
+      }),
+    ],
+    intl: fakeIntl,
+    scrollingDisabled: false,
+    sendVerificationEmailInProgress: false,
+    onResendVerificationEmail: noop,
+  };
+
+  test('InboxPageComponent has tabs and inbox items for orders', () => {
+    render(<InboxPageComponent {...ordersProps} />);
+
+    // Has links to orders and sales tabs
+    const ordersTabTitle = screen.getByRole('link', { name: 'InboxPage.ordersTabTitle' });
+    expect(ordersTabTitle).toBeInTheDocument();
+    expect(ordersTabTitle.getAttribute('href')).toContain('/inbox/orders');
+
+    const salesTabTitle = screen.getByRole('link', { name: 'InboxPage.salesTabTitle' });
+    expect(salesTabTitle).toBeInTheDocument();
+    expect(salesTabTitle.getAttribute('href')).toContain('/inbox/sales');
+
+    // Has 2 items
+    const items = screen.queryAllByRole('link', { name: /ItemX/i });
+    expect(items).toHaveLength(2);
+
+    const item1 = items[0];
+    expect(item1.getAttribute('href')).toContain('/order/order-1');
+    const status1 = within(item1).getByText('InboxPage.default-purchase.purchased.status');
+    expect(status1).toBeInTheDocument();
+
+    const item2 = items[1];
+    expect(item2.getAttribute('href')).toContain('/order/order-2');
+    const status2 = within(item2).getByText('InboxPage.default-purchase.purchased.status');
+    expect(status2).toBeInTheDocument();
+  });
+
+  // This is quite small component what comes to rendered HTML
+  // For now, we rely on snapshot-testing and checking quantity.
+  test('InboxItem matches snapshot of order', () => {
+    const stateDataOrder = getStateData({
+      transaction: ordersProps.transactions[0],
+      transactionRole: TX_TRANSITION_ACTOR_CUSTOMER,
     });
 
-    const startBooking2 = new Date(Date.UTC(2017, 2, 15));
-    const endBooking2 = new Date(Date.UTC(2017, 2, 16));
-
-    const booking2 = createBooking('booking2', {
-      start: startBooking2,
-      end: endBooking2,
-      displayStart: startBooking2,
-      displayEnd: endBooking2,
-    });
-
-    const ordersProps = {
-      unitType: LINE_ITEM_NIGHT,
-      location: { search: '' },
-      history: {
-        push: () => console.log('HistoryPush called'),
-      },
-      params: {
-        tab: 'orders',
-      },
-      authInProgress: false,
-      currentUser: currentUserProvider,
-      currentUserHasListings: false,
-      isAuthenticated: false,
-      fetchInProgress: false,
-      onLogout: noop,
-      onManageDisableScrolling: noop,
-      transactions: [
-        createTransaction({
-          id: 'order-1',
-          lastTransition: TRANSITION_CONFIRM_PAYMENT,
-          customer,
-          provider,
-          lastTransitionedAt: new Date(Date.UTC(2017, 0, 15)),
-          booking: booking1,
-        }),
-        createTransaction({
-          id: 'order-2',
-          lastTransition: TRANSITION_CONFIRM_PAYMENT,
-          customer,
-          provider,
-          lastTransitionedAt: new Date(Date.UTC(2016, 0, 15)),
-          booking: booking2,
-        }),
-      ],
-      intl: fakeIntl,
-      scrollingDisabled: false,
-      sendVerificationEmailInProgress: false,
-      onResendVerificationEmail: noop,
-    };
-
-    const ordersTree = renderShallow(<InboxPageComponent {...ordersProps} />);
-    expect(ordersTree).toMatchSnapshot();
-
-    const ordersPropsWithListing = {
-      unitType: LINE_ITEM_NIGHT,
-      location: { search: '' },
-      history: {
-        push: () => console.log('HistoryPush called'),
-      },
-      params: {
-        tab: 'orders',
-      },
-      authInProgress: false,
-      currentUser: currentUserProvider,
-      currentUserHasListings: true,
-      currentUserListing: createOwnListing('user-has-listing'),
-      isAuthenticated: false,
-      fetchInProgress: false,
-      onLogout: noop,
-      onManageDisableScrolling: noop,
-      transactions: [
-        createTransaction({
-          id: 'order-1',
-          lastTransition: TRANSITION_CONFIRM_PAYMENT,
-          customer,
-          provider,
-          lastTransitionedAt: new Date(Date.UTC(2017, 0, 15)),
-          booking: booking1,
-        }),
-        createTransaction({
-          id: 'order-2',
-          lastTransition: TRANSITION_CONFIRM_PAYMENT,
-          customer,
-          provider,
-          lastTransitionedAt: new Date(Date.UTC(2016, 0, 15)),
-          booking: booking2,
-        }),
-      ],
-      intl: fakeIntl,
-      scrollingDisabled: false,
-      sendVerificationEmailInProgress: false,
-      onResendVerificationEmail: noop,
-    };
-
-    const ordersTreeWithListing = renderShallow(<InboxPageComponent {...ordersPropsWithListing} />);
-    expect(ordersTreeWithListing).toMatchSnapshot();
-
-    const stateDataOrder = txState(fakeIntl, ordersProps.transactions[0], 'order');
-
-    // Deeply render one InboxItem
-    const orderItem = renderDeep(
+    const tree = render(
       <InboxItem
-        unitType={LINE_ITEM_NIGHT}
-        type="order"
         tx={ordersProps.transactions[0]}
+        transactionRole={TX_TRANSITION_ACTOR_CUSTOMER}
         intl={fakeIntl}
         stateData={stateDataOrder}
+        isBooking={false}
+        stockType="multipleItems"
       />
     );
-    expect(orderItem).toMatchSnapshot();
+    expect(tree.asFragment().firstChild).toMatchSnapshot();
+    expect(screen.getByText('InboxPage.quantity')).toBeInTheDocument();
+  });
 
-    const salesProps = {
-      unitType: LINE_ITEM_NIGHT,
-      location: { search: '' },
-      history: {
-        push: () => console.log('HistoryPush called'),
-      },
-      params: {
-        tab: 'sales',
-      },
-      authInProgress: false,
-      currentUser: currentUserCustomer,
-      currentUserHasListings: false,
-      isAuthenticated: false,
-      fetchInProgress: false,
-      onLogout: noop,
-      onManageDisableScrolling: noop,
-      transactions: [
-        createTransaction({
-          id: 'sale-1',
-          lastTransition: TRANSITION_CONFIRM_PAYMENT,
-          customer,
-          provider,
-          lastTransitionedAt: new Date(Date.UTC(2017, 0, 15)),
-          booking: booking1,
-        }),
-        createTransaction({
-          id: 'sale-2',
-          lastTransition: TRANSITION_CONFIRM_PAYMENT,
-          customer,
-          provider,
-          lastTransitionedAt: new Date(Date.UTC(2016, 0, 15)),
-          booking: booking2,
-        }),
-      ],
-      intl: fakeIntl,
-      scrollingDisabled: false,
-      sendVerificationEmailInProgress: false,
-      onResendVerificationEmail: noop,
-    };
+  test('InboxPageComponent has tabs and inbox items for sales', () => {
+    render(<InboxPageComponent {...salesProps} />);
 
-    const salesTree = renderShallow(<InboxPageComponent {...salesProps} />);
-    expect(salesTree).toMatchSnapshot();
+    // Has links to orders and sales tabs
+    const ordersTabTitle = screen.getByRole('link', { name: 'InboxPage.ordersTabTitle' });
+    expect(ordersTabTitle).toBeInTheDocument();
+    expect(ordersTabTitle.getAttribute('href')).toContain('/inbox/orders');
 
-    const stateDataSale = txState(fakeIntl, salesProps.transactions[0], 'sale');
+    const salesTabTitle = screen.getByRole('link', { name: 'InboxPage.salesTabTitle' });
+    expect(salesTabTitle).toBeInTheDocument();
+    expect(salesTabTitle.getAttribute('href')).toContain('/inbox/sales');
 
-    // Deeply render one InboxItem
-    const saleItem = renderDeep(
+    // Has 2 items
+    const items = screen.queryAllByRole('link', { name: /ItemX/i });
+    expect(items).toHaveLength(2);
+
+    const item1 = items[0];
+    expect(item1.getAttribute('href')).toContain('/sale/sale-1');
+    const status1 = within(item1).getByText('InboxPage.default-purchase.purchased.status');
+    expect(status1).toBeInTheDocument();
+
+    const item2 = items[1];
+    expect(item2.getAttribute('href')).toContain('/sale/sale-2');
+    const status2 = within(item2).getByText('InboxPage.default-purchase.purchased.status');
+    expect(status2).toBeInTheDocument();
+  });
+
+  // This is quite small component what comes to rendered HTML
+  // For now, we rely on snapshot-testing and checking quantity.
+  test('InboxItem matches snapshot of sales', () => {
+    const stateDataOrder = getStateData({
+      transaction: salesProps.transactions[0],
+      transactionRole: TX_TRANSITION_ACTOR_PROVIDER,
+    });
+
+    const tree = render(
       <InboxItem
-        unitType={LINE_ITEM_NIGHT}
-        type="sale"
         tx={salesProps.transactions[0]}
+        transactionRole={TX_TRANSITION_ACTOR_PROVIDER}
         intl={fakeIntl}
-        stateData={stateDataSale}
+        stateData={stateDataOrder}
+        isBooking={false}
+        stockType="oneItem"
       />
     );
-    expect(saleItem).toMatchSnapshot();
+    expect(tree.asFragment().firstChild).toMatchSnapshot();
+    expect(screen.queryByText('InboxPage.quantity')).not.toBeInTheDocument();
   });
 });

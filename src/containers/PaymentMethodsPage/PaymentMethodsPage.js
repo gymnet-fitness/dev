@@ -2,25 +2,27 @@ import React, { useState } from 'react';
 import { bool, func, object } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+
 import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import { ensureCurrentUser, ensureStripeCustomer, ensurePaymentMethodCard } from '../../util/data';
 import { propTypes } from '../../util/types';
 import { savePaymentMethod, deletePaymentMethod } from '../../ducks/paymentMethods.duck';
 import { handleCardSetup } from '../../ducks/stripe.duck';
-import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/UI.duck';
+import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
+
 import {
+  H3,
   SavedCardDetails,
-  LayoutSideNavigation,
-  LayoutWrapperMain,
-  LayoutWrapperAccountSettingsSideNav,
-  LayoutWrapperTopbar,
-  LayoutWrapperFooter,
   Footer,
   Page,
   UserNav,
+  LayoutSideNavigation,
 } from '../../components';
-import { TopbarContainer } from '../../containers';
-import { PaymentMethodsForm } from '../../forms';
+
+import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+
+import PaymentMethodsForm from './PaymentMethodsForm/PaymentMethodsForm';
+
 import { createStripeSetupIntent, stripeCustomer } from './PaymentMethodsPage.duck.js';
 
 import css from './PaymentMethodsPage.module.css';
@@ -146,54 +148,55 @@ const PaymentMethodsPageComponent = props => {
   const showCardDetails = !!hasDefaultPaymentMethod;
   return (
     <Page title={title} scrollingDisabled={scrollingDisabled}>
-      <LayoutSideNavigation>
-        <LayoutWrapperTopbar>
-          <TopbarContainer
-            currentPage="PaymentMethodsPage"
-            desktopClassName={css.desktopTopbar}
-            mobileClassName={css.mobileTopbar}
-          />
-          <UserNav selectedPageName="PaymentMethodsPage" />
-        </LayoutWrapperTopbar>
-        <LayoutWrapperAccountSettingsSideNav currentTab="PaymentMethodsPage" />
-        <LayoutWrapperMain>
-          <div className={css.content}>
-            <h1 className={css.title}>
-              <FormattedMessage id="PaymentMethodsPage.heading" />
-            </h1>
-            {!stripeCustomerFetched ? null : (
-              <>
-                {showCardDetails ? (
-                  <SavedCardDetails
-                    card={card}
-                    onManageDisableScrolling={onManageDisableScrolling}
-                    onChange={setCardState}
-                    onDeleteCard={handleRemovePaymentMethod}
-                    deletePaymentMethodInProgress={deletePaymentMethodInProgress}
-                  />
-                ) : null}
-                {showForm ? (
-                  <PaymentMethodsForm
-                    className={css.paymentForm}
-                    formId="PaymentMethodsForm"
-                    initialValues={initalValuesForStripePayment}
-                    onSubmit={handleSubmit}
-                    handleRemovePaymentMethod={handleRemovePaymentMethod}
-                    hasDefaultPaymentMethod={hasDefaultPaymentMethod}
-                    addPaymentMethodError={addPaymentMethodError}
-                    deletePaymentMethodError={deletePaymentMethodError}
-                    createStripeCustomerError={createStripeCustomerError}
-                    handleCardSetupError={handleCardSetupError}
-                    inProgress={isSubmitting}
-                  />
-                ) : null}
-              </>
-            )}
-          </div>
-        </LayoutWrapperMain>
-        <LayoutWrapperFooter>
-          <Footer />
-        </LayoutWrapperFooter>
+      <LayoutSideNavigation
+        topbar={
+          <>
+            <TopbarContainer
+              currentPage="PaymentMethodsPage"
+              desktopClassName={css.desktopTopbar}
+              mobileClassName={css.mobileTopbar}
+            />
+            <UserNav currentPage="PaymentMethodsPage" />
+          </>
+        }
+        sideNav={null}
+        useAccountSettingsNav
+        currentPage="PaymentMethodsPage"
+        footer={<Footer />}
+      >
+        <div className={css.content}>
+          <H3 as="h1">
+            <FormattedMessage id="PaymentMethodsPage.heading" />
+          </H3>
+          {!stripeCustomerFetched ? null : (
+            <>
+              {showCardDetails ? (
+                <SavedCardDetails
+                  card={card}
+                  onManageDisableScrolling={onManageDisableScrolling}
+                  onChange={setCardState}
+                  onDeleteCard={handleRemovePaymentMethod}
+                  deletePaymentMethodInProgress={deletePaymentMethodInProgress}
+                />
+              ) : null}
+              {showForm ? (
+                <PaymentMethodsForm
+                  className={css.paymentForm}
+                  formId="PaymentMethodsForm"
+                  initialValues={initalValuesForStripePayment}
+                  onSubmit={handleSubmit}
+                  handleRemovePaymentMethod={handleRemovePaymentMethod}
+                  hasDefaultPaymentMethod={hasDefaultPaymentMethod}
+                  addPaymentMethodError={addPaymentMethodError}
+                  deletePaymentMethodError={deletePaymentMethodError}
+                  createStripeCustomerError={createStripeCustomerError}
+                  handleCardSetupError={handleCardSetupError}
+                  inProgress={isSubmitting}
+                />
+              ) : null}
+            </>
+          )}
+        </div>
       </LayoutSideNavigation>
     </Page>
   );

@@ -5,8 +5,8 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { propTypes } from '../../util/types';
 import { sendVerificationEmail, hasCurrentUserErrors } from '../../ducks/user.duck';
-import { logout, authenticationInProgress } from '../../ducks/Auth.duck';
-import { manageDisableScrolling } from '../../ducks/UI.duck';
+import { logout, authenticationInProgress } from '../../ducks/auth.duck';
+import { manageDisableScrolling } from '../../ducks/ui.duck';
 import { Topbar } from '../../components';
 
 export const TopbarContainerComponent = props => {
@@ -16,8 +16,6 @@ export const TopbarContainerComponent = props => {
     currentSearchParams,
     currentUser,
     currentUserHasListings,
-    currentUserListing,
-    currentUserListingFetched,
     currentUserHasOrders,
     history,
     isAuthenticated,
@@ -40,8 +38,6 @@ export const TopbarContainerComponent = props => {
       currentSearchParams={currentSearchParams}
       currentUser={currentUser}
       currentUserHasListings={currentUserHasListings}
-      currentUserListing={currentUserListing}
-      currentUserListingFetched={currentUserListingFetched}
       currentUserHasOrders={currentUserHasOrders}
       history={history}
       isAuthenticated={isAuthenticated}
@@ -66,7 +62,6 @@ TopbarContainerComponent.defaultProps = {
   currentUserHasOrders: null,
   notificationCount: 0,
   sendVerificationEmailError: null,
-  currentUserListing: null,
   authScopes: null,
 };
 
@@ -76,8 +71,6 @@ TopbarContainerComponent.propTypes = {
   currentSearchParams: object,
   currentUser: propTypes.currentUser,
   currentUserHasListings: bool.isRequired,
-  currentUserListingFetched: bool.isRequired,
-  currentUserListing: propTypes.ownListing,
   currentUserHasOrders: bool,
   isAuthenticated: bool.isRequired,
   authScopes: array,
@@ -98,13 +91,11 @@ TopbarContainerComponent.propTypes = {
 
 const mapStateToProps = state => {
   // Topbar needs isAuthenticated
-  const { isAuthenticated, logoutError, authScopes } = state.Auth;
+  const { isAuthenticated, logoutError, authScopes } = state.auth;
   // Topbar needs user info.
   const {
     currentUser,
     currentUserHasListings,
-    currentUserListing,
-    currentUserListingFetched,
     currentUserHasOrders,
     currentUserNotificationCount: notificationCount,
     sendVerificationEmailInProgress,
@@ -115,8 +106,6 @@ const mapStateToProps = state => {
     authInProgress: authenticationInProgress(state),
     currentUser,
     currentUserHasListings,
-    currentUserListing,
-    currentUserListingFetched,
     currentUserHasOrders,
     notificationCount,
     isAuthenticated,

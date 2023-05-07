@@ -28,24 +28,25 @@ import { loadableReady } from '@loadable/component';
 import './styles/marketplaceDefaults.css';
 
 // Configs and store setup
-import config from './config';
+import appSettings from './config/settings';
+import defaultConfig from './config/configDefault';
 import { LoggingAnalyticsHandler, GoogleAnalyticsHandler } from './analytics/handlers';
 import configureStore from './store';
 
 // Utils
 import { createInstance, types as sdkTypes } from './util/sdkLoader';
+import { mergeConfig } from './util/configHelpers';
 import { matchPathname } from './util/routes';
-import * as sample from './util/sample';
 import * as apiUtils from './util/api';
 import * as log from './util/log';
 
 // Import relevant global duck files
-import { authInfo } from './ducks/Auth.duck';
+import { authInfo } from './ducks/auth.duck';
 import { fetchAppAssets } from './ducks/hostedAssets.duck';
 import { fetchCurrentUser } from './ducks/user.duck';
 
 // Route config
-import routeConfiguration from './routeConfiguration';
+import routeConfiguration from './routing/routeConfiguration';
 // App it self
 import { ClientApp, renderApp } from './app';
 
@@ -55,7 +56,7 @@ const render = (store, shouldHydrate) => {
   // when auth information is present.
   const state = store.getState();
   const cdnAssetsVersion = state.hostedAssets.version;
-  const authInfoLoaded = state.Auth.authInfoLoaded;
+  const authInfoLoaded = state.auth.authInfoLoaded;
   const info = authInfoLoaded ? Promise.resolve({}) : store.dispatch(authInfo());
   info
     .then(() => {
@@ -64,19 +65,20 @@ const render = (store, shouldHydrate) => {
       // and fetch hosted assets in parallel before initializing the ClientApp
       return Promise.all([
         loadableReady(),
-        store.dispatch(fetchAppAssets(config.appCdnAssets, cdnAssetsVersion)),
+        store.dispatch(fetchAppAssets(defaultConfig.appCdnAssets, cdnAssetsVersion)),
       ]);
     })
     .then(([_, fetchedAssets]) => {
       const translations = fetchedAssets?.translations?.data || {};
+      const hostedConfig = fetchedAssets?.config?.data || {};
       if (shouldHydrate) {
         ReactDOM.hydrate(
-          <ClientApp store={store} hostedTranslations={translations} />,
+          <ClientApp store={store} hostedTranslations={translations} hostedConfig={hostedConfig} />,
           document.getElementById('root')
         );
       } else {
         ReactDOM.render(
-          <ClientApp store={store} hostedTranslations={translations} />,
+          <ClientApp store={store} hostedTranslations={translations} hostedConfig={hostedConfig} />,
           document.getElementById('root')
         );
       }
@@ -90,29 +92,20 @@ const setupAnalyticsHandlers = () => {
   let handlers = [];
 
   // Log analytics page views and events in dev mode
-  if (config.dev) {
+  if (appSettings.dev) {
     handlers.push(new LoggingAnalyticsHandler());
   }
 
   // Add Google Analytics 4 (GA4) handler if tracker ID is found
   if (process.env.REACT_APP_GOOGLE_ANALYTICS_ID) {
-    if (window?.gtag) {
-      handlers.push(new GoogleAnalyticsHandler(window.gtag));
-    } else {
-      // Some adblockers (e.g. Ghostery) might block the Google Analytics integration.
-      console.warn(
-        'Google Analytics (window.gtag) is not available. It might be that your adblocker is blocking it.'
-      );
-    }
     if (process.env.REACT_APP_GOOGLE_ANALYTICS_ID.indexOf('G-') !== 0) {
       console.warn(
         'Google Analytics 4 (GA4) should have measurement id that starts with "G-" prefix'
       );
+    } else {
+      handlers.push(new GoogleAnalyticsHandler());
     }
   }
-  
-  
-  
 
   return handlers;
 };
@@ -122,18 +115,18 @@ if (typeof window !== 'undefined') {
   // set up logger with Sentry DSN client key and environment
   log.setup();
 
-  const baseUrl = config.sdk.baseUrl ? { baseUrl: config.sdk.baseUrl } : {};
-  const assetCdnBaseUrl = config.sdk.assetCdnBaseUrl
-    ? { assetCdnBaseUrl: config.sdk.assetCdnBaseUrl }
+  const baseUrl = appSettings.sdk.baseUrl ? { baseUrl: appSettings.sdk.baseUrl } : {};
+  const assetCdnBaseUrl = appSettings.sdk.assetCdnBaseUrl
+    ? { assetCdnBaseUrl: appSettings.sdk.assetCdnBaseUrl }
     : {};
 
   // eslint-disable-next-line no-underscore-dangle
   const preloadedState = window.__PRELOADED_STATE__ || '{}';
   const initialState = JSON.parse(preloadedState, sdkTypes.reviver);
   const sdk = createInstance({
-    transitVerbose: config.sdk.transitVerbose,
-    clientId: config.sdk.clientId,
-    secure: config.usingSSL,
+    transitVerbose: appSettings.sdk.transitVerbose,
+    clientId: appSettings.sdk.clientId,
+    secure: appSettings.usingSSL,
     typeHandlers: apiUtils.typeHandlers,
     ...baseUrl,
     ...assetCdnBaseUrl,
@@ -144,15 +137,14 @@ if (typeof window !== 'undefined') {
   require('./util/polyfills');
   render(store, !!window.__PRELOADED_STATE__);
 
-  if (config.dev) {
+  if (appSettings.dev) {
     // Expose stuff for the browser REPL
     window.app = {
-      config,
+      appSettings,
+      defaultConfig,
       sdk,
       sdkTypes,
       store,
-      sample,
-      routeConfiguration: routeConfiguration(),
     };
   }
 }
@@ -177,4 +169,11 @@ export default renderApp;
 // exporting matchPathname and configureStore for server side rendering.
 // matchPathname helps to figure out which route is called and if it has preloading needs
 // configureStore is used for creating initial store state for Redux after preloading
-export { matchPathname, configureStore, routeConfiguration, config, fetchAppAssets };
+export {
+  matchPathname,
+  configureStore,
+  routeConfiguration,
+  defaultConfig,
+  mergeConfig,
+  fetchAppAssets,
+};

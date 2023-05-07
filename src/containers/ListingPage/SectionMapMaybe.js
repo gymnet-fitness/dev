@@ -4,8 +4,7 @@ import { FormattedMessage } from '../../util/reactIntl';
 import classNames from 'classnames';
 import { propTypes } from '../../util/types';
 import { obfuscatedCoordinates } from '../../util/maps';
-import { Map } from '../../components';
-import config from '../../config';
+import { Heading, Map } from '../../components';
 
 import css from './ListingPage.module.css';
 
@@ -16,7 +15,7 @@ class SectionMapMaybe extends Component {
   }
 
   render() {
-    const { className, rootClassName, geolocation, publicData, listingId } = this.props;
+    const { className, rootClassName, geolocation, publicData, listingId, mapsConfig } = this.props;
 
     if (!geolocation) {
       return null;
@@ -26,16 +25,16 @@ class SectionMapMaybe extends Component {
     const classes = classNames(rootClassName || css.sectionMap, className);
     const cacheKey = listingId ? `${listingId.uuid}_${geolocation.lat}_${geolocation.lng}` : null;
 
-    const mapProps = config.maps.fuzzy.enabled
-      ? { obfuscatedCenter: obfuscatedCoordinates(geolocation, cacheKey) }
+    const mapProps = mapsConfig.fuzzy.enabled
+      ? { obfuscatedCenter: obfuscatedCoordinates(geolocation, mapsConfig.fuzzy.offset, cacheKey) }
       : { address, center: geolocation };
     const map = <Map {...mapProps} useStaticMap={this.state.isStatic} />;
 
     return (
       <div className={classes}>
-        <h2 className={css.locationTitle}>
+        <Heading as="h2" rootClassName={css.sectionHeadingWithExtraMargin}>
           <FormattedMessage id="ListingPage.locationTitle" />
-        </h2>
+        </Heading>
         {this.state.isStatic ? (
           <button
             className={css.map}

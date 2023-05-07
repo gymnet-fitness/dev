@@ -3,23 +3,25 @@ import { bool, func, shape, string } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+
+import { useConfiguration } from '../../context/configurationContext';
 import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
-import { verify } from '../../ducks/EmailVerification.duck';
-import { isScrollingDisabled } from '../../ducks/UI.duck';
 import { parse } from '../../util/urlHelpers';
 import { ensureCurrentUser } from '../../util/data';
+import { verify } from '../../ducks/emailVerification.duck';
+import { isScrollingDisabled } from '../../ducks/ui.duck';
 import {
   Page,
-  LayoutSingleColumn,
-  LayoutWrapperTopbar,
-  LayoutWrapperMain,
-  LayoutWrapperFooter,
+  ResponsiveBackgroundImageContainer,
   Footer,
   NamedRedirect,
+  LayoutSingleColumn,
 } from '../../components';
-import { EmailVerificationForm } from '../../forms';
-import { TopbarContainer } from '../../containers';
+
+import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+
+import EmailVerificationForm from './EmailVerificationForm/EmailVerificationForm';
 
 import css from './EmailVerificationPage.module.css';
 
@@ -46,6 +48,7 @@ const parseVerificationToken = search => {
 };
 
 export const EmailVerificationPageComponent = props => {
+  const config = useConfiguration();
   const {
     currentUser,
     intl,
@@ -56,9 +59,6 @@ export const EmailVerificationPageComponent = props => {
     verificationError,
     location,
   } = props;
-  const title = intl.formatMessage({
-    id: 'EmailVerificationPage.title',
-  });
 
   const initialValues = {
     verificationToken: parseVerificationToken(location ? location.search : null),
@@ -73,31 +73,40 @@ export const EmailVerificationPageComponent = props => {
   }
 
   return (
-    <Page title={title} scrollingDisabled={scrollingDisabled} referrer="origin">
-      <LayoutSingleColumn>
-        <LayoutWrapperTopbar>
-          <TopbarContainer />
-        </LayoutWrapperTopbar>
-        <LayoutWrapperMain className={css.layoutWrapperMain}>
-          <div className={css.root}>
-            <div className={css.content}>
-              {user.id ? (
-                <EmailVerificationForm
-                  initialValues={initialValues}
-                  onSubmit={submitVerification}
-                  currentUser={user}
-                  inProgress={emailVerificationInProgress}
-                  verificationError={verificationError}
-                />
-              ) : (
-                <FormattedMessage id="EmailVerificationPage.loadingUserInformation" />
-              )}
-            </div>
+    <Page
+      title={intl.formatMessage({
+        id: 'EmailVerificationPage.title',
+      })}
+      scrollingDisabled={scrollingDisabled}
+      referrer="origin"
+    >
+      <LayoutSingleColumn
+        mainColumnClassName={css.layoutWrapperMain}
+        topbar={<TopbarContainer />}
+        footer={<Footer />}
+      >
+        <ResponsiveBackgroundImageContainer
+          className={css.root}
+          childrenWrapperClassName={css.contentContainer}
+          as="section"
+          image={config.branding.brandImageURL}
+          sizes="100%"
+          useOverlay
+        >
+          <div className={css.content}>
+            {user.id ? (
+              <EmailVerificationForm
+                initialValues={initialValues}
+                onSubmit={submitVerification}
+                currentUser={user}
+                inProgress={emailVerificationInProgress}
+                verificationError={verificationError}
+              />
+            ) : (
+              <FormattedMessage id="EmailVerificationPage.loadingUserInformation" />
+            )}
           </div>
-        </LayoutWrapperMain>
-        <LayoutWrapperFooter>
-          <Footer />
-        </LayoutWrapperFooter>
+        </ResponsiveBackgroundImageContainer>
       </LayoutSingleColumn>
     </Page>
   );
@@ -127,7 +136,7 @@ EmailVerificationPageComponent.propTypes = {
 
 const mapStateToProps = state => {
   const { currentUser } = state.user;
-  const { isVerified, verificationError, verificationInProgress } = state.EmailVerification;
+  const { isVerified, verificationError, verificationInProgress } = state.emailVerification;
   return {
     isVerified,
     verificationError,

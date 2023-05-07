@@ -2,21 +2,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+
 import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
-import { isScrollingDisabled } from '../../ducks/UI.duck';
-import {
-  ManageListingCard,
-  Page,
-  PaginationLinks,
-  UserNav,
-  LayoutSingleColumn,
-  LayoutWrapperTopbar,
-  LayoutWrapperMain,
-  LayoutWrapperFooter,
-  Footer,
-} from '../../components';
-import { TopbarContainer } from '../../containers';
+import { isScrollingDisabled } from '../../ducks/ui.duck';
+
+import { H3, Page, PaginationLinks, UserNav, Footer, LayoutSingleColumn } from '../../components';
+
+import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+
+import ManageListingCard from './ManageListingCard/ManageListingCard';
 
 import { closeListing, openListing, getOwnListingsById } from './ManageListingsPage.duck';
 import css from './ManageListingsPage.module.css';
@@ -54,32 +49,36 @@ export class ManageListingsPageComponent extends Component {
     const listingsAreLoaded = !queryInProgress && hasPaginationInfo;
 
     const loadingResults = (
-      <h2>
-        <FormattedMessage id="ManageListingsPage.loadingOwnListings" />
-      </h2>
+      <div className={css.messagePanel}>
+        <H3 as="h2" className={css.heading}>
+          <FormattedMessage id="ManageListingsPage.loadingOwnListings" />
+        </H3>
+      </div>
     );
 
     const queryError = (
-      <h2 className={css.error}>
-        <FormattedMessage id="ManageListingsPage.queryError" />
-      </h2>
+      <div className={css.messagePanel}>
+        <H3 as="h2" className={css.heading}>
+          <FormattedMessage id="ManageListingsPage.queryError" />
+        </H3>
+      </div>
     );
 
     const noResults =
       listingsAreLoaded && pagination.totalItems === 0 ? (
-        <h1 className={css.title}>
+        <H3 as="h1" className={css.heading}>
           <FormattedMessage id="ManageListingsPage.noResults" />
-        </h1>
+        </H3>
       ) : null;
 
     const heading =
       listingsAreLoaded && pagination.totalItems > 0 ? (
-        <h1 className={css.title}>
+        <H3 as="h1" className={css.heading}>
           <FormattedMessage
             id="ManageListingsPage.youHaveListings"
             values={{ count: pagination.totalItems }}
           />
-        </h1>
+        </H3>
       ) : (
         noResults
       );
@@ -111,39 +110,38 @@ export class ManageListingsPageComponent extends Component {
 
     return (
       <Page title={title} scrollingDisabled={scrollingDisabled}>
-        <LayoutSingleColumn>
-          <LayoutWrapperTopbar>
-            <TopbarContainer currentPage="ManageListingsPage" />
-            <UserNav selectedPageName="ManageListingsPage" />
-          </LayoutWrapperTopbar>
-          <LayoutWrapperMain>
-            {queryInProgress ? loadingResults : null}
-            {queryListingsError ? queryError : null}
-            <div className={css.listingPanel}>
-              {heading}
-              <div className={css.listingCards}>
-                {listings.map(l => (
-                  <ManageListingCard
-                    className={css.listingCard}
-                    key={l.id.uuid}
-                    listing={l}
-                    isMenuOpen={!!listingMenuOpen && listingMenuOpen.id.uuid === l.id.uuid}
-                    actionsInProgressListingId={openingListing || closingListing}
-                    onToggleMenu={this.onToggleMenu}
-                    onCloseListing={onCloseListing}
-                    onOpenListing={onOpenListing}
-                    hasOpeningError={openingErrorListingId.uuid === l.id.uuid}
-                    hasClosingError={closingErrorListingId.uuid === l.id.uuid}
-                    renderSizes={renderSizes}
-                  />
-                ))}
-              </div>
-              {paginationLinks}
+        <LayoutSingleColumn
+          topbar={
+            <>
+              <TopbarContainer currentPage="ManageListingsPage" />
+              <UserNav currentPage="ManageListingsPage" />
+            </>
+          }
+          footer={<Footer />}
+        >
+          {queryInProgress ? loadingResults : null}
+          {queryListingsError ? queryError : null}
+          <div className={css.listingPanel}>
+            {heading}
+            <div className={css.listingCards}>
+              {listings.map(l => (
+                <ManageListingCard
+                  className={css.listingCard}
+                  key={l.id.uuid}
+                  listing={l}
+                  isMenuOpen={!!listingMenuOpen && listingMenuOpen.id.uuid === l.id.uuid}
+                  actionsInProgressListingId={openingListing || closingListing}
+                  onToggleMenu={this.onToggleMenu}
+                  onCloseListing={onCloseListing}
+                  onOpenListing={onOpenListing}
+                  hasOpeningError={openingErrorListingId.uuid === l.id.uuid}
+                  hasClosingError={closingErrorListingId.uuid === l.id.uuid}
+                  renderSizes={renderSizes}
+                />
+              ))}
             </div>
-          </LayoutWrapperMain>
-          <LayoutWrapperFooter>
-            <Footer />
-          </LayoutWrapperFooter>
+            {paginationLinks}
+          </div>
         </LayoutSingleColumn>
       </Page>
     );

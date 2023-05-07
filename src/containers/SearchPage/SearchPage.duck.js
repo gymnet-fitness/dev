@@ -1,10 +1,17 @@
-import unionWith from 'lodash/unionWith';
 import { storableError } from '../../util/errors';
-import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { convertUnitToSubUnit, unitDivisor } from '../../util/currency';
-import { formatDateStringToTz, getExclusiveEndDateWithTz } from '../../util/dates';
+import {
+  parseDateFromISO8601,
+  getExclusiveEndDate,
+  addTime,
+  subtractTime,
+  daysBetween,
+  getStartOf,
+} from '../../util/dates';
+import { createImageVariantConfig } from '../../util/sdkLoader';
+import { isOriginInUse, isStockInUse } from '../../util/search';
 import { parse } from '../../util/urlHelpers';
-import config from '../../config';
+import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 
 // Pagination page size might need to be dynamic on responsive page layouts
 // Current design has max 3 columns 12 is divisible by 2 and 3
@@ -31,8 +38,6 @@ const initialState = {
   searchInProgress: false,
   searchListingsError: null,
   currentPageResultIds: [],
-  searchMapListingIds: [],
-  searchMapListingsError: null,
 };
 
 const resultIds = data => data.data.map(l => l.id);
@@ -59,27 +64,6 @@ const listingPageReducer = (state = initialState, action = {}) => {
       // eslint-disable-next-line no-console
       console.error(payload);
       return { ...state, searchInProgress: false, searchListingsError: payload };
-
-    case SEARCH_MAP_LISTINGS_REQUEST:
-      return {
-        ...state,
-        searchMapListingsError: null,
-      };
-    case SEARCH_MAP_LISTINGS_SUCCESS: {
-      const searchMapListingIds = unionWith(
-        state.searchMapListingIds,
-        resultIds(payload.data),
-        (id1, id2) => id1.uuid === id2.uuid
-      );
-      return {
-        ...state,
-        searchMapListingIds,
-      };
-    }
-    case SEARCH_MAP_LISTINGS_ERROR:
-      // eslint-disable-next-line no-console
-      console.error(payload);
-      return { ...state, searchMapListingsError: payload };
 
     case SEARCH_MAP_SET_ACTIVE_LISTING:
       return {
@@ -111,25 +95,30 @@ export const searchListingsError = e => ({
   payload: e,
 });
 
-export const searchMapListingsRequest = () => ({ type: SEARCH_MAP_LISTINGS_REQUEST });
-
-export const searchMapListingsSuccess = response => ({
-  type: SEARCH_MAP_LISTINGS_SUCCESS,
-  payload: { data: response.data },
-});
-
-export const searchMapListingsError = e => ({
-  type: SEARCH_MAP_LISTINGS_ERROR,
-  error: true,
-  payload: e,
-});
-
-export const searchListings = searchParams => (dispatch, getState, sdk) => {
+export const searchListings = (searchParams, config) => (dispatch, getState, sdk) => {
   dispatch(searchListingsRequest(searchParams));
 
+  // SearchPage can enforce listing query to only those listings with valid listingType
+  // NOTE: this only works if you have set 'enum' type search schema to listing's public data fields
+  //       - listingType
+  //       Same setup could be expanded to 2 other extended data fields:
+  //       - transactionProcessAlias
+  //       - unitType
+  //       ...and then turned enforceValidListingType config to true in configListing.js
+  // Read More:
+  // https://www.sharetribe.com/docs/how-to/manage-search-schemas-with-flex-cli/#adding-listing-search-schemas
+  const searchValidListingTypes = listingTypes => {
+    return config.listing.enforceValidListingType
+      ? {
+          pub_listingType: listingTypes.map(l => l.listingType),
+          // pub_transactionProcessAlias: listingTypes.map(l => l.transactionType.alias),
+          // pub_unitType: listingTypes.map(l => l.transactionType.unitType),
+        }
+      : {};
+  };
+
   const priceSearchParams = priceParam => {
-    const inSubunits = value =>
-      convertUnitToSubUnit(value, unitDivisor(config.currencyConfig.currency));
+    const inSubunits = value => convertUnitToSubUnit(value, unitDivisor(config.currency));
     const values = priceParam ? priceParam.split(',') : [];
     return priceParam && values.length === 2
       ? {
@@ -138,60 +127,86 @@ export const searchListings = searchParams => (dispatch, getState, sdk) => {
       : {};
   };
 
-  const availabilityParams = (datesParam, minDurationParam) => {
-    const dateValues = datesParam ? datesParam.split(',') : [];
-    const hasDateValues = datesParam && dateValues.length === 2;
-    const startDate = hasDateValues ? dateValues[0] : null;
-    const endDate = hasDateValues ? dateValues[1] : null;
+  const datesSearchParams = datesParam => {
+    const searchTZ = 'Etc/UTC';
+    const datesFilter = config.search.defaultFilters.find(f => f.key === 'dates');
+    const values = datesParam ? datesParam.split(',') : [];
+    const hasValues = datesFilter && datesParam && values.length === 2;
+    const { dateRangeMode, availability } = datesFilter || {};
+    const isNightlyMode = dateRangeMode === 'night';
+    const isEntireRangeAvailable = availability === 'time-full';
 
-    const minDurationMaybe =
-      minDurationParam && Number.isInteger(minDurationParam) && hasDateValues
-        ? { minDuration: minDurationParam }
-        : {};
+    // SearchPage need to use a single time zone but listings can have different time zones
+    // We need to expand/prolong the time window (start & end) to cover other time zones too.
+    //
+    // NOTE: you might want to consider changing UI so that
+    //   1) location is always asked first before date range
+    //   2) use some 3rd party service to convert location to time zone (IANA tz name)
+    //   3) Make exact dates filtering against that specific time zone
+    //   This setup would be better for dates filter,
+    //   but it enforces a UX where location is always asked first and therefore configurability
+    const getProlongedStart = date => subtractTime(date, 14, 'hours', searchTZ);
+    const getProlongedEnd = date => addTime(date, 12, 'hours', searchTZ);
 
-    // Find configs for 'dates-length' filter
-    // (type: BookingDateRangeLengthFilter)
-    const filterConfigs = config.custom.filters;
-    const idOfBookingDateRangeLengthFilter = 'dates-length';
-    const dateLengthFilterConfig = filterConfigs.find(
-      f => f.id === idOfBookingDateRangeLengthFilter
-    );
-    // Extract time zone
-    const timeZone = dateLengthFilterConfig.config.searchTimeZone;
+    const startDate = hasValues ? parseDateFromISO8601(values[0], searchTZ) : null;
+    const endRaw = hasValues ? parseDateFromISO8601(values[1], searchTZ) : null;
+    const endDate =
+      hasValues && isNightlyMode
+        ? endRaw
+        : hasValues
+        ? getExclusiveEndDate(endRaw, searchTZ)
+        : null;
 
-    return hasDateValues
+    const today = getStartOf(new Date(), 'day', searchTZ);
+    const possibleStartDate = subtractTime(today, 14, 'hours', searchTZ);
+    const hasValidDates =
+      hasValues &&
+      startDate.getTime() >= possibleStartDate.getTime() &&
+      startDate.getTime() <= endDate.getTime();
+
+    const dayCount = isEntireRangeAvailable ? daysBetween(startDate, endDate) : 1;
+    const day = 1440;
+    const hour = 60;
+    // When entire range is required to be available, we count minutes of included date range,
+    // but there's a need to subtract one hour due to possibility of daylight saving time.
+    // If partial range is needed, then we just make sure that the shortest time unit supported
+    // is available within the range.
+    // You might want to customize this to match with your time units (e.g. day: 1440 - 60)
+    const minDuration = isEntireRangeAvailable ? dayCount * day - hour : hour;
+    return hasValidDates
       ? {
-          start: formatDateStringToTz(startDate, timeZone),
-          end: getExclusiveEndDateWithTz(endDate, timeZone),
-
-          // When we have `time-partial` value in the availability, the
-          // API returns listings that don't necessarily have the full
-          // start->end range available, but enough that the minDuration
-          // (in minutes) can be fulfilled.
-          //
-          // See: https://www.sharetribe.com/api-reference/marketplace.html#availability-filtering
+          start: getProlongedStart(startDate),
+          end: getProlongedEnd(endDate),
+          // Availability can be time-full or time-partial.
+          // However, due to prolonged time window, we need to use time-partial.
           availability: 'time-partial',
-
-          ...minDurationMaybe,
+          // minDuration uses minutes
+          minDuration,
         }
       : {};
   };
 
-  const { perPage, price, dates, minDuration, ...rest } = searchParams;
+  const { perPage, price, dates, sort, ...rest } = searchParams;
   const priceMaybe = priceSearchParams(price);
-  const availabilityMaybe = availabilityParams(dates, minDuration);
+  const datesMaybe = datesSearchParams(dates);
+  const sortMaybe = sort === config.search.sortConfig.relevanceKey ? {} : { sort };
 
   const params = {
     ...rest,
     ...priceMaybe,
-    ...availabilityMaybe,
-    per_page: perPage,
+    ...datesMaybe,
+    ...sortMaybe,
+    ...searchValidListingTypes(config.listing.listingTypes),
+    perPage,
   };
 
   return sdk.listings
     .query(params)
     .then(response => {
-      dispatch(addMarketplaceEntities(response));
+      const listingFields = config?.listing?.listingFields;
+      const sanitizeConfig = { listingFields };
+
+      dispatch(addMarketplaceEntities(response, sanitizeConfig));
       dispatch(searchListingsSuccess(response));
       return response;
     })
@@ -206,44 +221,51 @@ export const setActiveListing = listingId => ({
   payload: listingId,
 });
 
-export const searchMapListings = searchParams => (dispatch, getState, sdk) => {
-  dispatch(searchMapListingsRequest(searchParams));
-
-  const { perPage, ...rest } = searchParams;
-  const params = {
-    ...rest,
-    per_page: perPage,
-  };
-
-  return sdk.listings
-    .query(params)
-    .then(response => {
-      dispatch(addMarketplaceEntities(response));
-      dispatch(searchMapListingsSuccess(response));
-      return response;
-    })
-    .catch(e => {
-      dispatch(searchMapListingsError(storableError(e)));
-      throw e;
-    });
-};
-
-export const loadData = (params, search) => {
+export const loadData = (params, search, config) => {
   const queryParams = parse(search, {
     latlng: ['origin'],
     latlngBounds: ['bounds'],
   });
+
+  // Add minStock filter with default value (1), if stock management is in use.
+  // This can be overwriten with passed-in query parameters.
+  const minStockMaybe = isStockInUse(config) ? { minStock: 1 } : {};
   const { page = 1, address, origin, ...rest } = queryParams;
-  const originMaybe = config.sortSearchByDistance && origin ? { origin } : {};
-  return searchListings({
-    ...rest,
-    ...originMaybe,
-    page,
-    perPage: RESULT_PAGE_SIZE,
-    include: ['author', 'images'],
-    'fields.listing': ['title', 'geolocation', 'price', 'publicData'],
-    'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
-    'fields.image': ['variants.landscape-crop', 'variants.landscape-crop2x'],
-    'limit.images': 1,
-  });
+  const originMaybe = isOriginInUse(config) && origin ? { origin } : {};
+
+  const {
+    aspectWidth = 1,
+    aspectHeight = 1,
+    variantPrefix = 'listing-card',
+  } = config.layout.listingImage;
+  const aspectRatio = aspectHeight / aspectWidth;
+
+  return searchListings(
+    {
+      ...minStockMaybe,
+      ...rest,
+      ...originMaybe,
+      page,
+      perPage: RESULT_PAGE_SIZE,
+      include: ['author', 'images'],
+      'fields.listing': [
+        'title',
+        'geolocation',
+        'price',
+        'publicData.listingType',
+        'publicData.transactionProcessAlias',
+        'publicData.unitType',
+        // These help rendering of 'purchase' listings,
+        // when transitioning from search page to listing page
+        'publicData.pickupEnabled',
+        'publicData.shippingEnabled',
+      ],
+      'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
+      'fields.image': [`variants.${variantPrefix}`, `variants.${variantPrefix}-2x`],
+      ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
+      ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+      'limit.images': 1,
+    },
+    config
+  );
 };
