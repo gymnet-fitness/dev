@@ -1,29 +1,33 @@
 import React, { Component } from 'react';
-import { array, bool, func, number, shape, string } from 'prop-types';
-import { compose } from 'redux';
-import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
+import { array, arrayOf, bool, func, number, object, shape, string } from 'prop-types';
 import pickBy from 'lodash/pickBy';
 import classNames from 'classnames';
-import config from '../../config';
-import routeConfiguration from '../../routeConfiguration';
-import { withViewport } from '../../util/contextHelpers';
+
+import appSettings from '../../config/settings';
+import { useConfiguration } from '../../context/configurationContext';
+import { useRouteConfiguration } from '../../context/routeConfigurationContext';
+
+import { FormattedMessage, intlShape, useIntl } from '../../util/reactIntl';
+import { isMainSearchTypeKeywords, isOriginInUse } from '../../util/search';
+import { withViewport } from '../../util/uiHelpers';
 import { parse, stringify } from '../../util/urlHelpers';
 import { createResourceLocatorString, pathByRouteName } from '../../util/routes';
 import { propTypes } from '../../util/types';
 import {
   Button,
   LimitedAccessBanner,
-  Logo,
+  LinkedLogo,
   Modal,
   ModalMissingInformation,
   NamedLink,
-  TopbarDesktop,
-  TopbarMobileMenu,
 } from '../../components';
-import { TopbarSearchForm } from '../../forms';
 
 import MenuIcon from './MenuIcon';
 import SearchIcon from './SearchIcon';
+import TopbarSearchForm from './TopbarSearchForm/TopbarSearchForm';
+import TopbarMobileMenu from './TopbarMobileMenu/TopbarMobileMenu';
+import TopbarDesktop from './TopbarDesktop/TopbarDesktop';
+
 import css from './Topbar.module.css';
 
 const MAX_MOBILE_SCREEN_WIDTH = 768;
@@ -95,27 +99,38 @@ class TopbarComponent extends Component {
 
   handleSubmit(values) {
     const { currentSearchParams } = this.props;
-    const { search, selectedPlace } = values.location;
-    const { history } = this.props;
-    const { origin, bounds } = selectedPlace;
-    const originMaybe = config.sortSearchByDistance ? { origin } : {};
+    const { history, config, routeConfiguration } = this.props;
+
+    const topbarSearchParams = () => {
+      if (isMainSearchTypeKeywords(config)) {
+        return { keywords: values?.keywords };
+      }
+      // topbar search defaults to 'location' search
+      const { search, selectedPlace } = values?.location;
+      const { origin, bounds } = selectedPlace;
+      const originMaybe = isOriginInUse(config) ? { origin } : {};
+
+      return {
+        ...originMaybe,
+        address: search,
+        bounds,
+      };
+    };
     const searchParams = {
       ...currentSearchParams,
-      ...originMaybe,
-      address: search,
-      bounds,
+      ...topbarSearchParams(),
     };
-    history.push(createResourceLocatorString('SearchPage', routeConfiguration(), {}, searchParams));
+    history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
   }
 
   handleLogout() {
-    const { onLogout, history } = this.props;
+    const { onLogout, history, routeConfiguration } = this.props;
     onLogout().then(() => {
-      const path = pathByRouteName('LandingPage', routeConfiguration());
+      const path = pathByRouteName('LandingPage', routeConfiguration);
 
       // In production we ensure that data is really lost,
       // but in development mode we use stored values for debugging
-      if (config.dev) {
+      if (appSettings.dev) {
         history.push(path);
       } else if (typeof window !== 'undefined') {
         window.location = path;
@@ -137,8 +152,6 @@ class TopbarComponent extends Component {
       authInProgress,
       currentUser,
       currentUserHasListings,
-      currentUserListing,
-      currentUserListingFetched,
       currentUserHasOrders,
       currentPage,
       notificationCount,
@@ -150,9 +163,10 @@ class TopbarComponent extends Component {
       sendVerificationEmailInProgress,
       sendVerificationEmailError,
       showGenericError,
+      config,
     } = this.props;
 
-    const { mobilemenu, mobilesearch, address, origin, bounds } = parse(location.search, {
+    const { mobilemenu, mobilesearch, keywords, address, origin, bounds } = parse(location.search, {
       latlng: ['origin'],
       latlngBounds: ['bounds'],
     });
@@ -167,8 +181,6 @@ class TopbarComponent extends Component {
       <TopbarMobileMenu
         isAuthenticated={isAuthenticated}
         currentUserHasListings={currentUserHasListings}
-        currentUserListing={currentUserListing}
-        currentUserListingFetched={currentUserListingFetched}
         currentUser={currentUser}
         onLogout={this.handleLogout}
         notificationCount={notificationCount}
@@ -176,18 +188,25 @@ class TopbarComponent extends Component {
       />
     );
 
-    // Only render current search if full place object is available in the URL params
-    const locationFieldsPresent = config.sortSearchByDistance
-      ? address && origin && bounds
-      : address && bounds;
-    const initialSearchFormValues = {
-      location: locationFieldsPresent
-        ? {
-            search: address,
-            selectedPlace: { address, origin, bounds },
-          }
-        : null,
+    const topbarSearcInitialValues = () => {
+      if (isMainSearchTypeKeywords(config)) {
+        return { keywords };
+      }
+
+      // Only render current search if full place object is available in the URL params
+      const locationFieldsPresent = isOriginInUse(config)
+        ? address && origin && bounds
+        : address && bounds;
+      return {
+        location: locationFieldsPresent
+          ? {
+              search: address,
+              selectedPlace: { address, origin, bounds },
+            }
+          : null,
+      };
     };
+    const initialSearchFormValues = topbarSearcInitialValues();
 
     const classes = classNames(rootClassName || css.root, className);
 
@@ -209,13 +228,7 @@ class TopbarComponent extends Component {
             <MenuIcon className={css.menuIcon} />
             {notificationDot}
           </Button>
-          <NamedLink
-            className={css.home}
-            name="LandingPage"
-            title={intl.formatMessage({ id: 'Topbar.logoIcon' })}
-          >
-            <Logo format="mobile" />
-          </NamedLink>
+          <LinkedLogo format={'mobile'} alt={intl.formatMessage({ id: 'Topbar.logoIcon' })} />
           <Button
             rootClassName={css.searchMenu}
             onClick={this.handleMobileSearchOpen}
@@ -228,8 +241,6 @@ class TopbarComponent extends Component {
           <TopbarDesktop
             className={desktopClassName}
             currentUserHasListings={currentUserHasListings}
-            currentUserListing={currentUserListing}
-            currentUserListingFetched={currentUserListingFetched}
             currentUser={currentUser}
             currentPage={currentPage}
             initialSearchFormValues={initialSearchFormValues}
@@ -238,6 +249,7 @@ class TopbarComponent extends Component {
             notificationCount={notificationCount}
             onLogout={this.handleLogout}
             onSearchSubmit={this.handleSubmit}
+            appConfig={config}
           />
         </div>
         <Modal
@@ -262,6 +274,7 @@ class TopbarComponent extends Component {
               onSubmit={this.handleSubmit}
               initialValues={initialSearchFormValues}
               isMobile
+              appConfig={config}
             />
             <p className={css.mobileHelp}>
               <FormattedMessage id="Topbar.mobileSearchHelp" />
@@ -336,15 +349,31 @@ TopbarComponent.propTypes = {
     height: number.isRequired,
   }).isRequired,
 
-  // from injectIntl
+  // from useIntl
   intl: intlShape.isRequired,
+
+  // from useConfiguration
+  config: object.isRequired,
+
+  // from useRouteConfiguration
+  routeConfiguration: arrayOf(propTypes.route).isRequired,
 };
 
-const Topbar = compose(
-  withViewport,
-  injectIntl
-)(TopbarComponent);
+const EnhancedTopbar = props => {
+  const config = useConfiguration();
+  const routeConfiguration = useRouteConfiguration();
+  const intl = useIntl();
+  return (
+    <TopbarComponent
+      config={config}
+      routeConfiguration={routeConfiguration}
+      intl={intl}
+      {...props}
+    />
+  );
+};
 
+const Topbar = withViewport(EnhancedTopbar);
 Topbar.displayName = 'Topbar';
 
 export default Topbar;

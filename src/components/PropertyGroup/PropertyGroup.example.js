@@ -1,20 +1,46 @@
 import PropertyGroup from './PropertyGroup';
 
 const exampleOptions = [
-  { key: 'ashtanga', label: 'Ashtanga' },
-  { key: 'hatha', label: 'Hatha' },
-  { key: 'kundalini', label: 'Kundalini' },
-  { key: 'restorative', label: 'Restorative' },
-  { key: 'vinyasa', label: 'Vinyasa' },
-  { key: 'yin', label: 'yin' },
+  {
+    key: 'towels',
+    label: 'Towels',
+  },
+  {
+    key: 'bathroom',
+    label: 'Bathroom',
+  },
+  {
+    key: 'swimming_pool',
+    label: 'Swimming pool',
+  },
+  {
+    key: 'own_drinks',
+    label: 'Own drinks allowed',
+  },
+  {
+    key: 'jacuzzi',
+    label: 'Jacuzzi',
+  },
+  {
+    key: 'audiovisual_entertainment',
+    label: 'Audiovisual entertainment',
+  },
+  {
+    key: 'barbeque',
+    label: 'Barbeque',
+  },
+  {
+    key: 'own_food_allowed',
+    label: 'Own food allowed',
+  },
 ];
 
 export const WithSomeSelected = {
   component: PropertyGroup,
   props: {
-    id: 'yogaStyles',
+    id: 'amenities',
     options: exampleOptions,
-    selectedOptions: ['hatha', 'vinyasa', 'yin'],
+    selectedOptions: ['towels', 'bathroom', 'barbeque'],
     twoColumns: true,
   },
   group: 'misc',

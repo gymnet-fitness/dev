@@ -6,11 +6,14 @@
  */
 
 import React, { Component } from 'react';
-import { bool, func, object, oneOf, string, arrayOf } from 'prop-types';
+import { bool, func, object, oneOf, string, number } from 'prop-types';
+import { isInclusivelyAfterDay, isInclusivelyBeforeDay } from 'react-dates';
 import { Field } from 'react-final-form';
 import classNames from 'classnames';
+import moment from 'moment';
+
+import { useConfiguration } from '../../context/configurationContext';
 import { START_DATE, END_DATE } from '../../util/dates';
-import { propTypes } from '../../util/types';
 import { ValidationError } from '../../components';
 
 import DateRangeInput from './DateRangeInput';
@@ -55,7 +58,7 @@ class FieldDateRangeInputComponent extends Component {
     const {
       className,
       rootClassName,
-      unitType,
+      isDaily,
       startDateId,
       startDateLabel,
       endDateId,
@@ -79,30 +82,11 @@ class FieldDateRangeInputComponent extends Component {
       throw new Error('endDateId required when a endDateLabel is given');
     }
 
-    const { touched, error } = meta;
-    const value = input.value;
-
     // If startDate is valid label changes color and bottom border changes color too
-    const startDateIsValid = value && value.startDate instanceof Date;
-    const startDateLabelClasses = classNames(css.startDateLabel, {
-      [css.labelSuccess]: false, //startDateIsValid,
-    });
-    const startDateBorderClasses = classNames(css.input, {
-      [css.inputSuccess]: startDateIsValid,
-      [css.inputError]: touched && !startDateIsValid && typeof error === 'string',
-      [css.hover]: this.state.focusedInput === START_DATE,
-    });
+    const startDateLabelClasses = classNames(css.startDateLabel);
 
     // If endDate is valid label changes color and bottom border changes color too
-    const endDateIsValid = value && value.endDate instanceof Date;
-    const endDateLabelClasses = classNames(css.endDateLabel, {
-      [css.labelSuccess]: false, //endDateIsValid,
-    });
-    const endDateBorderClasses = classNames(css.input, {
-      [css.inputSuccess]: endDateIsValid,
-      [css.inputError]: touched && !endDateIsValid && typeof error === 'string',
-      [css.hover]: this.state.focusedInput === END_DATE,
-    });
+    const endDateLabelClasses = classNames(css.endDateLabel);
 
     const label =
       startDateLabel && endDateLabel ? (
@@ -119,7 +103,8 @@ class FieldDateRangeInputComponent extends Component {
     // eslint-disable-next-line no-unused-vars
     const { onBlur, onFocus, type, checked, ...restOfInput } = input;
     const inputProps = {
-      unitType,
+      isDaily,
+      minimumNights: isDaily ? 0 : 1,
       onBlur: this.handleBlur,
       onFocus: this.handleFocus,
       useMobileMargins,
@@ -137,14 +122,6 @@ class FieldDateRangeInputComponent extends Component {
       <div className={classes}>
         {label}
         <DateRangeInput {...inputProps} />
-        <div
-          className={classNames(css.inputBorders, {
-            [css.mobileMargins]: useMobileMargins && !this.state.focusedInput,
-          })}
-        >
-          <div className={startDateBorderClasses} />
-          <div className={endDateBorderClasses} />
-        </div>
         <ValidationError className={errorClasses} fieldMeta={meta} />
       </div>
     );
@@ -163,13 +140,12 @@ FieldDateRangeInputComponent.defaultProps = {
   startDatePlaceholderText: null,
   focusedInput: null,
   onFocusedInputChange: null,
-  timeSlots: null,
 };
 
 FieldDateRangeInputComponent.propTypes = {
   className: string,
   rootClassName: string,
-  unitType: propTypes.bookingUnitType.isRequired,
+  isDaily: bool.isRequired,
   useMobileMargins: bool,
   endDateId: string,
   endDateLabel: string,
@@ -177,15 +153,37 @@ FieldDateRangeInputComponent.propTypes = {
   startDateId: string,
   startDateLabel: string,
   startDatePlaceholderText: string,
-  timeSlots: arrayOf(propTypes.timeSlot),
   input: object.isRequired,
   meta: object.isRequired,
   focusedInput: oneOf([START_DATE, END_DATE]),
   onFocusedInputChange: func,
+
+  isOutsideRange: func.isRequired,
+  firstDayOfWeek: number.isRequired,
 };
 
 const FieldDateRangeInput = props => {
-  return <Field component={FieldDateRangeInputComponent} {...props} />;
+  const config = useConfiguration();
+  const { isOutsideRange, firstDayOfWeek, ...rest } = props;
+
+  // Outside range -><- today ... today+available days -1 -><- outside range
+  const defaultIsOutSideRange = day => {
+    const endOfRange = config.stripe.dayCountAvailableForBooking - 1;
+    return (
+      !isInclusivelyAfterDay(day, moment()) ||
+      !isInclusivelyBeforeDay(day, moment().add(endOfRange, 'days'))
+    );
+  };
+  const defaultFirstDayOfWeek = config.localization.firstDayOfWeek;
+
+  return (
+    <Field
+      component={FieldDateRangeInputComponent}
+      isOutsideRange={isOutsideRange || defaultIsOutSideRange}
+      firstDayOfWeek={firstDayOfWeek || defaultFirstDayOfWeek}
+      {...rest}
+    />
+  );
 };
 
 export { DateRangeInput };

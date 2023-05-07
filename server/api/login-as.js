@@ -1,11 +1,10 @@
 const http = require('http');
 const https = require('https');
 const sharetribeSdk = require('sharetribe-flex-sdk');
-const Decimal = require('decimal.js');
 const sdkUtils = require('../api-util/sdk');
 
 const CLIENT_ID = process.env.REACT_APP_SHARETRIBE_SDK_CLIENT_ID;
-const ROOT_URL = process.env.REACT_APP_CANONICAL_ROOT_URL;
+const ROOT_URL = process.env.REACT_APP_MARKETPLACE_ROOT_URL;
 const BASE_URL = process.env.REACT_APP_SHARETRIBE_SDK_BASE_URL;
 const TRANSIT_VERBOSE = process.env.REACT_APP_SHARETRIBE_SDK_TRANSIT_VERBOSE === 'true';
 const USING_SSL = process.env.REACT_APP_SHARETRIBE_USING_SSL === 'true';
@@ -24,16 +23,6 @@ const httpsAgent = new https.Agent({ keepAlive: true });
 // Cookies used for authorization code authentication.
 const stateKey = `st-${CLIENT_ID}-oauth2State`;
 const codeVerifierKey = `st-${CLIENT_ID}-pkceCodeVerifier`;
-
-/**
- * Makes a base64 string URL friendly by
- * replacing unaccepted characters.
- */
-const urlifyBase64 = base64Str =>
-  base64Str
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
 
 // Works as the redirect_uri passed in an authorization code request. Receives
 // an authorization code and uses that to log in and redirect to the landing

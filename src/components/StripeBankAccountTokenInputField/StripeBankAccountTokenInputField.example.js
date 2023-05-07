@@ -1,17 +1,21 @@
 /* eslint-disable no-console */
 import React from 'react';
 import { Form as FinalForm, FormSpy } from 'react-final-form';
+
+import defaultConfig from '../../config/configDefault';
+import * as validators from '../../util/validators';
 import { Button } from '../../components';
+
 import { stripeCountryConfigs } from './StripeBankAccountTokenInputField.util';
 import StripeBankAccountTokenInputField from './StripeBankAccountTokenInputField';
-import * as validators from '../../util/validators';
 
 const formComponent = country => props => (
   <FinalForm
     {...props}
     render={fieldRenderProps => {
       const { formName, handleSubmit, onChange } = fieldRenderProps;
-      const currency = stripeCountryConfigs(country).currency;
+      const currency = stripeCountryConfigs(country, defaultConfig.stripe.supportedCountries)
+        .currency;
 
       return (
         <form
@@ -52,7 +56,7 @@ export const DE_EUR = {
       console.log('values submitted:', values);
     },
   },
-  group: 'custom inputs',
+  group: 'inputs',
 };
 
 // US
@@ -69,7 +73,7 @@ export const US_USD = {
       console.log('values submitted:', values);
     },
   },
-  group: 'custom inputs',
+  group: 'inputs',
 };
 
 // GB
@@ -86,7 +90,7 @@ export const GB_GBP = {
       console.log('values submitted:', values);
     },
   },
-  group: 'custom inputs',
+  group: 'inputs',
 };
 
 // AU
@@ -103,7 +107,7 @@ export const AU_AUD = {
       console.log('values submitted:', values);
     },
   },
-  group: 'custom inputs',
+  group: 'inputs',
 };
 
 // CA
@@ -120,7 +124,7 @@ export const CA_CAD = {
       console.log('values submitted:', values);
     },
   },
-  group: 'custom inputs',
+  group: 'inputs',
 };
 
 // JP
@@ -137,5 +141,5 @@ export const JP_JPY = {
       console.log('values submitted:', values);
     },
   },
-  group: 'custom inputs',
+  group: 'inputs',
 };

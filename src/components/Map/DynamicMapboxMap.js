@@ -6,20 +6,11 @@ import { string, shape, number, object } from 'prop-types';
 // TODO: we should add an overlay with text "use two fingers to pan".
 import MultiTouch from 'mapbox-gl-multitouch';
 import uniqueId from 'lodash/uniqueId';
-import { circlePolyline } from '../../util/maps';
-import config from '../../config';
 
-const mapMarker = mapsConfig => {
-  const { enabled, url, width, height } = mapsConfig.customMarker;
-  if (enabled) {
-    const element = document.createElement('div');
-    element.style.backgroundImage = `url(${url})`;
-    element.style.width = `${width}px`;
-    element.style.height = `${height}px`;
-    return new window.mapboxgl.Marker({ element });
-  } else {
-    return new window.mapboxgl.Marker();
-  }
+import { circlePolyline } from '../../util/maps';
+
+const mapMarker = () => {
+  return new window.mapboxgl.Marker();
 };
 
 const circleLayer = (center, mapsConfig, layerId) => {
@@ -78,7 +69,7 @@ class DynamicMapboxMap extends Component {
         this.map.addLayer(circleLayer(center, mapsConfig, this.fuzzyLayerId));
       });
     } else {
-      this.centerMarker = mapMarker(mapsConfig);
+      this.centerMarker = mapMarker();
       this.centerMarker.setLngLat(position).addTo(this.map);
     }
   }
@@ -152,8 +143,6 @@ class DynamicMapboxMap extends Component {
 DynamicMapboxMap.defaultProps = {
   address: '',
   center: null,
-  zoom: config.maps.fuzzy.enabled ? config.maps.fuzzy.defaultZoomLevel : 11,
-  mapsConfig: config.maps,
 };
 
 DynamicMapboxMap.propTypes = {
@@ -162,8 +151,8 @@ DynamicMapboxMap.propTypes = {
     lat: number.isRequired,
     lng: number.isRequired,
   }).isRequired,
-  zoom: number,
-  mapsConfig: object,
+  zoom: number.isRequired,
+  mapsConfig: object.isRequired,
 };
 
 export default DynamicMapboxMap;

@@ -1,72 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ListingCard matches snapshot 1`] = `
-<NamedLink
-  className="root"
-  name="ListingPage"
-  params={
-    Object {
-      "id": "listing1",
-      "slug": "listing1-title",
-    }
-  }
+<a
+  class="root"
+  href="/l/listing1-title/listing1"
 >
   <div
-    className="threeToTwoWrapper"
-    onMouseEnter={[Function]}
-    onMouseLeave={[Function]}
+    class="root aspectRatioWrapper"
   >
     <div
-      className="aspectWrapper"
-    >
-      <lazyLoadWithDimensions(ListingImage)
-        alt="listing1 title"
-        image={null}
-        rootClassName="rootForImage"
-        sizes={null}
-        variants={
-          Array [
-            "landscape-crop",
-            "landscape-crop2x",
-          ]
-        }
-      />
-    </div>
-  </div>
-  <div
-    className="info"
-  >
-    <div
-      className="price"
+      class="aspectPadding"
+      style="padding-bottom: 100%;"
     >
       <div
-        className="priceValue"
-        title={55}
+        class="aspectBox"
       >
-        55
-      </div>
-      <div
-        className="perUnit"
-      >
-        <MemoizedFormattedMessage
-          id="ListingCard.perUnit"
+        <div
+          style="position: absolute; top: 0px; right: 0px; bottom: 0px; left: 0px;"
         />
       </div>
     </div>
+  </div>
+  <div
+    class="info"
+  >
     <div
-      className="mainInfo"
+      class="price"
     >
       <div
-        className="title"
+        class="priceValue"
+        title="55"
       >
-        listing1
-         
-        title
+        55
+      </div>
+    </div>
+    <div
+      class="mainInfo"
+    >
+      <div
+        class="title"
+      >
+        listing1 title
       </div>
       <div
-        className="certificateInfo"
-      />
+        class="authorInfo"
+      >
+        <span>
+          ListingCard.author
+        </span>
+      </div>
     </div>
   </div>
-</NamedLink>
+</a>
 `;

@@ -3,10 +3,10 @@ import { number, object, shape, string } from 'prop-types';
 import pick from 'lodash/pick';
 import isEqual from 'lodash/isEqual';
 import polyline from '@mapbox/polyline';
+
 import { encodeLatLng, stringify } from '../../util/urlHelpers';
-import { lazyLoadWithDimensions } from '../../util/contextHelpers';
+import { lazyLoadWithDimensions } from '../../util/uiHelpers';
 import { circlePolyline } from '../../util/maps';
-import config from '../../config';
 
 const DEFAULT_COLOR = 'FF0000';
 const DEFAULT_STROKE_OPACITY = 0.3;
@@ -64,12 +64,6 @@ const drawFuzzyCircle = (mapsConfig, center) => {
   return polylineGraphicTokens.join('|');
 };
 
-// Get custom marker data for static map URI
-const customMarker = (options, lat, lng) => {
-  const { anchorX, anchorY, url } = options;
-  return [`anchor:${anchorX},${anchorY}`, `icon:${url}`, `${lat},${lng}`].join('|');
-};
-
 class StaticGoogleMap extends Component {
   shouldComponentUpdate(nextProps, prevState) {
     // Do not draw the map unless center, zoom or dimensions change
@@ -86,12 +80,9 @@ class StaticGoogleMap extends Component {
 
     // Extra graphics for the static map image
     // 1. if fuzzy coordinates are used, return circle path
-    // 2. if customMarker is defined in config.js, use that
-    // 3. else return default marker
+    // 2. else return default marker
     const targetMaybe = mapsConfig.fuzzy.enabled
       ? { path: drawFuzzyCircle(mapsConfig, center) }
-      : mapsConfig.customMarker.enabled
-      ? { markers: customMarker(mapsConfig.customMarker, lat, lng) }
       : { markers: `${lat},${lng}` };
 
     const srcParams = stringify({
@@ -99,12 +90,16 @@ class StaticGoogleMap extends Component {
       zoom,
       size: `${width}x${height}`,
       maptype: 'roadmap',
-      key: config.maps.googleMapsAPIKey,
+      key: mapsConfig.googleMapsAPIKey,
       ...targetMaybe,
     });
 
     return (
-      <img src={`https://maps.googleapis.com/maps/api/staticmap?${srcParams}`} alt={address} />
+      <img
+        src={`https://maps.googleapis.com/maps/api/staticmap?${srcParams}`}
+        alt={address}
+        crossOrigin="anonymous"
+      />
     );
   }
 }
@@ -114,8 +109,6 @@ StaticGoogleMap.defaultProps = {
   rootClassName: null,
   address: '',
   center: null,
-  zoom: config.maps.fuzzy.enabled ? config.maps.fuzzy.defaultZoomLevel : 11,
-  mapsConfig: config.maps,
 };
 
 StaticGoogleMap.propTypes = {
@@ -126,8 +119,8 @@ StaticGoogleMap.propTypes = {
     lat: number.isRequired,
     lng: number.isRequired,
   }).isRequired,
-  zoom: number,
-  mapsConfig: object,
+  zoom: number.isRequired,
+  mapsConfig: object.isRequired,
 
   // from withDimensions
   dimensions: shape({

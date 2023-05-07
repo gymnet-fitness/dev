@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { bool, func, instanceOf, object, oneOfType, shape, string } from 'prop-types';
+import { arrayOf, bool, func, object, oneOfType, shape, string } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import classNames from 'classnames';
-import config from '../../config';
-import routeConfiguration from '../../routeConfiguration';
+
+// Import contexts and util modules
+import { useConfiguration } from '../../context/configurationContext';
+import { useRouteConfiguration } from '../../context/routeConfigurationContext';
+import { FormattedMessage, useIntl, intlShape } from '../../util/reactIntl';
 import { pathByRouteName, findRouteByRouteName } from '../../util/routes';
-import { propTypes, LINE_ITEM_NIGHT, LINE_ITEM_DAY, DATE_TYPE_DATETIME } from '../../util/types';
+import { propTypes, LINE_ITEM_HOUR, DATE_TYPE_DATE, DATE_TYPE_DATETIME } from '../../util/types';
 import {
   ensureListing,
   ensureCurrentUser,
@@ -25,26 +27,39 @@ import {
   isTransactionInitiateListingNotFoundError,
   isTransactionInitiateMissingStripeAccountError,
   isTransactionInitiateBookingTimeNotAvailableError,
+  isTransactionInitiateListingInsufficientStockError,
   isTransactionChargeDisabledError,
   isTransactionZeroPaymentError,
+  isTransitionQuantityInfoMissingError,
   transactionInitiateOrderStripeErrors,
 } from '../../util/errors';
 import { formatMoney } from '../../util/currency';
-import { TRANSITION_ENQUIRE, txIsPaymentPending, txIsPaymentExpired } from '../../util/transaction';
 import {
-  AvatarMedium,
-  BookingBreakdown,
-  Logo,
-  NamedLink,
-  NamedRedirect,
-  Page,
-  ResponsiveImage,
-} from '../../components';
-import { StripePaymentForm } from '../../forms';
-import { isScrollingDisabled } from '../../ducks/UI.duck';
+  getProcess,
+  isBookingProcessAlias,
+  resolveLatestProcessName,
+} from '../../transactions/transaction';
+
+// Import global thunk functions
+import { isScrollingDisabled } from '../../ducks/ui.duck';
 import { confirmCardPayment, retrievePaymentIntent } from '../../ducks/stripe.duck';
 import { savePaymentMethod } from '../../ducks/paymentMethods.duck';
 
+// Import shared components
+import {
+  AspectRatioWrapper,
+  AvatarMedium,
+  H3,
+  H4,
+  H6,
+  NamedLink,
+  NamedRedirect,
+  OrderBreakdown,
+  Page,
+  ResponsiveImage,
+} from '../../components';
+
+// Import modules from this directory
 import {
   initiateOrder,
   setInitialValues,
@@ -53,6 +68,8 @@ import {
   confirmPayment,
   sendMessage,
 } from './CheckoutPage.duck';
+import CustomTopbar from './CustomTopbar';
+import StripePaymentForm from './StripePaymentForm/StripePaymentForm';
 import { storeData, storedData, clearData } from './CheckoutPageSessionHelpers';
 import css from './CheckoutPage.module.css';
 
@@ -85,12 +102,133 @@ const initializeOrderPage = (initialValues, routes, dispatch) => {
   dispatch(OrderPage.setInitialValues(initialValues));
 };
 
-const checkIsPaymentExpired = existingTransaction => {
-  return txIsPaymentExpired(existingTransaction)
+const checkIsPaymentExpired = (existingTransaction, process) => {
+  const state = process.getState(existingTransaction);
+  return state === process.states.PAYMENT_EXPIRED
     ? true
-    : txIsPaymentPending(existingTransaction)
+    : state === process.states.PAYMENT_PENDING
     ? minutesBetween(existingTransaction.attributes.lastTransitionedAt, new Date()) >= 15
     : false;
+};
+
+const getFormattedTotalPrice = (transaction, intl) => {
+  const totalPrice = transaction.attributes.payinTotal;
+  return formatMoney(intl, totalPrice);
+};
+
+// This just makes it easier to transfrom bookingDates object if needed
+// (or manibulate bookingStart and bookingEnd)
+const bookingDatesMaybe = bookingDates => {
+  return bookingDates ? { bookingDates } : {};
+};
+
+// Extract relevant transaction type data from listing type
+// Note: this is saved to protectedData of the transaction entity
+//       therefore, we don't need the process name (nor alias)
+const transactionTypeDataMaybe = (listingType, unitTypeInPublicData, config) => {
+  const listingTypeConfig = config.listing.listingTypes.find(lt => lt.listingType === listingType);
+  const { process, alias, unitType, ...rest } = listingTypeConfig?.transactionType || {};
+  // Note: we want to rely on unitType written in public data of the listing entity.
+  //       The listingType configuration might have changed on the fly.
+  return unitTypeInPublicData ? { unitType: unitTypeInPublicData, ...rest } : {};
+};
+
+// Collect error message checks to a single function.
+const getErrorMessages = (
+  listingNotFound,
+  initiateOrderError,
+  speculateTransactionError,
+  listingLink
+) => {
+  let listingNotFoundErrorMessage = null;
+  let initiateOrderErrorMessage = null;
+  let speculateErrorMessage = null;
+
+  const isAmountTooLowError = isTransactionInitiateAmountTooLowError(initiateOrderError);
+  const isChargeDisabledError = isTransactionChargeDisabledError(initiateOrderError);
+  const stripeErrors = transactionInitiateOrderStripeErrors(initiateOrderError);
+
+  // We want to show one error at a time for the real transition
+  if (listingNotFound) {
+    listingNotFoundErrorMessage = <FormattedMessage id="CheckoutPage.listingNotFoundError" />;
+  } else if (isAmountTooLowError) {
+    initiateOrderErrorMessage = <FormattedMessage id="CheckoutPage.initiateOrderAmountTooLow" />;
+  } else if (isTransactionInitiateBookingTimeNotAvailableError(initiateOrderError)) {
+    // If bookings are used, there could be error related to those
+    initiateOrderErrorMessage = (
+      <FormattedMessage id="CheckoutPage.bookingTimeNotAvailableMessage" />
+    );
+  } else if (isTransitionQuantityInfoMissingError(initiateOrderError)) {
+    initiateOrderErrorMessage = (
+      <FormattedMessage id="CheckoutPage.correctQuantityInformationMissing" />
+    );
+  } else if (isTransactionInitiateListingInsufficientStockError(initiateOrderError)) {
+    // If stock management is used, there could be error related to that
+    initiateOrderErrorMessage = <FormattedMessage id="CheckoutPage.notEnoughStockMessage" />;
+  } else if (isChargeDisabledError) {
+    initiateOrderErrorMessage = <FormattedMessage id="CheckoutPage.chargeDisabledMessage" />;
+  } else if (stripeErrors && stripeErrors.length > 0) {
+    // NOTE: Error messages from Stripes are not part of translations.
+    // By default they are in English.
+    const stripeErrorsAsString = stripeErrors.join(', ');
+    initiateOrderErrorMessage = (
+      <FormattedMessage
+        id="CheckoutPage.initiateOrderStripeError"
+        values={{ stripeErrors: stripeErrorsAsString }}
+      />
+    );
+  } else if (initiateOrderError) {
+    // Generic initiate order error
+    initiateOrderErrorMessage = (
+      <FormattedMessage id="CheckoutPage.initiateOrderError" values={{ listingLink }} />
+    );
+  }
+
+  // We want to show one error at a time for speculateTransition
+  if (isTransactionInitiateMissingStripeAccountError(speculateTransactionError)) {
+    speculateErrorMessage = (
+      <FormattedMessage id="CheckoutPage.providerStripeAccountMissingError" />
+    );
+  } else if (isTransactionInitiateBookingTimeNotAvailableError(speculateTransactionError)) {
+    speculateErrorMessage = <FormattedMessage id="CheckoutPage.bookingTimeNotAvailableMessage" />;
+  } else if (isTransactionInitiateListingInsufficientStockError(speculateTransactionError)) {
+    speculateErrorMessage = <FormattedMessage id="CheckoutPage.notEnoughStockMessage" />;
+  } else if (isTransactionZeroPaymentError(speculateTransactionError)) {
+    speculateErrorMessage = <FormattedMessage id="CheckoutPage.initiateOrderAmountTooLow" />;
+  } else if (isTransitionQuantityInfoMissingError(speculateTransactionError)) {
+    speculateErrorMessage = (
+      <FormattedMessage id="CheckoutPage.correctQuantityInformationMissing" />
+    );
+  } else if (speculateTransactionError) {
+    speculateErrorMessage = <FormattedMessage id="CheckoutPage.speculateFailedMessage" />;
+  }
+
+  // Add paragraph-container for the error message, if it exists
+  const listingNotFoundErrorMessageParagraph = listingNotFoundErrorMessage ? (
+    <p className={css.notFoundError}>{listingNotFoundErrorMessage}</p>
+  ) : null;
+  const initiateOrderErrorMessageParagraph = initiateOrderErrorMessage ? (
+    <p className={css.orderError}>{initiateOrderErrorMessage}</p>
+  ) : null;
+  const speculateErrorMessageParagraph = speculateErrorMessage ? (
+    <p className={css.orderError}>{speculateErrorMessage}</p>
+  ) : null;
+  const speculateTransactionErrorMessageParagraph = speculateTransactionError ? (
+    <p className={css.speculateError}>
+      <FormattedMessage id="CheckoutPage.speculateTransactionError" />
+    </p>
+  ) : null;
+
+  return {
+    listingNotFoundErrorMessage: listingNotFoundErrorMessageParagraph,
+    initiateOrderErrorMessage: initiateOrderErrorMessageParagraph,
+    speculateErrorMessage: speculateErrorMessageParagraph,
+    speculateTransactionErrorMessage: speculateTransactionErrorMessageParagraph,
+  };
+};
+
+const txHasPassedPendingPayment = (tx, process) => {
+  return process.hasPassedState(process.states.PENDING_PAYMENT, tx);
 };
 
 export class CheckoutPageComponent extends Component {
@@ -134,8 +272,7 @@ export class CheckoutPageComponent extends Component {
    */
   loadInitialData() {
     const {
-      bookingData,
-      bookingDates,
+      orderData,
       listing,
       transaction,
       fetchSpeculatedTransaction,
@@ -154,54 +291,64 @@ export class CheckoutPageComponent extends Component {
     // Action is 'REPLACE' when user has directed through login/signup process
     const hasNavigatedThroughLink = history.action === 'PUSH' || history.action === 'REPLACE';
 
-    const hasDataInProps = !!(bookingData && bookingDates && listing) && hasNavigatedThroughLink;
+    const hasDataInProps = !!(orderData && listing && hasNavigatedThroughLink);
     if (hasDataInProps) {
       // Store data only if data is passed through props and user has navigated through a link.
-      storeData(bookingData, bookingDates, listing, transaction, STORAGE_KEY);
+      storeData(orderData, listing, transaction, STORAGE_KEY);
     }
 
     // NOTE: stored data can be empty if user has already successfully completed transaction.
-    const pageData = hasDataInProps
-      ? { bookingData, bookingDates, listing, transaction }
-      : storedData(STORAGE_KEY);
+    const pageData = hasDataInProps ? { orderData, listing, transaction } : storedData(STORAGE_KEY);
 
-    // Check if a booking is already created according to stored data.
     const tx = pageData ? pageData.transaction : null;
-    const isBookingCreated = tx && tx.booking && tx.booking.id;
+    const pageDataListing = pageData.listing;
+    const processName =
+      tx?.attributes?.processName ||
+      pageDataListing?.attributes?.publicData?.transactionProcessAlias?.split('/')[0];
+    const process = processName ? getProcess(processName) : null;
 
+    // If transaction has passed payment-pending state, speculated tx is not needed.
     const shouldFetchSpeculatedTransaction =
-      pageData &&
-      pageData.listing &&
-      pageData.listing.id &&
-      pageData.bookingData &&
-      pageData.bookingDates &&
-      pageData.bookingDates.bookingStart &&
-      pageData.bookingDates.bookingEnd &&
-      pageData.bookingData.quantity &&
-      !isBookingCreated;
+      !!pageData?.listing?.id &&
+      !!pageData.orderData &&
+      !!process &&
+      !txHasPassedPendingPayment(tx, process);
 
     if (shouldFetchSpeculatedTransaction) {
       const listingId = pageData.listing.id;
+      const processAlias = pageData.listing.attributes.publicData?.transactionProcessAlias;
       const transactionId = tx ? tx.id : null;
-      const { bookingStart, bookingEnd } = pageData.bookingDates;
 
-      // Fetch speculated transaction for showing price in booking breakdown
-      // NOTE: if unit type is line-item/units, quantity needs to be added.
-      // The way to pass it to checkout page is through pageData.bookingData
+      const requestTransition =
+        tx?.attributes?.lastTransition === process.transitions.INQUIRE
+          ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
+          : process.transitions.REQUEST_PAYMENT;
+      const isPrivileged = process.isPrivileged(requestTransition);
+
+      // Fetch speculated transaction for showing price in order breakdown
+      // NOTE: if unit type is line-item/item, quantity needs to be added.
+      // The way to pass it to checkout page is through pageData.orderData
+      const quantity = pageData.orderData?.quantity;
+      const quantityMaybe = quantity ? { quantity } : {};
+      const deliveryMethod = pageData.orderData?.deliveryMethod;
       fetchSpeculatedTransaction(
         {
           listingId,
-          bookingStart,
-          bookingEnd,
+          deliveryMethod,
+          ...quantityMaybe,
+          ...bookingDatesMaybe(pageData.orderData.bookingDates),
         },
-        transactionId
+        processAlias,
+        transactionId,
+        requestTransition,
+        isPrivileged
       );
     }
 
     this.setState({ pageData: pageData || {}, dataLoaded: true });
   }
 
-  handlePaymentIntent(handlePaymentParams) {
+  handlePaymentIntent(handlePaymentParams, process) {
     const {
       currentUser,
       stripeCustomerFetched,
@@ -210,14 +357,15 @@ export class CheckoutPageComponent extends Component {
       onConfirmPayment,
       onSendMessage,
       onSavePaymentMethod,
+      config,
     } = this.props;
     const {
       pageData,
-      speculatedTransaction,
       message,
       paymentIntent,
       selectedPaymentMethod,
       saveAfterOnetimePayment,
+      shippingDetails,
     } = handlePaymentParams;
     const storedTx = ensureTransaction(pageData.transaction);
 
@@ -226,6 +374,7 @@ export class CheckoutPageComponent extends Component {
     const ensuredDefaultPaymentMethod = ensurePaymentMethodCard(
       ensuredStripeCustomer.defaultPaymentMethod
     );
+    const processAlias = pageData?.listing?.attributes?.publicData?.transactionProcessAlias;
 
     let createdPaymentIntent = null;
 
@@ -242,12 +391,19 @@ export class CheckoutPageComponent extends Component {
 
     // Step 1: initiate order by requesting payment from Marketplace API
     const fnRequestPayment = fnParams => {
-      // fnParams should be { listingId, bookingStart, bookingEnd }
-      const hasPaymentIntents =
-        storedTx.attributes.protectedData && storedTx.attributes.protectedData.stripePaymentIntents;
+      // fnParams should be { listingId, deliveryMethod, quantity?, bookingDates?, paymentMethod?.setupPaymentMethodForSaving?, protectedData }
+      const hasPaymentIntents = storedTx.attributes.protectedData?.stripePaymentIntents;
+
+      const requestTransition =
+        storedTx?.attributes?.lastTransition === process.transitions.INQUIRE
+          ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
+          : process.transitions.REQUEST_PAYMENT;
+      const isPrivileged = process.isPrivileged(requestTransition);
 
       // If paymentIntent exists, order has been initiated previously.
-      return hasPaymentIntents ? Promise.resolve(storedTx) : onInitiateOrder(fnParams, storedTx.id);
+      return hasPaymentIntents
+        ? Promise.resolve(storedTx)
+        : onInitiateOrder(fnParams, processAlias, storedTx.id, requestTransition, isPrivileged);
     };
 
     // Step 2: pay using Stripe SDK
@@ -257,14 +413,12 @@ export class CheckoutPageComponent extends Component {
       const order = ensureTransaction(fnParams);
       if (order.id) {
         // Store order.
-        const { bookingData, bookingDates, listing } = pageData;
-        storeData(bookingData, bookingDates, listing, order, STORAGE_KEY);
+        const { orderData, listing } = pageData;
+        storeData(orderData, listing, order, STORAGE_KEY);
         this.setState({ pageData: { ...pageData, transaction: order } });
       }
 
-      const hasPaymentIntents =
-        order.attributes.protectedData && order.attributes.protectedData.stripePaymentIntents;
-
+      const hasPaymentIntents = order.attributes.protectedData?.stripePaymentIntents;
       if (!hasPaymentIntents) {
         throw new Error(
           `Missing StripePaymentIntents key in transaction's protectedData. Check that your transaction process is configured to use payment intents.`
@@ -310,8 +464,11 @@ export class CheckoutPageComponent extends Component {
     // Step 3: complete order by confirming payment to Marketplace API
     // Parameter should contain { paymentIntent, transactionId } returned in step 2
     const fnConfirmPayment = fnParams => {
+      // Remember the created PaymentIntent for step 5
       createdPaymentIntent = fnParams.paymentIntent;
-      return onConfirmPayment(fnParams);
+      const transactionId = fnParams.transactionId;
+      const transitionName = process.transitions.CONFIRM_PAYMENT;
+      return onConfirmPayment(transactionId, transitionName, {});
     };
 
     // Step 4: send initial message
@@ -355,11 +512,19 @@ export class CheckoutPageComponent extends Component {
       fnSavePaymentMethod
     );
 
-    // Create order aka transaction
-    // NOTE: if unit type is line-item/units, quantity needs to be added.
-    // The way to pass it to checkout page is through pageData.bookingData
-    const tx = speculatedTransaction ? speculatedTransaction : storedTx;
-
+    const quantity = pageData.orderData?.quantity;
+    const quantityMaybe = quantity ? { quantity } : {};
+    const deliveryMethod = pageData.orderData?.deliveryMethod;
+    const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
+    const shippingDetailsMaybe = shippingDetails ? { shippingDetails } : {};
+    const { listingType, unitType } = pageData?.listing?.attributes?.publicData || {};
+    const protectedDataMaybe = {
+      protectedData: {
+        ...transactionTypeDataMaybe(listingType, unitType, config),
+        ...deliveryMethodMaybe,
+        ...shippingDetailsMaybe,
+      },
+    };
     // Note: optionalPaymentParams contains Stripe paymentMethod,
     // but that can also be passed on Step 2
     // stripe.confirmCardPayment(stripe, { payment_method: stripePaymentMethodId })
@@ -372,22 +537,30 @@ export class CheckoutPageComponent extends Component {
 
     const orderParams = {
       listingId: pageData.listing.id,
-      bookingStart: tx.booking.attributes.start,
-      bookingEnd: tx.booking.attributes.end,
-      quantity: pageData.bookingData ? pageData.bookingData.quantity : null,
+      deliveryMethod,
+      ...quantityMaybe,
+      ...bookingDatesMaybe(pageData.orderData.bookingDates),
+      ...protectedDataMaybe,
       ...optionalPaymentParams,
     };
 
     return handlePaymentIntentCreation(orderParams);
   }
 
-  handleSubmit(values) {
+  handleSubmit(values, process) {
     if (this.state.submitting) {
       return;
     }
     this.setState({ submitting: true });
 
-    const { history, speculatedTransaction, currentUser, paymentIntent, dispatch } = this.props;
+    const {
+      history,
+      routeConfiguration,
+      speculatedTransaction,
+      currentUser,
+      paymentIntent,
+      dispatch,
+    } = this.props;
     const { card, message, paymentMethod, formValues } = values;
     const {
       name,
@@ -398,6 +571,14 @@ export class CheckoutPageComponent extends Component {
       state,
       country,
       saveAfterOnetimePayment,
+      recipientName,
+      recipientPhoneNumber,
+      recipientAddressLine1,
+      recipientAddressLine2,
+      recipientPostal,
+      recipientCity,
+      recipientState,
+      recipientCountry,
     } = formValues;
 
     // Billing address is recommended.
@@ -423,6 +604,23 @@ export class CheckoutPageComponent extends Component {
       ...addressMaybe,
     };
 
+    const shippingDetailsMaybe =
+      recipientName && recipientAddressLine1 && recipientPostal
+        ? {
+            shippingDetails: {
+              name: recipientName,
+              phoneNumber: recipientPhoneNumber,
+              address: {
+                city: recipientCity,
+                country: recipientCountry,
+                line1: recipientAddressLine1,
+                line2: recipientAddressLine2,
+                postalCode: recipientPostal,
+                state: recipientState,
+              },
+            },
+          }
+        : {};
     const requestPaymentParams = {
       pageData: this.state.pageData,
       speculatedTransaction,
@@ -432,23 +630,26 @@ export class CheckoutPageComponent extends Component {
       message,
       paymentIntent,
       selectedPaymentMethod: paymentMethod,
-      saveAfterOnetimePayment: !!saveAfterOnetimePayment,
+      saveAfterOnetimePayment:
+        Array.isArray(saveAfterOnetimePayment) && saveAfterOnetimePayment.length > 0,
+      ...shippingDetailsMaybe,
     };
 
-    this.handlePaymentIntent(requestPaymentParams)
+    this.handlePaymentIntent(requestPaymentParams, process)
       .then(res => {
         const { orderId, messageSuccess, paymentMethodSaved } = res;
         this.setState({ submitting: false });
 
-        const routes = routeConfiguration();
         const initialMessageFailedToTransaction = messageSuccess ? null : orderId;
-        const orderDetailsPath = pathByRouteName('OrderDetailsPage', routes, { id: orderId.uuid });
+        const orderDetailsPath = pathByRouteName('OrderDetailsPage', routeConfiguration, {
+          id: orderId.uuid,
+        });
         const initialValues = {
           initialMessageFailedToTransaction,
           savePaymentMethodFailed: !paymentMethodSaved,
         };
 
-        initializeOrderPage(initialValues, routes, dispatch);
+        initializeOrderPage(initialValues, routeConfiguration, dispatch);
         clearData(STORAGE_KEY);
         history.push(orderDetailsPath);
       })
@@ -458,28 +659,24 @@ export class CheckoutPageComponent extends Component {
       });
   }
 
-  onStripeInitialized(stripe) {
+  onStripeInitialized(stripe, process) {
     this.stripe = stripe;
 
     const { paymentIntent, onRetrievePaymentIntent } = this.props;
     const tx = this.state.pageData ? this.state.pageData.transaction : null;
 
-    // We need to get up to date PI, if booking is created but payment is not expired.
+    // We need to get up to date PI, if payment is pending but it's not expired.
     const shouldFetchPaymentIntent =
       this.stripe &&
       !paymentIntent &&
       tx &&
       tx.id &&
-      tx.booking &&
-      tx.booking.id &&
-      txIsPaymentPending(tx) &&
-      !checkIsPaymentExpired(tx);
+      process?.getState(tx) === process?.states.PAYMENT_PENDING &&
+      !checkIsPaymentExpired(tx, process);
 
     if (shouldFetchPaymentIntent) {
       const { stripePaymentIntentClientSecret } =
-        tx.attributes.protectedData && tx.attributes.protectedData.stripePaymentIntents
-          ? tx.attributes.protectedData.stripePaymentIntents.default
-          : {};
+        tx.attributes.protectedData?.stripePaymentIntents?.default || {};
 
       // Fetch up to date PaymentIntent from Stripe
       onRetrievePaymentIntent({ stripe, stripePaymentIntentClientSecret });
@@ -501,6 +698,7 @@ export class CheckoutPageComponent extends Component {
       paymentIntent,
       retrievePaymentIntentError,
       stripeCustomerFetched,
+      config,
     } = this.props;
 
     // Since the listing data is already given from the ListingPage
@@ -513,39 +711,35 @@ export class CheckoutPageComponent extends Component {
       isTransactionInitiateListingNotFoundError(speculateTransactionError) ||
       isTransactionInitiateListingNotFoundError(initiateOrderError);
 
-    const isLoading = !this.state.dataLoaded || speculateTransactionInProgress;
-
-    const { listing, bookingDates, transaction } = this.state.pageData;
+    const { listing, transaction, orderData } = this.state.pageData;
     const existingTransaction = ensureTransaction(transaction);
     const speculatedTransaction = ensureTransaction(speculatedTransactionMaybe, {}, null);
     const currentListing = ensureListing(listing);
     const currentAuthor = ensureUser(currentListing.author);
 
+    const processName = existingTransaction.id
+      ? existingTransaction?.attributes?.processName
+      : listing?.id
+      ? listing.attributes.publicData?.transactionProcessAlias?.split('/')[0]
+      : null;
+    const latestProcessName = resolveLatestProcessName(processName);
+
     const listingTitle = currentListing.attributes.title;
-    const title = intl.formatMessage({ id: 'CheckoutPage.title' }, { listingTitle });
+    const title = latestProcessName
+      ? intl.formatMessage({ id: `CheckoutPage.${latestProcessName}.title` }, { listingTitle })
+      : 'Checkout page is loading data';
 
     const pageProps = { title, scrollingDisabled };
-    const topbar = (
-      <div className={css.topbar}>
-        <NamedLink className={css.home} name="LandingPage">
-          <Logo
-            className={css.logoMobile}
-            title={intl.formatMessage({ id: 'CheckoutPage.goToLandingPage' })}
-            format="mobile"
-          />
-          <Logo
-            className={css.logoDesktop}
-            alt={intl.formatMessage({ id: 'CheckoutPage.goToLandingPage' })}
-            format="desktop"
-          />
-        </NamedLink>
-      </div>
-    );
+
+    const isLoading = !this.state.dataLoaded || speculateTransactionInProgress;
 
     if (isLoading) {
-      return <Page {...pageProps}>{topbar}</Page>;
+      return (
+        <Page {...pageProps}>
+          <CustomTopbar intl={intl} />
+        </Page>
+      );
     }
-
     const isOwnListing =
       currentUser &&
       currentUser.id &&
@@ -553,13 +747,7 @@ export class CheckoutPageComponent extends Component {
       currentAuthor.id &&
       currentAuthor.id.uuid === currentUser.id.uuid;
 
-    const hasListingAndAuthor = !!(currentListing.id && currentAuthor.id);
-    const hasBookingDates = !!(
-      bookingDates &&
-      bookingDates.bookingStart &&
-      bookingDates.bookingEnd
-    );
-    const hasRequiredData = hasListingAndAuthor && hasBookingDates;
+    const hasRequiredData = !!(currentListing.id && currentAuthor.id && processName);
     const canShowPage = hasRequiredData && !isOwnListing;
     const shouldRedirect = !isLoading && !canShowPage;
 
@@ -569,33 +757,37 @@ export class CheckoutPageComponent extends Component {
       // eslint-disable-next-line no-console
       console.error('Missing or invalid data for checkout, redirecting back to listing page.', {
         transaction: speculatedTransaction,
-        bookingDates,
         listing,
       });
       return <NamedRedirect name="ListingPage" params={params} />;
     }
 
-    // Show breakdown only when speculated transaction and booking are loaded
-    // (i.e. have an id)
-    const tx = existingTransaction.booking ? existingTransaction : speculatedTransaction;
-    const txBooking = ensureBooking(tx.booking);
-    const timeZone = currentListing.attributes.availabilityPlan
-      ? currentListing.attributes.availabilityPlan.timezone
-      : 'Etc/UTC';
+    // Show breakdown only when (speculated?) transaction is loaded
+    // (i.e. it has an id and lineItems)
+    const tx = existingTransaction.id ? existingTransaction : speculatedTransaction;
+    const timeZone = listing?.attributes?.availabilityPlan?.timezone;
+    const transactionProcessAlias = currentListing.attributes.publicData?.transactionProcessAlias;
+    const unitType = currentListing.attributes.publicData?.unitType;
+    const lineItemUnitType = `line-item/${unitType}`;
+    const dateType = lineItemUnitType === LINE_ITEM_HOUR ? DATE_TYPE_DATETIME : DATE_TYPE_DATE;
+    const txBookingMaybe = tx.booking?.id
+      ? { booking: ensureBooking(tx.booking), dateType, timeZone }
+      : {};
     const breakdown =
-      tx.id && txBooking.id ? (
-        <BookingBreakdown
-          className={css.bookingBreakdown}
+      tx.id && tx.attributes.lineItems?.length > 0 ? (
+        <OrderBreakdown
+          className={css.orderBreakdown}
           userRole="customer"
-          unitType={config.bookingUnitType}
           transaction={tx}
-          booking={txBooking}
-          dateType={DATE_TYPE_DATETIME}
-          timeZone={timeZone}
+          {...txBookingMaybe}
+          currency={config.currency}
+          marketplaceName={config.marketplaceName}
         />
       ) : null;
 
-    const isPaymentExpired = checkIsPaymentExpired(existingTransaction);
+    const process = latestProcessName ? getProcess(latestProcessName) : null;
+    const transitions = process.transitions;
+    const isPaymentExpired = checkIsPaymentExpired(existingTransaction, process);
     const hasDefaultPaymentMethod = !!(
       stripeCustomerFetched &&
       ensureStripeCustomer(currentUser.stripeCustomer).attributes.stripeCustomerId &&
@@ -617,6 +809,15 @@ export class CheckoutPageComponent extends Component {
     const firstImage =
       currentListing.images && currentListing.images.length > 0 ? currentListing.images[0] : null;
 
+    const {
+      aspectWidth = 1,
+      aspectHeight = 1,
+      variantPrefix = 'listing-card',
+    } = config.layout.listingImage;
+    const variants = firstImage
+      ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith(variantPrefix))
+      : [];
+
     const listingLink = (
       <NamedLink
         name="ListingPage"
@@ -626,117 +827,26 @@ export class CheckoutPageComponent extends Component {
       </NamedLink>
     );
 
-    const isAmountTooLowError = isTransactionInitiateAmountTooLowError(initiateOrderError);
-    const isChargeDisabledError = isTransactionChargeDisabledError(initiateOrderError);
-    const isBookingTimeNotAvailableError = isTransactionInitiateBookingTimeNotAvailableError(
-      initiateOrderError
+    const {
+      listingNotFoundErrorMessage,
+      initiateOrderErrorMessage,
+      speculateErrorMessage,
+      speculateTransactionErrorMessage,
+    } = getErrorMessages(
+      listingNotFound,
+      initiateOrderError,
+      speculateTransactionError,
+      listingLink
     );
-    const stripeErrors = transactionInitiateOrderStripeErrors(initiateOrderError);
-
-    let initiateOrderErrorMessage = null;
-    let listingNotFoundErrorMessage = null;
-
-    if (listingNotFound) {
-      listingNotFoundErrorMessage = (
-        <p className={css.notFoundError}>
-          <FormattedMessage id="CheckoutPage.listingNotFoundError" />
-        </p>
-      );
-    } else if (isAmountTooLowError) {
-      initiateOrderErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.initiateOrderAmountTooLow" />
-        </p>
-      );
-    } else if (isBookingTimeNotAvailableError) {
-      initiateOrderErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.bookingTimeNotAvailableMessage" />
-        </p>
-      );
-    } else if (isChargeDisabledError) {
-      initiateOrderErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.chargeDisabledMessage" />
-        </p>
-      );
-    } else if (stripeErrors && stripeErrors.length > 0) {
-      // NOTE: Error messages from Stripes are not part of translations.
-      // By default they are in English.
-      const stripeErrorsAsString = stripeErrors.join(', ');
-      initiateOrderErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage
-            id="CheckoutPage.initiateOrderStripeError"
-            values={{ stripeErrors: stripeErrorsAsString }}
-          />
-        </p>
-      );
-    } else if (initiateOrderError) {
-      // Generic initiate order error
-      initiateOrderErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.initiateOrderError" values={{ listingLink }} />
-        </p>
-      );
-    }
-
-    const speculateTransactionErrorMessage = speculateTransactionError ? (
-      <p className={css.speculateError}>
-        <FormattedMessage id="CheckoutPage.speculateTransactionError" />
-      </p>
-    ) : null;
-    let speculateErrorMessage = null;
-
-    if (isTransactionInitiateMissingStripeAccountError(speculateTransactionError)) {
-      speculateErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.providerStripeAccountMissingError" />
-        </p>
-      );
-    } else if (isTransactionInitiateBookingTimeNotAvailableError(speculateTransactionError)) {
-      speculateErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.bookingTimeNotAvailableMessage" />
-        </p>
-      );
-    } else if (isTransactionZeroPaymentError(speculateTransactionError)) {
-      speculateErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.initiateOrderAmountTooLow" />
-        </p>
-      );
-    } else if (speculateTransactionError) {
-      speculateErrorMessage = (
-        <p className={css.orderError}>
-          <FormattedMessage id="CheckoutPage.speculateFailedMessage" />
-        </p>
-      );
-    }
-
-    const unitType = config.bookingUnitType;
-    const isNightly = unitType === LINE_ITEM_NIGHT;
-    const isDaily = unitType === LINE_ITEM_DAY;
-
-    const unitTranslationKey = isNightly
-      ? 'CheckoutPage.perNight'
-      : isDaily
-      ? 'CheckoutPage.perDay'
-      : 'CheckoutPage.perUnit';
-
-    const price = currentListing.attributes.price;
-    const formattedPrice = formatMoney(intl, price);
-    const detailsSubTitle = `${formattedPrice} ${intl.formatMessage({ id: unitTranslationKey })}`;
 
     const showInitialMessageInput = !(
-      existingTransaction && existingTransaction.attributes.lastTransition === TRANSITION_ENQUIRE
+      existingTransaction && existingTransaction.attributes.lastTransition === transitions.INQUIRE
     );
 
     // Get first and last name of the current user and use it in the StripePaymentForm to autofill the name field
-    const userName =
-      currentUser && currentUser.attributes
-        ? `${currentUser.attributes.profile.firstName} ${currentUser.attributes.profile.lastName}`
-        : null;
+    const userName = currentUser?.attributes?.profile
+      ? `${currentUser.attributes.profile.firstName} ${currentUser.attributes.profile.lastName}`
+      : null;
 
     // If paymentIntent status is not waiting user action,
     // confirmCardPayment has been called previously.
@@ -746,26 +856,38 @@ export class CheckoutPageComponent extends Component {
     // If your marketplace works mostly in one country you can use initial values to select country automatically
     // e.g. {country: 'FI'}
 
-    const initalValuesForStripePayment = { name: userName };
+    const initalValuesForStripePayment = { name: userName, recipientName: userName };
+    const askShippingDetails =
+      orderData?.deliveryMethod === 'shipping' &&
+      !txHasPassedPendingPayment(existingTransaction, process);
 
     return (
       <Page {...pageProps}>
-        {topbar}
+        <CustomTopbar intl={intl} />
         <div className={css.contentContainer}>
-          <div className={css.aspectWrapper}>
+          <AspectRatioWrapper
+            width={aspectWidth}
+            height={aspectHeight}
+            className={css.aspectWrapper}
+          >
             <ResponsiveImage
               rootClassName={css.rootForImage}
               alt={listingTitle}
               image={firstImage}
-              variants={['landscape-crop', 'landscape-crop2x']}
+              variants={variants}
             />
-          </div>
+          </AspectRatioWrapper>
           <div className={classNames(css.avatarWrapper, css.avatarMobile)}>
             <AvatarMedium user={currentAuthor} disableProfileLink />
           </div>
           <div className={css.bookListingContainer}>
-            <div className={css.heading}>
-              <h1 className={css.title}>{title}</h1>
+            <div className={css.headingContainer}>
+              <H3 as="h1" className={css.heading}>
+                {title}
+              </H3>
+              <H4 as="h2" className={css.detailsHeadingMobile}>
+                <FormattedMessage id="CheckoutPage.listingTitle" values={{ listingTitle }} />
+              </H4>
             </div>
 
             <div className={css.priceBreakdownContainer}>
@@ -788,10 +910,9 @@ export class CheckoutPageComponent extends Component {
               {showPaymentForm ? (
                 <StripePaymentForm
                   className={css.paymentForm}
-                  onSubmit={this.handleSubmit}
+                  onSubmit={values => this.handleSubmit(values, process)}
                   inProgress={this.state.submitting}
                   formId="CheckoutPagePaymentForm"
-                  paymentInfo={intl.formatMessage({ id: 'CheckoutPage.paymentInfo' })}
                   authorDisplayName={currentAuthor.attributes.profile.displayName}
                   showInitialMessageInput={showInitialMessageInput}
                   initialValues={initalValuesForStripePayment}
@@ -804,7 +925,16 @@ export class CheckoutPageComponent extends Component {
                     hasDefaultPaymentMethod ? currentUser.stripeCustomer.defaultPaymentMethod : null
                   }
                   paymentIntent={paymentIntent}
-                  onStripeInitialized={this.onStripeInitialized}
+                  onStripeInitialized={stripe => this.onStripeInitialized(stripe, process)}
+                  askShippingDetails={askShippingDetails}
+                  showPickUplocation={orderData?.deliveryMethod === 'pickup'}
+                  listingLocation={currentListing?.attributes?.publicData?.location}
+                  totalPrice={tx.id ? getFormattedTotalPrice(tx, intl) : null}
+                  locale={config.localization.locale}
+                  stripePublishableKey={config.stripe.publishableKey}
+                  marketplaceName={config.marketplaceName}
+                  isBooking={isBookingProcessAlias(transactionProcessAlias)}
+                  isFuzzyLocation={config.maps.fuzzy.enabled}
                 />
               ) : null}
               {isPaymentExpired ? (
@@ -819,22 +949,38 @@ export class CheckoutPageComponent extends Component {
           </div>
 
           <div className={css.detailsContainerDesktop}>
-            <div className={css.detailsAspectWrapper}>
+            <AspectRatioWrapper
+              width={aspectWidth}
+              height={aspectHeight}
+              className={css.detailsAspectWrapper}
+            >
               <ResponsiveImage
                 rootClassName={css.rootForImage}
                 alt={listingTitle}
                 image={firstImage}
-                variants={['landscape-crop', 'landscape-crop2x']}
+                variants={variants}
               />
+            </AspectRatioWrapper>
+            <div className={css.listingDetailsWrapper}>
+              <div className={css.avatarWrapper}>
+                <AvatarMedium user={currentAuthor} disableProfileLink />
+              </div>
+              <div className={css.detailsHeadings}>
+                <H4 as="h2">
+                  <NamedLink
+                    name="ListingPage"
+                    params={{ id: currentListing.id?.uuid, slug: createSlug(listingTitle) }}
+                  >
+                    {listingTitle}
+                  </NamedLink>
+                </H4>
+              </div>
+              {speculateTransactionErrorMessage}
+              <H6 as="h3" className={css.orderBreakdownTitle}>
+                <FormattedMessage id={`CheckoutPage.${latestProcessName}.orderBreakdown`} />
+              </H6>
+              <hr className={css.totalDivider} />
             </div>
-            <div className={css.avatarWrapper}>
-              <AvatarMedium user={currentAuthor} disableProfileLink />
-            </div>
-            <div className={css.detailsHeadings}>
-              <h2 className={css.detailsTitle}>{listingTitle}</h2>
-              <p className={css.detailsSubtitle}>{detailsSubTitle}</p>
-            </div>
-            {speculateTransactionErrorMessage}
             {breakdown}
           </div>
         </div>
@@ -847,8 +993,7 @@ CheckoutPageComponent.defaultProps = {
   initiateOrderError: null,
   confirmPaymentError: null,
   listing: null,
-  bookingData: {},
-  bookingDates: null,
+  orderData: {},
   speculateTransactionError: null,
   speculatedTransaction: null,
   transaction: null,
@@ -859,11 +1004,7 @@ CheckoutPageComponent.defaultProps = {
 CheckoutPageComponent.propTypes = {
   scrollingDisabled: bool.isRequired,
   listing: propTypes.listing,
-  bookingData: object,
-  bookingDates: shape({
-    bookingStart: instanceOf(Date).isRequired,
-    bookingEnd: instanceOf(Date).isRequired,
-  }),
+  orderData: object,
   fetchStripeCustomer: func.isRequired,
   stripeCustomerFetched: bool.isRequired,
   fetchSpeculatedTransaction: func.isRequired,
@@ -891,20 +1032,42 @@ CheckoutPageComponent.propTypes = {
   // from connect
   dispatch: func.isRequired,
 
-  // from injectIntl
+  // from useIntl
   intl: intlShape.isRequired,
 
-  // from withRouter
+  // from useConfiguration
+  config: object.isRequired,
+
+  // from useRouteConfiguration
+  routeConfiguration: arrayOf(propTypes.route).isRequired,
+
+  // from useHistory
   history: shape({
     push: func.isRequired,
   }).isRequired,
 };
 
+const EnhancedCheckoutPage = props => {
+  const config = useConfiguration();
+  const routeConfiguration = useRouteConfiguration();
+  const intl = useIntl();
+  const history = useHistory();
+
+  return (
+    <CheckoutPageComponent
+      config={config}
+      routeConfiguration={routeConfiguration}
+      intl={intl}
+      history={history}
+      {...props}
+    />
+  );
+};
+
 const mapStateToProps = state => {
   const {
     listing,
-    bookingData,
-    bookingDates,
+    orderData,
     stripeCustomerFetched,
     speculateTransactionInProgress,
     speculateTransactionError,
@@ -919,8 +1082,7 @@ const mapStateToProps = state => {
     scrollingDisabled: isScrollingDisabled(state),
     currentUser,
     stripeCustomerFetched,
-    bookingData,
-    bookingDates,
+    orderData,
     speculateTransactionInProgress,
     speculateTransactionError,
     speculatedTransaction,
@@ -936,31 +1098,31 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   dispatch,
-  fetchSpeculatedTransaction: (params, transactionId) =>
-    dispatch(speculateTransaction(params, transactionId)),
+  fetchSpeculatedTransaction: (params, processAlias, txId, transitionName, isPrivileged) =>
+    dispatch(speculateTransaction(params, processAlias, txId, transitionName, isPrivileged)),
   fetchStripeCustomer: () => dispatch(stripeCustomer()),
-  onInitiateOrder: (params, transactionId) => dispatch(initiateOrder(params, transactionId)),
+  onInitiateOrder: (params, processAlias, transactionId, transitionName, isPrivileged) =>
+    dispatch(initiateOrder(params, processAlias, transactionId, transitionName, isPrivileged)),
   onRetrievePaymentIntent: params => dispatch(retrievePaymentIntent(params)),
   onConfirmCardPayment: params => dispatch(confirmCardPayment(params)),
-  onConfirmPayment: params => dispatch(confirmPayment(params)),
+  onConfirmPayment: (transactionId, transitionName, transitionParams) =>
+    dispatch(confirmPayment(transactionId, transitionName, transitionParams)),
   onSendMessage: params => dispatch(sendMessage(params)),
   onSavePaymentMethod: (stripeCustomer, stripePaymentMethodId) =>
     dispatch(savePaymentMethod(stripeCustomer, stripePaymentMethodId)),
 });
 
 const CheckoutPage = compose(
-  withRouter,
   connect(
     mapStateToProps,
     mapDispatchToProps
-  ),
-  injectIntl
-)(CheckoutPageComponent);
+  )
+)(EnhancedCheckoutPage);
 
 CheckoutPage.setInitialValues = (initialValues, saveToSessionStorage = false) => {
   if (saveToSessionStorage) {
-    const { listing, bookingData, bookingDates } = initialValues;
-    storeData(bookingData, bookingDates, listing, null, STORAGE_KEY);
+    const { listing, orderData } = initialValues;
+    storeData(orderData, listing, null, STORAGE_KEY);
   }
 
   return setInitialValues(initialValues);

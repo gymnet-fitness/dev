@@ -20,7 +20,7 @@
   align-items: center;
 
   /* fill */
-  background-color: var(--matterColorLight);
+  background-color: var(--colorWhite);
 
   /* shadows */
   box-shadow: var(--boxShadow);
@@ -28,11 +28,6 @@
   @media (--viewportMedium) {
     display: none;
   }
-}
-
-.home {
-  display: flex;
-  padding: calc((var(--topbarHeight) - var(--Topbar_logoHeight)) / 2) 24px;
 }
 
 .logoutButton {
@@ -44,7 +39,7 @@
 .searchMenu {
   /* Font */
   composes: h5 from global;
-  color: var(--matterColor);
+  color: var(--colorGrey700);
 
   /* Layout */
   display: flex;
@@ -93,8 +88,8 @@
   right: 17px;
 
   /* Style: red dot with white border */
-  background-color: var(--failColor);
-  border: 2px solid var(--matterColorLight);
+  background-color: var(--colorFail);
+  border: 2px solid var(--colorWhite);
 
   animation-name: notificationPop;
   animation-duration: 0.1s;
@@ -127,10 +122,10 @@
 
 /* Icon component styles */
 .rootMenuIcon {
-  fill: var(--matterColor);
+  fill: var(--colorGrey700);
 }
 .rootSearchIcon {
-  stroke: var(--matterColor);
+  stroke: var(--colorGrey700);
 }
 
 .searchContainer {
@@ -140,7 +135,7 @@
 }
 
 .mobileHelp {
-  color: var(--matterColorAnti);
+  color: var(--colorGrey300);
   margin: 0 24px;
 
   /* Absolute position to avoid affecting the layout of the autocomplete
@@ -203,10 +198,6 @@
   composes: marketplaceModalIconStyles from global;
 }
 
-.reminderModalLinkButton {
-  composes: button buttonFont buttonText buttonBorders buttonColorsPrimary from global;
-}
-
 .genericError {
   position: fixed;
   top: calc(var(--topbarHeight) + 15px);
@@ -225,7 +216,7 @@
   /* Bleed the bg color from the bottom */
   padding-bottom: 4px;
   background-color: var(--marketplaceColor);
-  border-radius: 4px;
+  border-radius: var(--borderRadiusMedium);
 
   /* Place on top of everything */
   z-index: var(--zIndexGenericError);
@@ -242,16 +233,15 @@
 
 .genericErrorContent {
   padding: 16px 22px;
-  border-radius: 4px;
   background-color: var(--marketplaceColorLight);
-  border-radius: 4px;
+  border-radius: var(--borderRadiusMedium);
 }
 
 .genericErrorText {
   composes: h5 from global;
   font-weight: var(--fontWeightSemiBold);
   margin: 0;
-  color: var(--matterColorLight);
+  color: var(--colorWhite);
 
   @media (--viewportMedium) {
     margin: 0;

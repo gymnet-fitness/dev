@@ -6,21 +6,25 @@
   & :global(.SingleDatePicker) {
     display: block;
   }
+
   & :global(.SingleDatePicker_picker__directionLeft) {
     /* !important is added to top because react-dates uses inline style for height */
     /* Similar problem as in issue: https://github.com/airbnb/react-dates/issues/947 */
-    top: 36px !important;
-    width: 100%;
-    min-height: calc(100vh - 252px);
+    box-shadow: var(--boxShadowButton);
+    left: unset !important;
+    width: calc(100% - 48px);
     background-color: var(--marketplaceColor);
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
 
     @media (--viewportMedium) {
       /* !important is added to top because react-dates uses inline style for height */
       /* Similar problem as in issue: https://github.com/airbnb/react-dates/issues/947 */
-      top: 40px !important;
+      top: 48px !important;
+      width: 100%;
       min-height: auto;
       box-shadow: var(--boxShadowPopup);
-      border-radius: 0 0 2px 2px;
+      border-radius: 0 0 6px 6px;
     }
   }
 
@@ -31,35 +35,49 @@
     line-height: 24px;
     letter-spacing: -0.1px;
 
-    /* Dimensions */
     display: block;
     width: 100%;
+
+    padding: 5px 0 5px 30px;
     margin: 0;
-    padding: 5px 0 5px 0;
+    border-radius: 6px;
+    border: 1px solid #d8dce6;
+    background-color: #fff;
+    outline: none;
 
-    /* Borders */
-    border: none;
-    border-radius: 0;
-    border-bottom-style: solid;
-    border-bottom-width: 2px;
-    border-bottom-color: var(--attentionColor);
+    transition: all 0.1s ease-in-out;
 
-    transition: border-bottom-color var(--transitionStyle);
-    transition: all 0.15s ease-out;
-    background: none;
     background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g stroke="%234A4A4A" transform="translate(1 1)"><rect stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" x=".292" y="1.459" width="13.417" height="12.25" rx="1"/><path d="M3.208.292V3.21M10.792.292V3.21M.292 4.376h13.416" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="6.5" width="1" height="1" rx=".5"/><rect x="6.5" y="6.5" width="1" height="1" rx=".5"/><rect x="9.5" y="6.5" width="1" height="1" rx=".5"/><rect x="3.5" y="9.5" width="1" height="1" rx=".5"/><rect x="6.5" y="9.5" width="1" height="1" rx=".5"/><rect x="9.5" y="9.5" width="1" height="1" rx=".5"/></g></g></svg>');
     background-repeat: no-repeat;
-    background-position: 0 10px;
-    padding-left: 24px;
+    background-position: 8px 8px;
+
+    &:hover {
+      border: 1px solid #b8bfd1;
+      transition: all ease-in-out 100ms;
+    }
+    &:focus {
+      border-radius: 6px 6px 0 0;
+      border-color: #80bdff;
+      box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
+      transition: all ease-in-out 100ms;
+    }
 
     &::placeholder {
-      color: var(--matterColorAnti);
+      color: var(--colorGrey300);
     }
 
     @media (--viewportMedium) {
+      background-position: 8px 13px;
+      font-size: 16px;
       line-height: 32px;
-      padding: 4px 0 1px 26px;
-      border-bottom-width: 3px;
+      padding: 7px 0 7px 32px;
+
+      &:focus {
+        border-radius: 6px 6px 0 0;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
+        transition: all ease-in-out 100ms;
+      }
     }
   }
 
@@ -98,7 +116,7 @@
   }
 
   & :global(.DayPickerNavigation_button) {
-    color: var(--matterColorLight);
+    color: var(--colorWhite);
     border: 0;
   }
 
@@ -111,19 +129,19 @@
     width: 100%;
   }
   & :global(.DayPicker_weekHeader) {
-    color: var(--matterColorLight);
+    color: var(--colorWhite);
     top: 57px;
   }
 
   & :global(.DayPicker_weekHeader_li) {
-    font-weight: 400;
+    font-weight: var(--fontWeightRegular);
   }
 
   & :global(.CalendarMonth_caption) {
-    font-weight: 400;
+    font-weight: var(--fontWeightRegular);
     font-size: 21px;
     line-height: 24px;
-    color: var(--matterColorLight);
+    color: var(--colorWhite);
 
     margin: 1px 0 14px;
 
@@ -147,7 +165,7 @@
     line-height: 24px;
     letter-spacing: 0;
 
-    color: var(--matterColorLight);
+    color: var(--colorWhite);
     border: 0;
     margin-top: 0;
     margin-bottom: 0;
@@ -190,7 +208,7 @@
     align-items: center;
     width: 100%;
     height: var(--DateInput_selectionHeight);
-    background-color: var(--successColor);
+    background-color: var(--colorSuccess);
     transition: all 0.2s ease-out;
   }
   /* Remove default bg-color and use our extra span instead '.renderedDay' */
@@ -204,7 +222,7 @@
     align-items: center;
     width: 100%;
     height: var(--DateInput_selectionHeight);
-    background-color: var(--successColor);
+    background-color: var(--colorSuccess);
     border-radius: calc(var(--DateInput_selectionHeight) / 2);
   }
   /* Remove default bg-color and use our extra span instead '.renderedDay' */
@@ -259,7 +277,7 @@
   & :global(.DateInput_input__disabled) {
     font-family: var(--fontFamily);
     font-weight: var(--fontWeightMedium);
-    font-size: 16px;
+    font-size: 14px;
     line-height: 24px;
     letter-spacing: -0.1px;
 
@@ -267,37 +285,58 @@
     display: block;
     width: 100%;
     margin: 0;
-    padding: 5px 0 5px 24px;
+
+    /* 6 + 24 + 4 + borders are divisible by 6 */
+    padding: 6px 12px 4px 30px;
+    background-color: #fff;
 
     /* Borders */
-    border: none;
+    border-radius: 6px;
+    border: 1px solid #d8dce6;
     border-bottom-style: solid;
-    border-bottom-width: 2px;
-    border-bottom-color: var(--matterColorNegative);
-    border-radius: 0;
+    border-bottom-color: var(--colorGrey100);
+    outline: none;
 
-    /* Effects */
+    /* Transition */
     transition: border-bottom-color var(--transitionStyle);
     transition: all 0.15s ease-out;
 
     background: none;
     background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g stroke="%23E6E6E6" transform="translate(1 1)"><rect stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" x=".292" y="1.459" width="13.417" height="12.25" rx="1"/><path d="M3.208.292V3.21M10.792.292V3.21M.292 4.376h13.416" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="6.5" width="1" height="1" rx=".5"/><rect x="6.5" y="6.5" width="1" height="1" rx=".5"/><rect x="9.5" y="6.5" width="1" height="1" rx=".5"/><rect x="3.5" y="9.5" width="1" height="1" rx=".5"/><rect x="6.5" y="9.5" width="1" height="1" rx=".5"/><rect x="9.5" y="9.5" width="1" height="1" rx=".5"/></g></g></svg>');
     background-repeat: no-repeat;
-    background-position: 0 10px;
+    background-position: 8px 8px;
 
+    /* Effects */
     &:hover {
-      border-bottom-color: var(--matterColorNegative);
+      border: 1px solid #b8bfd1;
+      transition: all ease-in-out 100ms;
+    }
+    &:focus {
+      background-color: #fff;
+      border-color: #80bdff;
+      box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
+      transition: all ease-in-out 100ms;
+    }
+    &:disabled {
+      opacity: 0.5;
+
+      &:hover {
+        cursor: not-allowed;
+      }
     }
 
     @media (--viewportMedium) {
+      font-size: 16px;
       line-height: 32px;
-      padding: 4px 0 9px 24px;
-      border-bottom-width: 3px;
+      /* 7 + 32 + 7 + borders = 48, which is divisible by 8. */
+      padding: 7px 16px 7px 32px;
+      line-height: 32px;
+      background-position: 8px 13px;
     }
   }
 
   & :global(.DateInput_input__disabled::placeholder) {
-    color: var(--matterColorNegative);
+    color: var(--colorGrey100);
     font-style: normal;
   }
 }
@@ -321,8 +360,6 @@
     /* !important is added to top because react-dates uses inline style for height */
     /* Similar problem as in issue: https://github.com/airbnb/react-dates/issues/947 */
     top: 34px !important;
-    border-top: 2px solid var(--matterColorDark);
-    min-height: calc(100vh - 252px + 2px);
 
     @media (--viewportMedium) {
       /* !important is added to top because react-dates uses inline style for height */
@@ -342,6 +379,6 @@
 
 .rootNextMonthIcon,
 .rootPreviousMonthIcon {
-  stroke: var(--matterColorLight);
-  fill: var(--matterColorLight);
+  stroke: var(--colorWhite);
+  fill: var(--colorWhite);
 }

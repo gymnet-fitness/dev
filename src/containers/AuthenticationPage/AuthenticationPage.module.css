@@ -1,21 +1,27 @@
 @import '../../styles/customMediaQueries.css';
 
-.layoutWrapperMain {
-  min-height: calc(100vh - var(--topbarHeight));
-
-  @media (--viewportMedium) {
-    min-height: calc(100vh - var(--topbarHeightDesktop));
-  }
+.root {
+  flex-grow: 1;
 }
 
-.root {
+.contentContainer {
   composes: marketplaceModalRootStyles from global;
-  composes: defaultBackgroundImageForDesktop from global;
+  height: calc(100vh - 60px);
+
+  @media (--viewportMedium) {
+    height: unset;
+  }
 }
 
 .content {
   composes: marketplaceModalBaseStyles from global;
   padding-top: 29px;
+
+  @media (--viewportMedium) {
+    margin-top: 5vh;
+    margin-bottom: 7.5vh;
+    min-height: 700px;
+  }
 }
 
 /* ================ Tabs & Form ================ */
@@ -28,10 +34,12 @@
 
 .tab {
   composes: marketplaceModalTitleStyles from global;
+  padding: 0;
   margin-top: 0;
   margin-bottom: 0;
 
   @media (--viewportMedium) {
+    padding: 0;
     margin-top: 0;
   }
 }
@@ -90,6 +98,7 @@
 
 /* Terms of Service modal*/
 
+.privacyWrapper,
 .termsWrapper {
   width: 100%;
   padding-top: 40px;
@@ -97,15 +106,6 @@
   @media (--viewportMedium) {
     width: 604px;
     padding-top: 11px;
-  }
-}
-
-.termsHeading {
-  composes: h1 from global;
-  margin: 0 0 19px 0;
-
-  @media (--viewportMedium) {
-    margin: 0 0 19px 0;
   }
 }
 
@@ -151,6 +151,12 @@
 /* Make the email pop */
 .email {
   font-weight: var(--fontWeightHighlightEmail);
+
+  /* fallback option */
+  word-break: break-all;
+  /* use break-word if available */
+  word-break: break-word;
+  hyphens: auto;
 }
 
 /* Helper links */
@@ -188,15 +194,15 @@
   margin-top: 0;
   margin-bottom: 0;
   padding-top: 16px;
-  color: var(--matterColorDark);
+  color: var(--colorBlack);
 
   @media (--viewportMedium) {
+    padding: 0;
     margin-top: 6px;
   }
 }
 
 .confirmInfoText {
-  composes: h4 from global;
 }
 
 .buttonIcon {
@@ -218,7 +224,7 @@
   margin: 28px 0 20px 0;
   text-align: center;
   position: relative;
-  background-color: var(--matterColorLight);
+  background-color: var(--colorWhite);
 
   &:after {
     content: '';
@@ -239,7 +245,7 @@
 }
 
 .socialButtonsOrText {
-  background-color: var(--matterColorLight);
+  background-color: var(--colorWhite);
   width: auto;
   display: inline-block;
   z-index: 3;

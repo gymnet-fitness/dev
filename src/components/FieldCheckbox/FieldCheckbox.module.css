@@ -1,3 +1,5 @@
+@import '../../styles/customMediaQueries.css';
+
 .root {
   position: relative;
 }
@@ -19,7 +21,14 @@
   &:hover + label .boxSuccess,
   &:focus + label .boxSuccess,
   &:checked + label .boxSuccess {
-    stroke: var(--successColor);
+    stroke: var(--colorSuccess);
+  }
+
+  /* disabled version */
+  &:hover + label .boxDisabled,
+  &:focus + label .boxDisabled,
+  &:checked + label .boxDisabled {
+    stroke: var(--colorGrey300);
   }
 
   /* Display the "check" when checked */
@@ -32,7 +41,14 @@
   /* Display the "check" when checked */
   &:checked + label .checkedSuccess {
     display: inline;
-    stroke: var(--successColor);
+    stroke: var(--colorSuccess);
+    stroke-width: 1px;
+  }
+
+  /* Display the disabled when checked */
+  &:checked + label .checkedDisabled {
+    display: inline;
+    stroke: var(--colorGrey300);
     stroke-width: 1px;
   }
 
@@ -40,7 +56,7 @@
   &:focus + label .text,
   &:hover + label .text,
   &:checked + label .text {
-    color: var(--matterColorDark);
+    color: var(--colorBlack);
   }
 }
 
@@ -51,15 +67,18 @@
 }
 
 .checkboxWrapper {
-  /* This should follow line-height */
   height: 32px;
   margin-top: -1px;
-  margin-right: 12px;
+  margin-right: 8px;
   align-self: baseline;
 
   display: inline-flex;
   align-items: center;
   cursor: pointer;
+
+  @media (--viewportMedium) {
+    height: 24px;
+  }
 }
 
 .checked {
@@ -68,19 +87,26 @@
 }
 .checkedSuccess {
   display: none;
-  fill: var(--successColor);
+  fill: var(--colorSuccess);
 }
 
+.checkedDisabled {
+  display: none;
+  fill: var(--colorGrey300);
+}
+
+.boxDisabled,
 .boxSuccess,
 .box {
-  stroke: var(--matterColorAnti);
+  stroke: var(--colorGrey300);
 }
 
 .text {
 }
 .textRoot {
   composes: marketplaceListingAttributeFontStyles from global;
-  color: var(--matterColor);
+  color: var(--colorGrey700);
+  padding: 0;
   margin-top: -1px;
   margin-bottom: 1px;
   cursor: pointer;

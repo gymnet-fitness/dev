@@ -1,9 +1,10 @@
 import React from 'react';
 import { string } from 'prop-types';
-import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import classNames from 'classnames';
+
+import { useConfiguration } from '../../context/configurationContext';
+import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import { twitterPageURL } from '../../util/urlHelpers';
-import config from '../../config';
 import {
   IconSocialMediaFacebook,
   IconSocialMediaInstagram,
@@ -15,7 +16,7 @@ import {
 
 import css from './Footer.module.css';
 
-const renderSocialMediaLinks = intl => {
+const renderSocialMediaLinks = (intl, config) => {
   const { siteFacebookPage, siteInstagramPage, siteTwitterHandle } = config;
   const siteTwitterPage = twitterPageURL(siteTwitterHandle);
 
@@ -54,21 +55,20 @@ const renderSocialMediaLinks = intl => {
 };
 
 const Footer = props => {
+  const config = useConfiguration();
   const { rootClassName, className, intl } = props;
-  const socialMediaLinks = renderSocialMediaLinks(intl);
+  const socialMediaLinks = renderSocialMediaLinks(intl, config);
   const classes = classNames(rootClassName || css.root, className);
 
   return (
     <div className={classes}>
       <div className={css.topBorderWrapper}>
         <div className={css.content}>
-          <div className={css.someLiksMobile}>{socialMediaLinks}</div>
+          <div className={css.socialLinksMobile}>{socialMediaLinks}</div>
           <div className={css.links}>
             <div className={css.organization} id="organization">
               <NamedLink name="LandingPage" className={css.logoLink}>
-                <span className={css.logo}>
-                  <Logo format="desktop" />
-                </span>
+                <Logo format="desktop" className={css.logo} />
               </NamedLink>
               <div className={css.organizationInfo}>
                 <p className={css.organizationDescription}>
@@ -84,55 +84,34 @@ const Footer = props => {
             <div className={css.infoLinks}>
               <ul className={css.list}>
                 <li className={css.listItem}>
-                  <NamedLink name="NewListingPage" className={css.link}>
-                    <FormattedMessage id="Footer.toNewListingPage" />
-                  </NamedLink>
-                  </li>
-                <li className={css.listItem}>
-                  <NamedLink name="AboutPage" className={css.link}>
+                  <NamedLink name="CMSPage" params={{ pageId: 'about' }} className={css.link}>
                     <FormattedMessage id="Footer.toAboutPage" />
                   </NamedLink>
                 </li>
-                <li className={css.ListItem}>
-                                  <a href="https://shop.gymnet-fitness.com" className={css.link}>Shop</a>
-                </li>
                 <li className={css.listItem}>
-                  <NamedLink name="FAQPage" className={css.link}>
-                    <FormattedMessage id="Footer.toFAQPage" />
+                  <NamedLink name="SearchPage" className={css.link}>
+                    <FormattedMessage id="Footer.toSearchPage" />
                   </NamedLink>
                 </li>
-                
                 <li className={css.listItem}>
-                  <NamedLink name="AboutPage" to={{ hash: '#contact' }} className={css.link}>
-                    <FormattedMessage id="Footer.toContactPage" />
+                  <NamedLink name="NewListingPage" className={css.link}>
+                    <FormattedMessage id="Footer.toNewListingPage" />
                   </NamedLink>
                 </li>
               </ul>
             </div>
             <div className={css.searches}>
               <ul className={css.list}>
-                              <li className={css.listItem}>
-                                  <NamedLink
-                                      name="SearchPage"
-                                      to={{
-                                          search:
-                                              '?address=Atlanta%2C%20Georgia%2C%20USA&bounds=33.659131000000%2C-84.526561000000%2C33.88173000000%2C-84.348033000000',
-                                      }}
-                                      className={css.link}
-                                  >
-                                      <FormattedMessage id="Footer.searchAtlanta" />
-                                  </NamedLink>
-                              </li>
-                              <li className={css.listItem}>
+                <li className={css.listItem}>
                   <NamedLink
                     name="SearchPage"
                     to={{
                       search:
-                        '?address=Miami%20Beach%2C%20Miami%2C%20Florida%2033125%2C%20United%20States&bounds=25.96759075%2C-80.02646385%2C25.61146077%2C-80.34572239',
+                        '?address=Atlanta%2C%20GA&bounds=33.919%2C-84.244%2C33.587%2C-84.633',
                     }}
                     className={css.link}
                   >
-                    <FormattedMessage id="Footer.searchMiami" />
+                    <FormattedMessage id="Footer.searchAtlanta" />
                   </NamedLink>
                 </li>
                 <li className={css.listItem}>
@@ -140,18 +119,37 @@ const Footer = props => {
                     name="SearchPage"
                     to={{
                       search:
-                        '?address=Chicago%2C%20Illinois%2C%20United%20States&bounds=42.034895347%2C-87.509753018%2C41.644286%2C-87.869226',
+                        '?address=Chicago%2C%20IL&bounds=42.035%2C-87.51%2C41.644%2C-87.869',
                     }}
                     className={css.link}
                   >
                     <FormattedMessage id="Footer.searchChicago" />
                   </NamedLink>
                 </li>
+                <li className={css.listItem}>
+                  <NamedLink
+                    name="SearchPage"
+                    to={{
+                      search:
+                        '?address=Miami%2C%20FL&bounds=25.967%2C-80.026%2C25.611%2C-80.345',
+                    }}
+                    className={css.link}
+                  >
+                    <FormattedMessage id="Footer.searchMiami" />
+                  </NamedLink>
+                </li>
+                
+              </ul>
+            </div>
+            <div className={css.searchesExtra}>
+              <ul className={css.list}>
                 
               </ul>
             </div>
             <div className={css.extraLinks}>
-              <div className={css.someLinks}>{socialMediaLinks}</div>
+              {socialMediaLinks.length > 0 ? (
+                <div className={css.socialLinks}>{socialMediaLinks}</div>
+              ) : null}
               <div className={css.legalMatters}>
                 <ul className={css.tosAndPrivacy}>
                   <li>

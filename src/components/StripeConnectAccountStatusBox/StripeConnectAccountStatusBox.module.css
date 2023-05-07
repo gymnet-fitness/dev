@@ -10,13 +10,11 @@
   flex-wrap: wrap;
 
   padding: 15px 32px 23px 32px;
-  margin-bottom: 24px;
+  margin-bottom: 72px;
 
-  border-radius: 4px;
-}
+  border-radius: var(--borderRadiusMedium);
 
-@media (--viewportMedium) {
-  .verificiationBox {
+  @media (--viewportMedium) {
     flex-wrap: nowrap;
   }
 }
@@ -26,16 +24,14 @@
   flex-wrap: wrap;
   padding: 5px 24px 3px 0px;
   margin-bottom: 16px;
-}
 
-@media (--viewportMedium) {
-  .verificiationBoxTextWrapper {
+  @media (--viewportMedium) {
     margin-bottom: 0px;
   }
 }
 
 .verificationBoxTitle {
-  composes: h4 from global;
+  composes: h5 from global;
   font-weight: var(--fontWeightSemiBold);
 
   align-self: center;
@@ -46,7 +42,7 @@
 }
 
 .verificationBoxText {
-  composes: h4 from global;
+  composes: h5 from global;
   font-weight: var(--fontWeightRegular);
   margin-top: 0;
   margin-bottom: 0;
@@ -56,7 +52,7 @@
   composes: h5 from global;
   font-weight: var(--fontWeightSemiBold);
 
-  border-radius: 4px;
+  border-radius: var(--borderRadiusMedium);
   min-height: 38px;
   width: 300px;
   max-width: 110px;
@@ -64,20 +60,20 @@
 
 /* Verification required box */
 .verficiationNeededBox {
-  border: 1px solid var(--attentionColor);
-  background: var(--attentionColorLight);
+  border: 1px solid var(--colorAttention);
+  background: var(--colorAttentionLight);
 }
 
 /* Verification error box */
 .verficiationErrorBox {
-  background: var(--failColorLight);
-  border: 1px solid var(--failColor);
+  border: var(--borderErrorField);
+  background: var(--colorFailLight);
 }
 
 /* Verification success box */
 .verficiationSuccessBox {
-  background: var(--successColorLight);
-  border: 1px solid var(--successColor);
+  background: var(--colorSuccessLight);
+  border: 1px solid var(--colorSuccess);
   padding: 8px 24px;
 }
 
@@ -86,7 +82,7 @@
 }
 .editVerificationButton {
   composes: h4 from global;
-  color: var(--matterColor);
+  color: var(--colorGrey700);
   font-weight: var(--fontWeightNormal);
   min-height: 46px;
   margin: 0;
@@ -95,7 +91,7 @@
   &:hover,
   &:focus {
     outline: none;
-    color: var(--matterColorDark);
+    color: var(--colorBlack);
   }
 }
 
@@ -104,12 +100,12 @@
 }
 
 .iconEditPencil {
-  stroke: var(--matterColor);
+  stroke: var(--colorGrey700);
 }
 
 .spinner {
   width: 24px;
   height: 24px;
-  stroke: var(--successColor);
+  stroke: var(--colorSuccess);
   stroke-width: 3px;
 }

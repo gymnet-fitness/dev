@@ -34,7 +34,7 @@
  */
 
 import React from 'react';
-import { arrayOf, string } from 'prop-types';
+import { arrayOf, oneOfType, string } from 'prop-types';
 import classNames from 'classnames';
 import { FormattedMessage } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
@@ -43,7 +43,16 @@ import NoImageIcon from './NoImageIcon';
 import css from './ResponsiveImage.module.css';
 
 const ResponsiveImage = props => {
-  const { className, rootClassName, alt, noImageMessage, image, variants, ...rest } = props;
+  const {
+    className,
+    rootClassName,
+    alt,
+    noImageMessage,
+    image,
+    variants,
+    dimensions,
+    ...rest
+  } = props;
   const classes = classNames(rootClassName || css.root, className);
 
   if (image == null || variants.length === 0) {
@@ -88,6 +97,7 @@ ResponsiveImage.defaultProps = {
   className: null,
   rootClassName: null,
   image: null,
+  sizes: null,
   noImageMessage: null,
 };
 
@@ -95,8 +105,9 @@ ResponsiveImage.propTypes = {
   className: string,
   rootClassName: string,
   alt: string.isRequired,
-  image: propTypes.image,
+  image: oneOfType([propTypes.image, propTypes.imageAsset]),
   variants: arrayOf(string).isRequired,
+  sizes: string,
   noImageMessage: string,
 };
 

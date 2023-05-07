@@ -36,11 +36,14 @@ const defaultDirectives = {
     '*.google-analytics.com',
     'stats.g.doubleclick.net',
 
+    'fonts.googleapis.com',
+
     'sentry.io',
     '*.stripe.com',
   ],
   fontSrc: [self, data, 'assets-sharetribecom.sharetribe.com', 'fonts.gstatic.com'],
-  frameSrc: [self, '*.stripe.com'],
+  formAction: [self],
+  frameSrc: [self, '*.stripe.com', '*.youtube-nocookie.com'],
   imgSrc: [
     self,
     data,
@@ -50,8 +53,8 @@ const defaultDirectives = {
     'sharetribe.imgix.net', // Safari 9.1 didn't recognize asterisk rule.
 
     // Styleguide placeholder images
-    'lorempixel.com',
-    'via.placeholder.com',
+    'picsum.photos',
+    '*.picsum.photos',
 
     'api.mapbox.com',
     'maps.googleapis.com',
@@ -64,6 +67,9 @@ const defaultDirectives = {
     'www.google.com',
     'www.google-analytics.com',
     'stats.g.doubleclick.net',
+
+    // Youtube (static image)
+    '*.ytimg.com',
 
     '*.stripe.com',
   ],
@@ -87,13 +93,10 @@ const defaultDirectives = {
  * @param {String} reportUri URL where the browser will POST the
  * policy violation reports
  *
- * @param {Boolean} enforceSsl When SSL is enforced, all mixed content
- * is blocked/reported by the policy
- *
  * @param {Boolean} reportOnly In the report mode, requests are only
  * reported to the report URL instead of blocked
  */
-module.exports = (reportUri, enforceSsl, reportOnly) => {
+module.exports = (reportUri, reportOnly) => {
   // ================ START CUSTOM CSP URLs ================ //
 
   // Add custom CSP whitelisted URLs here. See commented example
@@ -117,12 +120,13 @@ module.exports = (reportUri, enforceSsl, reportOnly) => {
   // https://github.com/helmetjs/helmet/blob/bdb09348c17c78698b0c94f0f6cc6b3968cd43f9/middlewares/content-security-policy/index.ts#L51
 
   const directives = Object.assign({ reportUri: [reportUri] }, defaultDirectives, customDirectives);
-  if (enforceSsl) {
-    directives.blockAllMixedContent = [];
+  if (!reportOnly) {
+    directives.upgradeInsecureRequests = [];
   }
 
   // See: https://helmetjs.github.io/docs/csp/
   return helmet.contentSecurityPolicy({
+    useDefaults: false,
     directives,
     reportOnly,
   });

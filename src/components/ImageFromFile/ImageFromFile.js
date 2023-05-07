@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
+import { any, node, number, string } from 'prop-types';
 import { FormattedMessage } from '../../util/reactIntl';
 import classNames from 'classnames';
-import { Promised } from '../../components';
+
+import { AspectRatioWrapper, Promised } from '../../components';
 
 import css from './ImageFromFile.module.css';
 
@@ -21,57 +22,47 @@ const readImage = file =>
   });
 
 // Create elements out of given thumbnail file
-class ImageFromFile extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      promisedImage: readImage(this.props.file),
-    };
-  }
+const ImageFromFile = props => {
+  const [promisedImage, setPromisedImage] = useState(readImage(props.file));
+  const { className, rootClassName, aspectWidth, aspectHeight, file, id, children } = props;
+  const classes = classNames(rootClassName || css.root, className);
 
-  render() {
-    const { className, rootClassName, aspectRatioClassName, file, id, children } = this.props;
-    const classes = classNames(rootClassName || css.root, className);
-    const aspectRatioClasses = aspectRatioClassName || css.aspectWrapper;
-    return (
-      <Promised
-        key={id}
-        promise={this.state.promisedImage}
-        renderFulfilled={dataURL => {
-          return (
-            <div className={classes}>
-              <div className={css.threeToTwoWrapper}>
-                <div className={aspectRatioClasses}>
-                  <img src={dataURL} alt={file.name} className={css.rootForImage} />
-                </div>
-              </div>
-              {children}
-            </div>
-          );
-        }}
-        renderRejected={() => (
+  return (
+    <Promised
+      key={id}
+      promise={promisedImage}
+      renderFulfilled={dataURL => {
+        return (
           <div className={classes}>
-            <FormattedMessage id="ImageFromFile.couldNotReadFile" />
+            <AspectRatioWrapper width={aspectWidth} height={aspectHeight}>
+              <img src={dataURL} alt={file.name} className={css.rootForImage} />
+            </AspectRatioWrapper>
+            {children}
           </div>
-        )}
-      />
-    );
-  }
-}
+        );
+      }}
+      renderRejected={() => (
+        <div className={classes}>
+          <FormattedMessage id="ImageFromFile.couldNotReadFile" />
+        </div>
+      )}
+    />
+  );
+};
 
 ImageFromFile.defaultProps = {
   className: null,
   children: null,
   rootClassName: null,
-  aspectRatioClassName: null,
+  aspectWidth: 1,
+  aspectHeight: 1,
 };
-
-const { any, node, string } = PropTypes;
 
 ImageFromFile.propTypes = {
   className: string,
   rootClassName: string,
-  aspectRatioClassName: string,
+  aspectWidth: number,
+  aspectHeight: number,
   file: any.isRequired,
   id: string.isRequired,
   children: node,

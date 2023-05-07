@@ -30,7 +30,7 @@
 }
 
 .reviewContent {
-  composes: h4 from global;
+  composes: textSmall from global;
   font-style: italic;
   margin: 0;
   white-space: pre-line;
@@ -40,7 +40,7 @@
   composes: h5 from global;
   margin-top: 10px;
   margin-bottom: 0px;
-  color: var(--matterColorAnti);
+  color: var(--colorGrey300);
 
   @media (--viewportMedium) {
     margin-top: 9px;
@@ -73,11 +73,10 @@
 .desktopReviewRatingWrapper {
   /* For aligning rating starts in the middle
    * of a paragraph line */
-  position: relative;
   display: none;
 
   @media (--viewportMedium) {
-    display: inline;
+    display: inline-flex;
   }
 }
 
@@ -85,8 +84,6 @@
   /* For aligning rating starts in the middle
    * of a paragraph line */
   display: inline-flex;
-  position: absolute;
-  top: 4px;
   white-space: nowrap;
 }
 

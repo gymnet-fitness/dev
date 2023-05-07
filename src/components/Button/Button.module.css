@@ -1,21 +1,25 @@
 @import '../../styles/customMediaQueries.css';
 
 .root {
-  composes: button buttonFont buttonText buttonBorders buttonColors from global;
+  composes: buttonDefault from global;
 
   /* Clear padding that is set for link elements looking like buttons */
   padding: 0;
 }
 
 .primaryButtonRoot {
-  composes: button buttonFont buttonText buttonBorders buttonColorsPrimary from global;
+  composes: buttonPrimary from global;
 
   /* Clear padding that is set for link elements looking like buttons */
   padding: 0;
 }
 
+.primaryButtonInlineRoot {
+  composes: buttonPrimaryInline from global;
+}
+
 .secondaryButtonRoot {
-  composes: button buttonFont buttonText buttonBordersSecondary buttonColorsSecondary from global;
+  composes: buttonSecondary from global;
 
   /* We must lift up the text from the center since it looks better with
    the button border. Also clears the top padding set for link
@@ -23,14 +27,23 @@
   padding: 0 0 2px 0;
 }
 
+.secondaryButtonInlineRoot {
+  composes: buttonSecondaryInline from global;
+
+  margin: 17px 0 0 0;
+}
+
 .inlineTextButtonRoot {
-  composes: a from global;
+  composes: a textSmall from global;
 }
 
 .primaryButton {
   /* Class handle for primary button state styles */
 }
 .secondaryButton {
+  /* Class handle for secondary button state styles */
+}
+.secondaryButtonInline {
   /* Class handle for secondary button state styles */
 }
 
@@ -43,11 +56,12 @@
 }
 
 .primaryButton.inProgress:disabled {
-  background-color: var(--successColor);
+  background-color: var(--colorSuccess);
 }
 
-.secondaryButton.inProgress:disabled {
-  background-color: var(--matterColorLight);
+.secondaryButton.inProgress:disabled,
+.secondaryButtonInline.inProgress:disabled {
+  background-color: var(--colorWhite);
 }
 
 .ready {
@@ -59,24 +73,25 @@
 }
 
 .primaryButton.ready:disabled {
-  background-color: var(--successColor);
+  background-color: var(--colorSuccess);
 }
 
-.secondaryButton.ready:disabled {
-  background-color: var(--matterColorLight);
+.secondaryButton.ready:disabled,
+.secondaryButtonInline.ready:disabled {
+  background-color: var(--colorWhite);
 }
 
 .spinner {
   width: 28px;
   height: 28px;
-  stroke: var(--matterColorLight);
+  stroke: var(--colorWhite);
   stroke-width: 3px;
 }
 
 .checkmark {
   width: 24px;
   height: 24px;
-  stroke: var(--matterColorLight);
+  stroke: var(--colorWhite);
 
   /* Animation */
   animation-name: checkmarkAnimation;
@@ -99,44 +114,64 @@
   }
 }
 
-.secondaryButton .spinner {
-  stroke: var(--matterColorAnti);
+.secondaryButton .spinner,
+.secondaryButtonInline .spinner {
+  stroke: var(--colorGrey300);
 }
 
-.secondaryButton .checkmark {
-  stroke: var(--matterColorAnti);
+.secondaryButton .checkmark,
+.secondaryButtonInline .checkmark {
+  stroke: var(--colorGrey300);
 }
 
 /* Social logins && SSO buttons */
 
 .socialButtonRoot {
-  composes: button buttonFont buttonText from global;
-
+  display: block;
+  width: 100%;
   min-height: 48px;
+  margin: 0;
 
-  background-color: var(--matterColorLight);
-  color: var(--matterColorDark);
+  padding: 0;
 
+  transition: all var(--transitionStyleButton);
+  cursor: pointer;
+
+  font-family: var(--fontFamily);
   font-weight: var(--fontWeightMedium);
   font-size: 14px;
+  line-height: 24px;
+
+  text-align: center;
+  text-decoration: none;
 
   border: 1px solid #d2d2d2;
-  border-radius: 4px;
+  border-radius: var(--borderRadiusMedium);
+
+  background-color: var(--colorWhite);
+  color: var(--colorBlack);
 
   /* We need to add this to position the icon inside button */
   position: relative;
 
-  @media (--viewportMedium) {
-    padding: 0;
-  }
-
   &:hover,
   &:focus {
-    background-color: var(--matterColorLight);
+    outline: none;
+    box-shadow: var(--boxShadowButton);
+    background-color: var(--colorWhite);
+    text-decoration: none;
   }
   &:disabled {
-    background-color: var(--matterColorNegative);
-    color: var(--matterColorLight);
+    box-shadow: none;
+    cursor: not-allowed;
+    background-color: var(--colorGrey100);
+    color: var(--colorWhite);
+  }
+
+  @media (--viewportMedium) {
+    font-size: 16px;
+    line-height: 24px;
+    padding: 0;
   }
 }
 

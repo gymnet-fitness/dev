@@ -23,12 +23,9 @@
   white-space: nowrap;
 
   /* Font */
-  font-weight: var(--fontWeightMedium);
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0;
+  composes: textSmall from global;
 
-  color: var(--matterColor);
+  color: var(--colorGrey700);
   padding-bottom: 10px;
   padding-top: 10px;
 
@@ -40,12 +37,12 @@
   border-bottom-color: transparent;
 
   transition: var(--transitionStyleButton);
-  background-image: url("data:image/svg+xml;utf8,<svg width='4' height='32' viewBox='0 0 4 32' xmlns='http://www.w3.org/2000/svg'><path d='M0 0h4v32H0z' fill='var(--marketplaceColorEncoded)' fill-rule='evenodd'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg width='4' height='32' viewBox='0 0 4 32' xmlns='http://www.w3.org/2000/svg'><path d='M0 0h4v32H0z' fill='%234a4a4a' fill-rule='evenodd'/></svg>");
   background-position: calc(var(--TabNav_linkWidth) + 4px) center; /* SelectedLink's width (200px) + border thickness (4px) = 204px */
 
   &:hover {
     text-decoration: none;
-    color: var(--matterColorDark);
+    color: var(--colorBlack);
   }
 
   @media (--viewportLarge) {
@@ -58,19 +55,19 @@
     margin-top: 0;
     margin-bottom: 16px;
 
-    padding-top: 6px; /* Drop the text to adjust it to correct baseline */
-    padding-bottom: 2px;
+    padding-top: 5px; /* Drop the text to adjust it to correct baseline */
+    padding-bottom: 3px;
 
     &:hover {
-      background-image: url("data:image/svg+xml;utf8,<svg width='4' height='32' viewBox='0 0 4 32' xmlns='http://www.w3.org/2000/svg'><path d='M0 0h4v32H0z' fill='var(--marketplaceColorEncoded)' fill-rule='evenodd'/></svg>");
+      background-image: url("data:image/svg+xml;utf8,<svg width='4' height='32' viewBox='0 0 4 32' xmlns='http://www.w3.org/2000/svg'><path d='M0 0h4v32H0z' fill='%234a4a4a' fill-rule='evenodd'/></svg>");
       background-position: right center;
     }
   }
 }
 
 .selectedLink {
-  border-bottom-color: var(--matterColorDark);
-  color: var(--matterColorDark);
+  border-bottom-color: var(--colorBlack);
+  color: var(--colorBlack);
 
   @media (--viewportLarge) {
     width: var(--TabNav_linkWidth);
@@ -78,7 +75,7 @@
     background-position: right center;
 
     &:hover {
-      background-image: url("data:image/svg+xml;utf8,<svg width='4' height='32' viewBox='0 0 4 32' xmlns='http://www.w3.org/2000/svg'><path d='M0 0h4v32H0z' fill='%23000' fill-rule='evenodd'/></svg>");
+      background-image: url("data:image/svg+xml;utf8,<svg width='4' height='32' viewBox='0 0 4 32' xmlns='http://www.w3.org/2000/svg'><path d='M0 0h4v32H0z' fill='%234a4a4a' fill-rule='evenodd'/></svg>");
       background-position: right center;
     }
   }
@@ -86,6 +83,6 @@
 
 .disabled {
   pointer-events: none;
-  color: var(--matterColorAnti);
+  color: var(--colorGrey300);
   text-decoration: none;
 }

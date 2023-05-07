@@ -11,55 +11,46 @@
   }
 }
 
-.threeToTwoWrapper {
-  /* Layout */
-  display: block;
-  width: 100%;
-  position: relative;
+.aspectRatioWrapper {
   transition: var(--transitionStyleButton);
+  background: var(--colorGrey100); /* Loading BG color */
+  border-radius: var(--borderRadiusMedium);
 
-  &:hover {
-    transform: scale(1.02);
-    box-shadow: var(--boxShadowListingCard);
+  @media (--viewportMedium) {
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: var(--boxShadowListingCard);
+    }
   }
 }
 
-/* Firefox doesn't support image aspect ratio inside flexbox */
-.aspectWrapper {
-  padding-bottom: 66.6667%; /* 3:2 Aspect Ratio */
-  background: var(--matterColorNegative); /* Loading BG color */
-}
-
 .rootForImage {
-  /* Layout - image will take space defined by aspect ratio wrapper */
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  border: solid 1px var(--colorGrey100);
+  border-radius: var(--borderRadiusMedium);
   width: 100%;
-  border-radius: var(--borderRadius);
+  height: 100%;
 }
 
 .info {
   /* Layout */
   display: flex;
-  flex-direction: row;
-  padding: 16px 0 2px 0;
+  flex-direction: column;
+  padding: 14px 0 2px 0;
 }
 
 .price {
   /* Layout */
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: flex-start;
   flex-shrink: 0;
-  margin-right: 18px;
+  margin-bottom: 4px;
 }
 
 .priceValue {
   /* Font */
-  composes: h2 from global;
+  composes: textSmall from global;
+  font-weight: var(--fontWeightSemiBold);
 
   /* Remove default margins from font */
   margin-top: 0;
@@ -73,8 +64,13 @@
 
 .perUnit {
   /* Font */
-  composes: marketplaceTinyFontStyles from global;
-  color: var(--matterColor);
+  composes: textSmall from global;
+  font-weight: var(--fontWeightSemiBold);
+
+  color: var(--marketplaceColor);
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
 
   /* Remove default margins from font */
   margin-top: 0;
@@ -93,23 +89,20 @@
 
 .title {
   /* Font */
-  composes: h3 from global;
-  color: var(--matterColor);
-
-  /* Remove default margins from font */
-  margin-top: 0;
-  margin-bottom: 0;
-
-  @media (--viewportMedium) {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
+  composes: textSmall from global;
+  font-weight: var(--fontWeightBold);
+  color: var(--colorGrey700);
+  margin: 0;
 }
 
-.certificateInfo {
+.authorInfo {
   /* Font */
   composes: marketplaceTinyFontStyles from global;
-  color: var(--matterColor);
+  font-weight: var(--fontWeightMedium);
+  color: var(--colorGrey700);
+
+  padding-top: 4px;
+  padding-bottom: 4px;
 
   /* Remove default margins from font */
   margin-top: 0;

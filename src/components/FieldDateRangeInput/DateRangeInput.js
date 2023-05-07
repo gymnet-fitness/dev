@@ -5,27 +5,50 @@
  * N.B. *isOutsideRange* in defaultProps is defining what dates are available to booking.
  */
 import React, { Component } from 'react';
-import { bool, func, instanceOf, oneOf, shape, string, arrayOf } from 'prop-types';
-import { DateRangePicker, isInclusivelyAfterDay, isInclusivelyBeforeDay } from 'react-dates';
-import { intlShape, injectIntl } from '../../util/reactIntl';
+import { bool, func, instanceOf, oneOf, shape, string } from 'prop-types';
+import { DateRangePicker } from 'react-dates';
 import classNames from 'classnames';
 import moment from 'moment';
+
+import { intlShape, injectIntl } from '../../util/reactIntl';
 import { START_DATE, END_DATE } from '../../util/dates';
-import { LINE_ITEM_DAY, propTypes } from '../../util/types';
-import config from '../../config';
-import {
-  isDayBlockedFn,
-  isOutsideRangeFn,
-  isBlockedBetween,
-  apiEndDateToPickerDate,
-  pickerEndDateToApiDate,
-} from './DateRangeInput.helpers';
 
 import { IconArrowHead } from '../../components';
 import css from './DateRangeInput.module.css';
 
 export const HORIZONTAL_ORIENTATION = 'horizontal';
 export const ANCHOR_LEFT = 'left';
+
+// When the unit type is day, the endDate of booking range is exclusive.
+// In the UI picker, we show only inclusive dates
+const apiEndDateToPickerDate = (isDaily, endDate) => {
+  const isValid = endDate instanceof Date;
+
+  // API end dates are exlusive, so we need to shift them with daily
+  // booking.
+  return isValid && isDaily
+    ? moment(endDate).subtract(1, 'days')
+    : isValid
+    ? moment(endDate)
+    : null;
+};
+
+// When the unit type is day, the endDate of booking range is exclusive.
+// In the UI picker, we show only inclusive dates
+const pickerEndDateToApiDate = (isDaily, endDate) => {
+  const isValid = endDate instanceof moment;
+
+  // API end dates are exlusive, so we need to shift them with daily
+  // booking.
+  return isValid && isDaily
+    ? endDate
+        .clone()
+        .add(1, 'days')
+        .toDate()
+    : isValid
+    ? endDate.toDate()
+    : null;
+};
 
 // Since final-form tracks the onBlur event for marking the field as
 // touched (which triggers possible error validation rendering), only
@@ -79,7 +102,8 @@ const defaultProps = {
   daySize: 38,
   isRTL: false,
   initialVisibleMonth: null,
-  firstDayOfWeek: config.i18n.firstDayOfWeek,
+  // This gets default value at FieldDateRangeInput
+  firstDayOfWeek: 0,
   numberOfMonths: 1,
   keepOpenOnDateSelect: false,
   reopenPickerOnClearDates: false,
@@ -98,18 +122,12 @@ const defaultProps = {
   renderDayContents: day => {
     return <span className="renderedDay">{day.format('D')}</span>;
   },
-  minimumNights: 1,
+  minimumNights: 0,
   enableOutsideDays: false,
-  isDayBlocked: () => false,
+  isDayBlocked: () => () => false,
 
-  // outside range -><- today ... today+available days -1 -><- outside range
-  isOutsideRange: day => {
-    const endOfRange = config.dayCountAvailableForBooking - 1;
-    return (
-      !isInclusivelyAfterDay(day, moment()) ||
-      !isInclusivelyBeforeDay(day, moment().add(endOfRange, 'days'))
-    );
-  },
+  // This gets default value at FieldDateRangeInput
+  isOutsideRange: day => false,
   isDayHighlighted: () => {},
 
   // Internationalization props
@@ -118,10 +136,6 @@ const defaultProps = {
   displayFormat: 'ddd, MMM D',
   monthFormat: 'MMMM YYYY',
   weekDayFormat: 'dd',
-  phrases: {
-    closeDatePicker: null, // Handled inside component
-    clearDate: null, // Handled inside component
-  },
 };
 
 class DateRangeInputComponent extends Component {
@@ -152,26 +166,30 @@ class DateRangeInputComponent extends Component {
   }
 
   onDatesChange(dates) {
-    const { unitType, timeSlots } = this.props;
+    const { isDaily, isBlockedBetween } = this.props;
     const { startDate, endDate } = dates;
 
     // both dates are selected, a new start date before the previous start
     // date is selected
     const startDateUpdated =
-      timeSlots &&
+      isBlockedBetween &&
       startDate &&
       endDate &&
       this.state.currentStartDate &&
       startDate.isBefore(this.state.currentStartDate);
 
-    // clear the end date in case a blocked date can be found
-    // between previous start date and new start date
-    const clearEndDate = startDateUpdated
-      ? isBlockedBetween(timeSlots, startDate, moment(this.state.currentStartDate).add(1, 'days'))
-      : false;
+    let startDateAsDate = startDate instanceof moment ? startDate.startOf('day').toDate() : null;
+    let endDateAsDate = pickerEndDateToApiDate(isDaily, endDate);
 
-    const startDateAsDate = moment && moment.isMoment(startDate) ? startDate.toDate() : null;
-    const endDateAsDate = clearEndDate ? null : pickerEndDateToApiDate(unitType, endDate);
+    if (startDateUpdated) {
+      // clear the end date in case a blocked date can be found
+      // between previous start date and new start date
+      const clearEndDate = isBlockedBetween(
+        startDate,
+        moment(this.state.currentStartDate).add(1, 'days')
+      );
+      endDateAsDate = clearEndDate ? null : pickerEndDateToApiDate(isDaily, endDate);
+    }
 
     this.setState(() => ({
       currentStartDate: startDateAsDate,
@@ -197,10 +215,9 @@ class DateRangeInputComponent extends Component {
   }
 
   render() {
-    /* eslint-disable no-unused-vars */
     const {
       className,
-      unitType,
+      isDaily,
       initialDates,
       intl,
       name,
@@ -209,40 +226,23 @@ class DateRangeInputComponent extends Component {
       onBlur,
       onChange,
       onFocus,
-      phrases,
       screenReaderInputMessage,
       useMobileMargins,
       value,
       children,
       render,
-      timeSlots,
+      isBlockedBetween,
+      isDayBlocked,
+      isOutsideRange,
       ...datePickerProps
     } = this.props;
-    /* eslint-enable no-unused-vars */
 
-    const isDaily = unitType === LINE_ITEM_DAY;
     const initialStartMoment = initialDates ? moment(initialDates.startDate) : null;
     const initialEndMoment = initialDates ? moment(initialDates.endDate) : null;
     const startDate =
       value && value.startDate instanceof Date ? moment(value.startDate) : initialStartMoment;
     const endDate =
-      apiEndDateToPickerDate(unitType, value ? value.endDate : null) || initialEndMoment;
-
-    let isDayBlocked = isDayBlockedFn(
-      timeSlots,
-      startDate,
-      endDate,
-      this.state.focusedInput,
-      unitType
-    );
-
-    let isOutsideRange = isOutsideRangeFn(
-      timeSlots,
-      startDate,
-      endDate,
-      this.state.focusedInput,
-      unitType
-    );
+      apiEndDateToPickerDate(isDaily, value ? value.endDate : null) || initialEndMoment;
 
     const startDatePlaceholderTxt =
       startDatePlaceholderText ||
@@ -253,12 +253,6 @@ class DateRangeInputComponent extends Component {
     const screenReaderInputText =
       screenReaderInputMessage ||
       intl.formatMessage({ id: 'FieldDateRangeInput.screenReaderInputMessage' });
-    const closeDatePickerText = phrases.closeDatePicker
-      ? phrases.closeDatePicker
-      : intl.formatMessage({ id: 'FieldDateRangeInput.closeDatePicker' });
-    const clearDateText = phrases.clearDate
-      ? phrases.clearDate
-      : intl.formatMessage({ id: 'FieldDateRangeInput.clearDate' });
 
     const classes = classNames(css.inputRoot, className, {
       [css.withMobileMargins]: useMobileMargins,
@@ -268,6 +262,8 @@ class DateRangeInputComponent extends Component {
       <div className={classes}>
         <DateRangePicker
           {...datePickerProps}
+          isDayBlocked={isDayBlocked(this.state.focusedInput)}
+          isOutsideRange={isOutsideRange(this.state.focusedInput)}
           focusedInput={this.state.focusedInput}
           onFocusChange={this.onFocusChange}
           startDate={startDate}
@@ -277,9 +273,6 @@ class DateRangeInputComponent extends Component {
           startDatePlaceholderText={startDatePlaceholderTxt}
           endDatePlaceholderText={endDatePlaceholderTxt}
           screenReaderInputMessage={screenReaderInputText}
-          phrases={{ closeDatePicker: closeDatePickerText, clearDate: clearDateText }}
-          isDayBlocked={isDayBlocked}
-          isOutsideRange={isOutsideRange}
         />
       </div>
     );
@@ -289,7 +282,6 @@ class DateRangeInputComponent extends Component {
 DateRangeInputComponent.defaultProps = {
   className: null,
   useMobileMargins: false,
-  timeSlots: null,
   ...defaultProps,
 };
 
@@ -297,19 +289,16 @@ DateRangeInputComponent.propTypes = {
   className: string,
   startDateId: string,
   endDateId: string,
-  unitType: propTypes.bookingUnitType.isRequired,
+  isDaily: bool.isRequired,
   focusedInput: oneOf([START_DATE, END_DATE]),
   initialDates: instanceOf(Date),
-  intl: intlShape.isRequired,
   name: string.isRequired,
+  isBlockedBetween: func,
+  isDayBlocked: func,
   isOutsideRange: func,
   onChange: func.isRequired,
   onBlur: func.isRequired,
   onFocus: func.isRequired,
-  phrases: shape({
-    closeDatePicker: string,
-    clearDate: string,
-  }),
   useMobileMargins: bool,
   startDatePlaceholderText: string,
   endDatePlaceholderText: string,
@@ -318,7 +307,9 @@ DateRangeInputComponent.propTypes = {
     startDate: instanceOf(Date),
     endDate: instanceOf(Date),
   }),
-  timeSlots: arrayOf(propTypes.timeSlot),
+
+  // from injectIntl
+  intl: intlShape.isRequired,
 };
 
 export default injectIntl(DateRangeInputComponent);

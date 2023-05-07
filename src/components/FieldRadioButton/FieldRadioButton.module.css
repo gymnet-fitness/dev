@@ -1,3 +1,5 @@
+@import '../../styles/customMediaQueries.css';
+
 .root {
   position: relative;
 }
@@ -19,7 +21,7 @@
   &:focus + label .notChecked,
   &:focus + label .required,
   &:checked + label .required {
-    stroke: var(--matterColorDark);
+    stroke: var(--colorBlack);
   }
 
   &:checked + label .notChecked {
@@ -30,22 +32,28 @@
   &:focus + label .text,
   &:hover + label .text,
   &:checked + label .text {
-    color: var(--matterColorDark);
+    color: var(--colorBlack);
   }
 }
 
 .label {
   display: flex;
   align-items: center;
-  padding-top: 6px;
+  padding-top: 1px;
+  padding-bottom: 5px;
+
+  @media (--viewportMedium) {
+    padding-top: 0px;
+    padding-bottom: 8px;
+  }
 }
 
 .radioButtonWrapper {
   /* This should follow line-height */
-  height: 32px;
-  margin-top: -2px;
+  height: 24px;
+  margin-top: -1px;
   margin-right: 12px;
-  align-self: baseline;
+  align-self: center;
 
   display: inline-flex;
   align-items: center;
@@ -62,14 +70,14 @@
 }
 
 .notChecked {
-  stroke: var(--matterColorAnti);
+  stroke: var(--colorGrey300);
   &:hover {
     stroke: pink;
   }
 }
 
 .required {
-  stroke: var(--attentionColor);
+  stroke: var(--colorAttention);
   &:hover {
     stroke: pink;
   }
@@ -77,7 +85,7 @@
 
 .text {
   composes: marketplaceListingAttributeFontStyles from global;
-  color: var(--matterColor);
+  color: var(--colorGrey700);
   margin-top: -1px;
   margin-bottom: 1px;
   cursor: pointer;

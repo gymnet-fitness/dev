@@ -1,25 +1,20 @@
 import React from 'react';
-import { bool, func } from 'prop-types';
+import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+
 import { FormattedMessage, injectIntl, intlShape } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
 import { ensureCurrentUser } from '../../util/data';
 import { sendVerificationEmail } from '../../ducks/user.duck';
-import {
-  LayoutSideNavigation,
-  LayoutWrapperMain,
-  LayoutWrapperAccountSettingsSideNav,
-  LayoutWrapperTopbar,
-  LayoutWrapperFooter,
-  Footer,
-  Page,
-  UserNav,
-} from '../../components';
-import { ContactDetailsForm } from '../../forms';
-import { TopbarContainer } from '../../containers';
+import { isScrollingDisabled } from '../../ducks/ui.duck';
 
-import { isScrollingDisabled } from '../../ducks/UI.duck';
+import { Footer, H3, Page, UserNav, LayoutSideNavigation } from '../../components';
+
+import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+
+import ContactDetailsForm from './ContactDetailsForm/ContactDetailsForm';
+
 import {
   saveContactDetails,
   saveContactDetailsClear,
@@ -33,7 +28,6 @@ export const ContactDetailsPageComponent = props => {
     savePhoneNumberError,
     saveContactDetailsInProgress,
     currentUser,
-    currentUserListing,
     contactDetailsChanged,
     onChange,
     scrollingDisabled,
@@ -75,27 +69,28 @@ export const ContactDetailsPageComponent = props => {
 
   return (
     <Page title={title} scrollingDisabled={scrollingDisabled}>
-      <LayoutSideNavigation>
-        <LayoutWrapperTopbar>
-          <TopbarContainer
-            currentPage="ContactDetailsPage"
-            desktopClassName={css.desktopTopbar}
-            mobileClassName={css.mobileTopbar}
-          />
-          <UserNav selectedPageName="ContactDetailsPage" listing={currentUserListing} />
-        </LayoutWrapperTopbar>
-        <LayoutWrapperAccountSettingsSideNav currentTab="ContactDetailsPage" />
-        <LayoutWrapperMain>
-          <div className={css.content}>
-            <h1 className={css.title}>
-              <FormattedMessage id="ContactDetailsPage.heading" />
-            </h1>
-            {contactInfoForm}
-          </div>
-        </LayoutWrapperMain>
-        <LayoutWrapperFooter>
-          <Footer />
-        </LayoutWrapperFooter>
+      <LayoutSideNavigation
+        topbar={
+          <>
+            <TopbarContainer
+              currentPage="ContactDetailsPage"
+              desktopClassName={css.desktopTopbar}
+              mobileClassName={css.mobileTopbar}
+            />
+            <UserNav currentPage="ContactDetailsPage" />
+          </>
+        }
+        sideNav={null}
+        useAccountSettingsNav
+        currentPage="ContactDetailsPage"
+        footer={<Footer />}
+      >
+        <div className={css.content}>
+          <H3 as="h1">
+            <FormattedMessage id="ContactDetailsPage.heading" />
+          </H3>
+          {contactInfoForm}
+        </div>
       </LayoutSideNavigation>
     </Page>
   );
@@ -110,12 +105,13 @@ ContactDetailsPageComponent.defaultProps = {
   resetPasswordError: null,
 };
 
+const { bool, func } = PropTypes;
+
 ContactDetailsPageComponent.propTypes = {
   saveEmailError: propTypes.error,
   savePhoneNumberError: propTypes.error,
   saveContactDetailsInProgress: bool.isRequired,
   currentUser: propTypes.currentUser,
-  currentUserListing: propTypes.ownListing,
   contactDetailsChanged: bool.isRequired,
   onChange: func.isRequired,
   onSubmitContactDetails: func.isRequired,
@@ -132,12 +128,7 @@ ContactDetailsPageComponent.propTypes = {
 
 const mapStateToProps = state => {
   // Topbar needs user info.
-  const {
-    currentUser,
-    currentUserListing,
-    sendVerificationEmailInProgress,
-    sendVerificationEmailError,
-  } = state.user;
+  const { currentUser, sendVerificationEmailInProgress, sendVerificationEmailError } = state.user;
   const {
     saveEmailError,
     savePhoneNumberError,
@@ -151,7 +142,6 @@ const mapStateToProps = state => {
     savePhoneNumberError,
     saveContactDetailsInProgress,
     currentUser,
-    currentUserListing,
     contactDetailsChanged,
     scrollingDisabled: isScrollingDisabled(state),
     sendVerificationEmailInProgress,

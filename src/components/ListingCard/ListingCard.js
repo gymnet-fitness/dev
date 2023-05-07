@@ -1,23 +1,26 @@
 import React, { Component } from 'react';
-import { array, string, func } from 'prop-types';
-import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
+import { string, func, bool } from 'prop-types';
 import classNames from 'classnames';
-import { lazyLoadWithDimensions } from '../../util/contextHelpers';
-import { LINE_ITEM_DAY, LINE_ITEM_NIGHT, propTypes } from '../../util/types';
+
+import { useConfiguration } from '../../context/configurationContext';
+
+import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
+import { lazyLoadWithDimensions } from '../../util/uiHelpers';
+import { propTypes } from '../../util/types';
 import { formatMoney } from '../../util/currency';
-import { ensureListing } from '../../util/data';
+import { ensureListing, ensureUser } from '../../util/data';
 import { richText } from '../../util/richText';
-import { findOptionsForSelectFilter } from '../../util/search';
 import { createSlug } from '../../util/urlHelpers';
-import config from '../../config';
-import { NamedLink, ResponsiveImage } from '../../components';
+import { isBookingProcessAlias } from '../../transactions/transaction';
+
+import { AspectRatioWrapper, NamedLink, ResponsiveImage } from '../../components';
 
 import css from './ListingCard.module.css';
 
 const MIN_LENGTH_FOR_LONG_WORDS = 10;
 
-const priceData = (price, intl) => {
-  if (price && price.currency === config.currency) {
+const priceData = (price, currency, intl) => {
+  if (price && price.currency === currency) {
     const formattedPrice = formatMoney(intl, price);
     return { formattedPrice, priceTitle: formattedPrice };
   } else if (price) {
@@ -35,76 +38,76 @@ const priceData = (price, intl) => {
   return {};
 };
 
-const getCertificateInfo = (certificateOptions, key) => {
-  return certificateOptions.find(c => c.key === key);
-};
-
-class ListingImage extends Component {
-  render() {
-    return <ResponsiveImage {...this.props} />;
-  }
-}
-const LazyImage = lazyLoadWithDimensions(ListingImage, { loadAfterInitialRendering: 3000 });
+const LazyImage = lazyLoadWithDimensions(ResponsiveImage, { loadAfterInitialRendering: 3000 });
 
 export const ListingCardComponent = props => {
+  const config = useConfiguration();
   const {
     className,
     rootClassName,
     intl,
     listing,
     renderSizes,
-    filtersConfig,
     setActiveListing,
+    showAuthorInfo,
   } = props;
   const classes = classNames(rootClassName || css.root, className);
   const currentListing = ensureListing(listing);
   const id = currentListing.id.uuid;
   const { title = '', price, publicData } = currentListing.attributes;
   const slug = createSlug(title);
+  const author = ensureUser(listing.author);
+  const authorName = author.attributes.profile.displayName;
   const firstImage =
     currentListing.images && currentListing.images.length > 0 ? currentListing.images[0] : null;
 
-  const certificateOptions = findOptionsForSelectFilter('certificate', filtersConfig);
-  const certificate = publicData
-    ? getCertificateInfo(certificateOptions, publicData.certificate)
+  const {
+    aspectWidth = 1,
+    aspectHeight = 1,
+    variantPrefix = 'listing-card',
+  } = config.layout.listingImage;
+  const variants = firstImage
+    ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith(variantPrefix))
+    : [];
+
+  const { formattedPrice, priceTitle } = priceData(price, config.currency, intl);
+
+  const setActivePropsMaybe = setActiveListing
+    ? {
+        onMouseEnter: () => setActiveListing(currentListing.id),
+        onMouseLeave: () => setActiveListing(null),
+      }
     : null;
-  const { formattedPrice, priceTitle } = priceData(price, intl);
-
-  const unitType = config.bookingUnitType;
-  const isNightly = unitType === LINE_ITEM_NIGHT;
-  const isDaily = unitType === LINE_ITEM_DAY;
-
-  const unitTranslationKey = isNightly
-    ? 'ListingCard.perNight'
-    : isDaily
-    ? 'ListingCard.perDay'
-    : 'ListingCard.perUnit';
 
   return (
     <NamedLink className={classes} name="ListingPage" params={{ id, slug }}>
-      <div
-        className={css.threeToTwoWrapper}
-        onMouseEnter={() => setActiveListing(currentListing.id)}
-        onMouseLeave={() => setActiveListing(null)}
+      <AspectRatioWrapper
+        className={css.aspectRatioWrapper}
+        width={aspectWidth}
+        height={aspectHeight}
+        {...setActivePropsMaybe}
       >
-        <div className={css.aspectWrapper}>
-          <LazyImage
-            rootClassName={css.rootForImage}
-            alt={title}
-            image={firstImage}
-            variants={['landscape-crop', 'landscape-crop2x']}
-            sizes={renderSizes}
-          />
-        </div>
-      </div>
+        <LazyImage
+          rootClassName={css.rootForImage}
+          alt={title}
+          image={firstImage}
+          variants={variants}
+          sizes={renderSizes}
+        />
+      </AspectRatioWrapper>
       <div className={css.info}>
         <div className={css.price}>
           <div className={css.priceValue} title={priceTitle}>
             {formattedPrice}
           </div>
-          <div className={css.perUnit}>
-            <FormattedMessage id={unitTranslationKey} />
-          </div>
+          {isBookingProcessAlias(publicData?.transactionProcessAlias) ? (
+            <div className={css.perUnit}>
+              <FormattedMessage
+                id="ListingCard.perUnit"
+                values={{ unitType: publicData?.unitType }}
+              />
+            </div>
+          ) : null}
         </div>
         <div className={css.mainInfo}>
           <div className={css.title}>
@@ -113,11 +116,11 @@ export const ListingCardComponent = props => {
               longWordClass: css.longWord,
             })}
           </div>
-          <div className={css.certificateInfo}>
-            {certificate && !certificate.hideFromListingInfo ? (
-              <span>{certificate.label}</span>
-            ) : null}
-          </div>
+          {showAuthorInfo ? (
+            <div className={css.authorInfo}>
+              <FormattedMessage id="ListingCard.author" values={{ authorName }} />
+            </div>
+          ) : null}
         </div>
       </div>
     </NamedLink>
@@ -128,16 +131,16 @@ ListingCardComponent.defaultProps = {
   className: null,
   rootClassName: null,
   renderSizes: null,
-  filtersConfig: config.custom.filters,
-  setActiveListing: () => null,
+  setActiveListing: null,
+  showAuthorInfo: true,
 };
 
 ListingCardComponent.propTypes = {
   className: string,
   rootClassName: string,
-  filtersConfig: array,
   intl: intlShape.isRequired,
   listing: propTypes.listing.isRequired,
+  showAuthorInfo: bool,
 
   // Responsive image sizes hint
   renderSizes: string,

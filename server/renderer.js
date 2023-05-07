@@ -119,58 +119,6 @@ exports.render = function(requestUrl, context, data, renderApp, webExtractor) {
       <script>window.__PRELOADED_STATE__ = ${JSON.stringify(serializedState)};</script>
   `;
 
-  // We want to precisely control where the analytics script is
-  // injected in the HTML file so we can catch all events as early as
-  // possible. This script also ensures that all the GA scripts
-  // are added only when the proper env var is present.
-  // NOTE: when dealing with cookie consents, it might make more sense to
-  //       include this script through react-helmet.
-  //
-  // See: https://developers.google.com/analytics/devguides/collection/gtagjs
-  const googleAnalyticsId = process.env.REACT_APP_GOOGLE_ANALYTICS_ID;
-  
-  // Add Google Analytics script if correct id exists (it should start with 'G-' prefix)
-  const hasGoogleAnalyticsv4Id = googleAnalyticsId?.indexOf('G-') === 0;
-  
-  // Add Meta Pixel Script
-  const metaScripts = `
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '954243245573919');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=954243245573919&ev=PageView&noscript=1"
-/></noscript>
-	`;
-
-
-  // Google Analytics: gtag.js
-  // NOTE: FTW is a single-page application (SPA).
-  //       gtag.js sends initial page_view event after page load.
-  //       but we need to handle subsequent events for in-app navigation.
-  const gtagScripts = `
-      <script async src="https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}"></script>
-      <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-      
-        gtag('config', '${googleAnalyticsId}', {
-          cookie_flags: 'SameSite=None;Secure',
-        });
-      </script>
-    `;
-  const googleAnalyticsScript = hasGoogleAnalyticsv4Id ? gtagScripts : '';
-
-
   return template({
     htmlAttributes: head.htmlAttributes.toString(),
     title: head.title.toString(),
@@ -178,8 +126,6 @@ src="https://www.facebook.com/tr?id=954243245573919&ev=PageView&noscript=1"
     meta: head.meta.toString(),
     script: head.script.toString(),
     preloadedStateScript,
-    googleAnalyticsScript,
-    metaScripts,
     ssrStyles: webExtractor.getStyleTags(),
     ssrLinks: webExtractor.getLinkTags(),
     ssrScripts: webExtractor.getScriptTags(),

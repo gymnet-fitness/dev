@@ -15,7 +15,7 @@ const Review = props => {
 
   return (
     <div className={css.review}>
-      <Avatar className={css.avatar} user={review.author} disableProfileLink />
+      <Avatar className={css.avatar} user={review.author} />
       <div>
         <ReviewRating
           rating={review.attributes.rating}

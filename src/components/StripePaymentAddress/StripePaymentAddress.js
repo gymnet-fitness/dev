@@ -1,7 +1,7 @@
 import React from 'react';
-import { intlShape } from '../../util/reactIntl';
 import { bool, object, string } from 'prop-types';
-import config from '../../config';
+
+import { intlShape } from '../../util/reactIntl';
 import * as validators from '../../util/validators';
 import getCountryCodes from '../../translations/countryCodes';
 import { FieldTextInput, FieldSelect } from '../../components';
@@ -9,7 +9,7 @@ import { FieldTextInput, FieldSelect } from '../../components';
 import css from './StripePaymentAddress.module.css';
 
 const StripePaymentAddress = props => {
-  const { className, intl, disabled, form, fieldId, card } = props;
+  const { className, intl, disabled, form, fieldId, card, locale } = props;
 
   const optionalText = intl.formatMessage({
     id: 'StripePaymentAddress.optionalText',
@@ -74,8 +74,8 @@ const StripePaymentAddress = props => {
     card.update({ value: { postalCode: value } });
   };
 
-  // Use tha language set in config.locale to get the correct translations of the country names
-  const countryCodes = getCountryCodes(config.locale);
+  // Use the language set in config.localization.locale to get the correct translations of the country names
+  const countryCodes = getCountryCodes(locale);
 
   return (
     <div className={className ? className : css.root}>
@@ -180,6 +180,7 @@ StripePaymentAddress.propTypes = {
   disabled: bool,
   form: object.isRequired,
   fieldId: string,
+  locale: string.isRequired,
 
   // from injectIntl
   intl: intlShape.isRequired,

@@ -6,8 +6,12 @@
  */
 import React, { Component } from 'react';
 import { bool, func, object, string } from 'prop-types';
+import { isInclusivelyAfterDay, isInclusivelyBeforeDay } from 'react-dates';
 import { Field } from 'react-final-form';
 import classNames from 'classnames';
+import moment from 'moment';
+
+import { useConfiguration } from '../../context/configurationContext';
 import { ValidationError } from '../../components';
 
 import DateInput from './DateInput';
@@ -15,22 +19,17 @@ import css from './FieldDateInput.module.css';
 
 const MAX_MOBILE_SCREEN_WIDTH = 768;
 
+const handleChange = (parentOnChange, inputOnChange) => value => {
+  // If "onChange" callback is passed through the props,
+  // it can notify the parent when the content of the input has changed.
+  if (parentOnChange) {
+    parentOnChange(value);
+  }
+  // Notify Final Form that the input has changed.
+  inputOnChange(value);
+};
+
 class FieldDateInputComponent extends Component {
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  handleChange(value) {
-    // If "onChange" callback is passed through the props,
-    // it can notify the parent when the content of the input has changed.
-    if (this.props.onChange) {
-      this.props.onChange(value);
-    }
-    // Notify Final Form that the input has changed.
-    this.props.input.onChange(value);
-  }
-
   render() {
     const {
       className,
@@ -42,7 +41,7 @@ class FieldDateInputComponent extends Component {
       meta,
       useMobileMargins,
       showErrorMessage,
-      onChange,
+      onChange: parentOnChange,
       ...rest
     } = this.props;
 
@@ -64,11 +63,11 @@ class FieldDateInputComponent extends Component {
       [css.pickerError]: hasError,
     });
 
-    const { onBlur, onFocus, onChange: finalFormOnChange, type, checked, ...restOfInput } = input;
+    const { onBlur, onFocus, onChange: inputOnChange, type, checked, ...restOfInput } = input;
     const inputProps = {
       onBlur: input.onBlur,
       onFocus: input.onFocus,
-      onChange: this.handleChange,
+      onChange: handleChange(parentOnChange, inputOnChange),
       useMobileMargins,
       id,
       readOnly: typeof window !== 'undefined' && window.innerWidth < MAX_MOBILE_SCREEN_WIDTH,
@@ -125,7 +124,26 @@ FieldDateInputComponent.propTypes = {
 };
 
 const FieldDateInput = props => {
-  return <Field component={FieldDateInputComponent} {...props} />;
+  const config = useConfiguration();
+  const { isOutsideRange, firstDayOfWeek, ...rest } = props;
+
+  // Outside range -><- today ... today+available days -1 -><- outside range
+  const defaultIsOutSideRange = day => {
+    const endOfRange = config.stripe?.dayCountAvailableForBooking - 1;
+    return (
+      !isInclusivelyAfterDay(day, moment()) ||
+      !isInclusivelyBeforeDay(day, moment().add(endOfRange, 'days'))
+    );
+  };
+  const defaultFirstDayOfWeek = config.localization.firstDayOfWeek;
+  return (
+    <Field
+      component={FieldDateInputComponent}
+      isOutsideRange={isOutsideRange || defaultIsOutSideRange}
+      firstDayOfWeek={firstDayOfWeek || defaultFirstDayOfWeek}
+      {...rest}
+    />
+  );
 };
 
 export { DateInput };

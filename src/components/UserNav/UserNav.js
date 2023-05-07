@@ -2,64 +2,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '../../util/reactIntl';
 import classNames from 'classnames';
-import { ACCOUNT_SETTINGS_PAGES } from '../../routeConfiguration';
+import { ACCOUNT_SETTINGS_PAGES } from '../../routing/routeConfiguration';
 import { LinkTabNavHorizontal } from '../../components';
-import { ensureOwnListing } from '../../util/data';
-import { LISTING_STATE_DRAFT } from '../../util/types';
-import { getListingType, createSlug } from '../../util/urlHelpers';
 
 import css from './UserNav.module.css';
 
-const listingTab = (listing, selectedPageName) => {
-  if (!listing) {
-    return {
-      text: <FormattedMessage id="UserNav.newListing" />,
-      selected: selectedPageName === 'NewListingPage',
-      linkProps: {
-        name: 'NewListingPage',
-      },
-    };
-  }
-  const currentListing = ensureOwnListing(listing);
-  const id = currentListing.id.uuid;
-  const { title = '', state } = currentListing.attributes;
-  const slug = createSlug(title);
-  const isDraft = state === LISTING_STATE_DRAFT;
-
-  return {
-    text: <FormattedMessage id="UserNav.editListing" />,
-    selected: selectedPageName === 'EditListingPage',
-    linkProps: {
-      name: 'EditListingPage',
-      params: {
-        id,
-        slug,
-        type: getListingType(isDraft),
-        tab: 'photos',
-      },
-    },
-  };
-};
-
 const UserNav = props => {
-  const { className, rootClassName, selectedPageName, listing } = props;
+  const { className, rootClassName, currentPage } = props;
   const classes = classNames(rootClassName || css.root, className);
 
   const tabs = [
     {
-      ...listingTab(listing, selectedPageName),
+      text: <FormattedMessage id="UserNav.yourListings" />,
+      selected: currentPage === 'ManageListingsPage',
+      linkProps: {
+        name: 'ManageListingsPage',
+      },
     },
     {
-      text: <FormattedMessage id="UserNav.profileSettingsPage" />,
-      selected: selectedPageName === 'ProfileSettingsPage',
+      text: <FormattedMessage id="UserNav.profileSettings" />,
+      selected: currentPage === 'ProfileSettingsPage',
       disabled: false,
       linkProps: {
         name: 'ProfileSettingsPage',
       },
     },
     {
-      text: <FormattedMessage id="UserNav.contactDetailsPage" />,
-      selected: ACCOUNT_SETTINGS_PAGES.includes(selectedPageName),
+      text: <FormattedMessage id="UserNav.accountSettings" />,
+      selected: ACCOUNT_SETTINGS_PAGES.includes(currentPage),
       disabled: false,
       linkProps: {
         name: 'ContactDetailsPage',
@@ -82,7 +52,7 @@ const { string } = PropTypes;
 UserNav.propTypes = {
   className: string,
   rootClassName: string,
-  selectedPageName: string.isRequired,
+  currentPage: string.isRequired,
 };
 
 export default UserNav;

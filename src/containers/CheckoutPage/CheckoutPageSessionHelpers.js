@@ -4,11 +4,12 @@
  * This data is saved to Session Store which only exists while the browsing session exists -
  * e.g. tab is open. (Session Store is not related to session cookies.)
  */
-import moment from 'moment';
 import reduce from 'lodash/reduce';
 import Decimal from 'decimal.js';
+
+import { isAfterDate, subtractTime } from '../../util/dates';
 import { types as sdkTypes } from '../../util/sdkLoader';
-import { TRANSITIONS } from '../../util/transaction';
+import { getProcess } from '../../transactions/transaction';
 
 const { UUID, Money } = sdkTypes;
 
@@ -51,22 +52,32 @@ export const isValidListing = listing => {
 // Validate content of an transaction received from SessionStore.
 // An id is required and the last transition needs to be one of the known transitions
 export const isValidTransaction = transaction => {
+  let process = null;
+  try {
+    const processName = transaction?.attributes?.processName;
+    process = getProcess(processName);
+  } catch (e) {
+    console.error(
+      'Transaction, found from sessionStorage, was following unsupported transaction process.'
+    );
+    return false;
+  }
+
   const props = {
     id: id => id instanceof UUID,
     type: type => type === 'transaction',
     attributes: v => {
-      return typeof v === 'object' && TRANSITIONS.includes(v.lastTransition);
+      return typeof v === 'object' && Object.values(process.transitions).includes(v.lastTransition);
     },
   };
   return validateProperties(transaction, props);
 };
 
-// Stores given bookingDates and listing to sessionStorage
-export const storeData = (bookingData, bookingDates, listing, transaction, storageKey) => {
-  if (window && window.sessionStorage && listing && bookingDates && bookingData) {
+// Stores given bookinData, listing and transaction to sessionStorage
+export const storeData = (orderData, listing, transaction, storageKey) => {
+  if (window && window.sessionStorage && listing && orderData) {
     const data = {
-      bookingData,
-      bookingDates,
+      orderData,
       listing,
       transaction,
       storedAt: new Date(),
@@ -105,13 +116,19 @@ export const storedData = storageKey => {
       return sdkTypes.reviver(k, v);
     };
 
-    const { bookingData, bookingDates, listing, transaction, storedAt } = checkoutPageData
+    // Note: orderData may contain bookingDates if booking process is used.
+    const { orderData, listing, transaction, storedAt } = checkoutPageData
       ? JSON.parse(checkoutPageData, reviver)
       : {};
 
+    const bookingDates = orderData?.bookingDates;
+    const isPotentiallyIncludedBookingDatesValid = bookingDates
+      ? isValidBookingDates(bookingDates)
+      : true;
+
     // If sessionStore contains freshly saved data (max 1 day old), use it
     const isFreshlySaved = storedAt
-      ? moment(storedAt).isAfter(moment().subtract(1, 'days'))
+      ? isAfterDate(storedAt, subtractTime(new Date(), 1, 'days'))
       : false;
 
     // resolve transaction as valid if it is missing
@@ -119,12 +136,12 @@ export const storedData = storageKey => {
 
     const isStoredDataValid =
       isFreshlySaved &&
-      isValidBookingDates(bookingDates) &&
+      isPotentiallyIncludedBookingDatesValid &&
       isValidListing(listing) &&
       isTransactionValid;
 
     if (isStoredDataValid) {
-      return { bookingData, bookingDates, listing, transaction };
+      return { orderData, listing, transaction };
     }
   }
   return {};

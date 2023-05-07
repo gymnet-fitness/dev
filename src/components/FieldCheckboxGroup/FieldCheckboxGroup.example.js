@@ -1,37 +1,63 @@
 import React from 'react';
 import { Form as FinalForm, FormSpy } from 'react-final-form';
 import arrayMutators from 'final-form-arrays';
-import { Button } from '../../components';
+import { Button, H3 } from '../../components';
 import FieldCheckboxGroup from './FieldCheckboxGroup';
 import { requiredFieldArrayCheckbox } from '../../util/validators';
 
 const formName = 'Styleguide.FieldCheckboxGroup';
 const formNameRequired = 'Styleguide.FieldCheckboxGroupRequired';
 
-const label = <h3>Yoga styles</h3>;
+const label = <H3>Amenities</H3>;
 
 const commonProps = {
   label: label,
   options: [
-    { key: 'ashtanga', label: 'Ashtanga' },
-    { key: 'hatha', label: 'Hatha' },
-    { key: 'kundalini', label: 'Kundalini' },
-    { key: 'restorative', label: 'Restorative' },
-    { key: 'vinyasa', label: 'Vinyasa' },
-    { key: 'yin', label: 'yin' },
+    {
+      key: 'towels',
+      label: 'Towels',
+    },
+    {
+      key: 'bathroom',
+      label: 'Bathroom',
+    },
+    {
+      key: 'swimming_pool',
+      label: 'Swimming pool',
+    },
+    {
+      key: 'own_drinks',
+      label: 'Own drinks allowed',
+    },
+    {
+      key: 'jacuzzi',
+      label: 'Jacuzzi',
+    },
+    {
+      key: 'audiovisual_entertainment',
+      label: 'Audiovisual entertainment',
+    },
+    {
+      key: 'barbeque',
+      label: 'Barbeque',
+    },
+    {
+      key: 'own_food_allowed',
+      label: 'Own food allowed',
+    },
   ],
   twoColumns: true,
 };
 
 const optionalProps = {
-  name: 'yogaStyles-optional',
-  id: 'yogaStyles-optional',
+  name: 'amenities-optional',
+  id: 'amenities-optional',
   ...commonProps,
 };
 
 const requiredProps = {
-  name: 'yogaStyles-required',
-  id: `${formNameRequired}.yogaStyles-required`,
+  name: 'amenities-required',
+  id: `${formNameRequired}.amenities-required`,
   ...commonProps,
   validate: requiredFieldArrayCheckbox('this is required'),
 };

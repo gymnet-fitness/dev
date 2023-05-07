@@ -6,9 +6,9 @@
 }
 
 .successFill {
-  fill: var(--successColor);
+  fill: var(--colorSuccess);
 }
 
 .checkStroke {
-  stroke: var(--matterColorLight);
+  stroke: var(--colorWhite);
 }

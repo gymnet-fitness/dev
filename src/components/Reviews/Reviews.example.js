@@ -1,11 +1,12 @@
 import Reviews from './Reviews';
-import { createReview, createUser } from '../../util/test-data';
+import { createReview, createUser } from '../../util/testData';
 
 export const WithNoReviews = {
   component: Reviews,
   props: {
     reviews: [],
   },
+  group: 'reviews',
 };
 
 export const WithThreeReviews = {
@@ -17,6 +18,7 @@ export const WithThreeReviews = {
       createReview('review_3', { rating: 5 }, { author: createUser('author_3') }),
     ],
   },
+  group: 'reviews',
 };
 
 export const WithBannedUser = {
@@ -30,6 +32,7 @@ export const WithBannedUser = {
       ),
     ],
   },
+  group: 'reviews',
 };
 
 export const WithDeletedUser = {
@@ -43,4 +46,5 @@ export const WithDeletedUser = {
       ),
     ],
   },
+  group: 'reviews',
 };

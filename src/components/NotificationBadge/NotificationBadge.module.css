@@ -3,10 +3,10 @@
 .root {
   /* Font */
   composes: h6 from global;
-  color: var(--matterColorLight);
+  color: var(--colorWhite);
   text-align: center;
 
-  background-color: var(--failColor);
+  background-color: var(--colorFail);
 
   /* Layout of a red dot */
   display: inline-block;
@@ -14,18 +14,27 @@
   min-width: 20px;
   height: 20px;
   border-radius: 10px;
-  padding-right: 6px;
-  padding-left: 7px;
+  padding: 1px 5px 3px 6px;
   margin-left: 4px;
 
   /* Font margins off */
   margin-top: 0;
   margin-bottom: 0;
+
   @media (--viewportMedium) {
     margin-top: 0;
     margin-bottom: 0;
+    padding: 2px 5px 3px 5px;
+  }
 
-    top: -10px;
+  @media (--viewportLarge) {
+    font-size: 14px;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    top: -2px;
+    padding: 4px 5px 4px 5px;
+
     position: relative;
   }
 }

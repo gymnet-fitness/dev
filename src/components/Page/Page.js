@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import { any, array, arrayOf, bool, number, object, oneOfType, shape, string } from 'prop-types';
 import { Helmet } from 'react-helmet-async';
-import { withRouter } from 'react-router-dom';
-import { injectIntl, intlShape } from '../../util/reactIntl';
+import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
-import routeConfiguration from '../../routeConfiguration';
-import config from '../../config';
+
+import { useConfiguration } from '../../context/configurationContext';
+import { useRouteConfiguration } from '../../context/routeConfigurationContext';
+import { useIntl, intlShape } from '../../util/reactIntl';
 import { metaTagProps } from '../../util/seo';
 import { canonicalRoutePath } from '../../util/routes';
-import { CookieConsent } from '../../components';
+import { propTypes } from '../../util/types';
 
-import facebookImage from '../../assets/yogatimeFacebook-1200x630.jpg';
-import twitterImage from '../../assets/yogatimeTwitter-600x314.jpg';
 import css from './Page.module.css';
 
 const preventDefault = e => {
@@ -78,16 +77,18 @@ class PageComponent extends Component {
       scrollingDisabled,
       referrer,
       author,
-      contentType,
+      openGraphType,
       description,
       facebookImages,
       published,
       schema,
-      tags,
+      socialSharing,
       title,
       twitterHandle,
       twitterImages,
       updated,
+      config,
+      routeConfiguration,
     } = this.props;
 
     const classes = classNames(rootClassName || css.root, className, {
@@ -95,52 +96,64 @@ class PageComponent extends Component {
     });
 
     this.scrollingDisabledChanged(scrollingDisabled);
-    const referrerMeta = referrer ? <meta name="referrer" content={referrer} /> : null;
 
-    const canonicalRootURL = config.canonicalRootURL;
+    const marketplaceRootURL = config.marketplaceRootURL;
     const shouldReturnPathOnly = referrer && referrer !== 'unsafe-url';
-    const canonicalPath = canonicalRoutePath(routeConfiguration(), location, shouldReturnPathOnly);
-    const canonicalUrl = `${canonicalRootURL}${canonicalPath}`;
+    const canonicalPath = canonicalRoutePath(routeConfiguration, location, shouldReturnPathOnly);
+    const canonicalUrl = `${marketplaceRootURL}${canonicalPath}`;
 
-    const siteTitle = config.siteTitle;
-    const schemaTitle = intl.formatMessage({ id: 'Page.schemaTitle' }, { siteTitle });
+    const marketplaceName = config.marketplaceName;
+    const schemaTitle = intl.formatMessage({ id: 'Page.schemaTitle' }, { marketplaceName });
     const schemaDescription = intl.formatMessage({ id: 'Page.schemaDescription' });
-    const metaTitle = title || schemaTitle;
-    const metaDescription = description || schemaDescription;
-    const facebookImgs = facebookImages || [
+    const pageTitle = title || schemaTitle;
+    const pageDescription = description || schemaDescription;
+    const {
+      title: socialSharingTitle,
+      description: socialSharingDescription,
+      images1200: socialSharingImages1200,
+      // Note: we use image with open graph's aspect ratio (1.91:1) also with Twitter
+      images600: socialSharingImages600,
+    } = socialSharing || {};
+
+    // Images for social media sharing
+    const defaultFacebookImageURL = config.branding.facebookImageURL;
+    const openGraphFallbackImages = [
       {
         name: 'facebook',
-        url: `${canonicalRootURL}${facebookImage}`,
+        url: defaultFacebookImageURL,
         width: 1200,
         height: 630,
       },
     ];
-    const twitterImgs = twitterImages || [
+    const defaultTwitterImageURL = config.branding.twitterImageURL;
+    const twitterFallbackImages = [
       {
         name: 'twitter',
-        url: `${canonicalRootURL}${twitterImage}`,
+        url: defaultTwitterImageURL,
         width: 600,
         height: 314,
       },
     ];
+    const facebookImgs = socialSharingImages1200 || facebookImages || openGraphFallbackImages;
+    const twitterImgs = socialSharingImages600 || twitterImages || twitterFallbackImages;
 
-    const metaToHead = metaTagProps({
-      author,
-      contentType,
-      description: metaDescription,
-      facebookImages: facebookImgs,
-      twitterImages: twitterImgs,
-      published,
-      tags,
-      title: metaTitle,
-      twitterHandle,
-      updated,
-      url: canonicalUrl,
-      locale: intl.locale,
-    });
-
-    // eslint-disable-next-line react/no-array-index-key
-    const metaTags = metaToHead.map((metaProps, i) => <meta key={i} {...metaProps} />);
+    const metaToHead = metaTagProps(
+      {
+        author,
+        openGraphType,
+        socialSharingTitle: socialSharingTitle || pageTitle,
+        socialSharingDescription: socialSharingDescription || pageDescription,
+        description: pageDescription,
+        facebookImages: facebookImgs,
+        twitterImages: twitterImgs,
+        twitterHandle,
+        published,
+        updated,
+        url: canonicalUrl,
+        locale: intl.locale,
+      },
+      config
+    );
 
     const facebookPage = config.siteFacebookPage;
     const twitterPage = twitterPageURL(config.siteTwitterHandle);
@@ -154,28 +167,27 @@ class PageComponent extends Component {
     // Schema attribute can be either single schema object or an array of objects
     // This makes it possible to include several different items from the same page.
     // E.g. Product, Place, Video
-    const schemaFromProps = Array.isArray(schema) ? schema : [schema];
+    const hasSchema = schema != null;
+    const schemaFromProps = hasSchema && Array.isArray(schema) ? schema : hasSchema ? [schema] : [];
+    const addressMaybe = config.address?.streetAddress ? { address: config.address } : {};
     const schemaArrayJSONString = JSON.stringify([
       ...schemaFromProps,
       {
         '@context': 'http://schema.org',
         '@type': 'Organization',
-        '@id': `${canonicalRootURL}#organization`,
-        url: canonicalRootURL,
-        name: siteTitle,
+        '@id': `${marketplaceRootURL}#organization`,
+        url: marketplaceRootURL,
+        name: marketplaceName,
         sameAs: sameOrganizationAs,
-        logo: `${canonicalRootURL}/static/webapp-icon-192x192.png`,
-        address: config.address,
+        logo: config.branding.logoImageMobileURL,
+        ...addressMaybe,
       },
       {
         '@context': 'http://schema.org',
         '@type': 'WebSite',
-        url: canonicalRootURL,
+        url: marketplaceRootURL,
         description: schemaDescription,
         name: schemaTitle,
-        publisher: {
-          '@id': `${canonicalRootURL}#organization`,
-        },
       },
     ]);
 
@@ -199,17 +211,18 @@ class PageComponent extends Component {
             lang: intl.locale,
           }}
         >
-          <title>{title}</title>
-          {referrerMeta}
+          <title>{pageTitle}</title>
+          {referrer ? <meta name="referrer" content={referrer} /> : null}
           <link rel="canonical" href={canonicalUrl} />
           <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
           <meta httpEquiv="Content-Language" content={intl.locale} />
-          {metaTags}
+          {metaToHead.map((metaProps, i) => (
+            <meta key={i} {...metaProps} />
+          ))}
           <script id="page-schema" type="application/ld+json">
             {schemaArrayJSONString.replace(/</g, '\\u003c')}
           </script>
         </Helmet>
-        <CookieConsent />
         <div
           className={css.content}
           style={scrollPositionStyles}
@@ -224,21 +237,19 @@ class PageComponent extends Component {
   }
 }
 
-const { any, array, arrayOf, bool, func, number, object, oneOfType, shape, string } = PropTypes;
-
 PageComponent.defaultProps = {
   className: null,
   rootClassName: null,
   children: null,
   author: null,
-  contentType: 'website',
+  openGraphType: 'website',
   description: null,
   facebookImages: null,
   twitterImages: null,
   published: null,
   referrer: null,
   schema: null,
-  tags: null,
+  socialSharing: null,
   twitterHandle: null,
   updated: null,
 };
@@ -254,7 +265,7 @@ PageComponent.propTypes = {
 
   // SEO related props
   author: string,
-  contentType: string, // og:type
+  openGraphType: string, // og:type
   description: string, // page description
   facebookImages: arrayOf(
     shape({
@@ -272,22 +283,62 @@ PageComponent.propTypes = {
   ),
   published: string, // article:published_time
   schema: oneOfType([object, array]), // http://schema.org
-  tags: string, // article:tag
-  title: string.isRequired, // page title
+  socialSharing: shape({
+    title: string,
+    description: string,
+    images1200: arrayOf(
+      // Page asset file can define this
+      shape({
+        width: number.isRequired,
+        height: number.isRequired,
+        url: string.isRequired,
+      })
+    ),
+    images600: arrayOf(
+      // Page asset file can define this
+      shape({
+        width: number.isRequired,
+        height: number.isRequired,
+        url: string.isRequired,
+      })
+    ),
+  }),
+  title: string, // page title
   twitterHandle: string, // twitter handle
   updated: string, // article:modified_time
 
-  // from withRouter
-  history: shape({
-    listen: func.isRequired,
-  }).isRequired,
-  location: object.isRequired,
+  // from useConfiguration
+  config: object.isRequired,
 
-  // from injectIntl
+  // from useRouteConfiguration
+  routeConfiguration: arrayOf(propTypes.route).isRequired,
+
+  // from useIntl
   intl: intlShape.isRequired,
+
+  // from useLocation
+  location: shape({
+    pathname: string.isRequired,
+    search: string.isRequired,
+    hash: string.isRequired,
+  }).isRequired,
 };
 
-const Page = injectIntl(withRouter(PageComponent));
-Page.displayName = 'Page';
+const Page = props => {
+  const config = useConfiguration();
+  const routeConfiguration = useRouteConfiguration();
+  const location = useLocation();
+  const intl = useIntl();
+
+  return (
+    <PageComponent
+      config={config}
+      routeConfiguration={routeConfiguration}
+      location={location}
+      intl={intl}
+      {...props}
+    />
+  );
+};
 
 export default Page;

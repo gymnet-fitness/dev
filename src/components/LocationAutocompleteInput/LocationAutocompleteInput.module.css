@@ -10,7 +10,7 @@
   width: 24px;
   align-self: stretch;
   border-bottom: 2px solid var(--marketplaceColor);
-  background-color: var(--matterColorLight);
+  background-color: var(--colorWhite);
 }
 
 .iconSvg {
@@ -33,7 +33,7 @@
 
 .input {
   flex-grow: 1;
-  height: var(--LocationAutocompleteInput_inputHeight);
+  height: 50px;
   padding-left: 10px;
   margin: 0;
   line-height: unset;
@@ -58,14 +58,23 @@ size and position, etc.
 .predictionsRoot {
   position: absolute;
   width: 100%;
-  padding-bottom: var(--locationAutocompleteBottomPadding);
-  top: var(--LocationAutocompleteInput_inputHeight);
+  top: 50px;
   left: 0;
   background-color: var(--marketplaceColor);
   border-bottom-left-radius: var(--borderRadius);
   border-bottom-right-radius: var(--borderRadius);
   box-shadow: var(--boxShadowPopup);
   z-index: calc(var(--zIndexPopup) + 1);
+}
+
+.predictionsRootGoogle {
+  /* Google Maps needs 72px bottom padding to accommodate logo, Mapbox doesn't have one */
+  padding-bottom: 72px;
+}
+
+.predictionsRootMapbox {
+  /* Google Maps needs 72px bottom padding to accommodate logo, Mapbox doesn't have one */
+  padding-bottom: 8px;
 }
 
 /*
@@ -83,7 +92,7 @@ bottom of the container.
   background-position: center;
 
   @media (--viewportMedium) {
-    background-position: center left var(--LocationAutocompleteInput_sidePaddingDesktop);
+    background-position: center left 36px;
   }
 }
 
@@ -95,7 +104,7 @@ bottom of the container.
   padding: 14px 0;
 
   & li {
-    color: var(--matterColorLight);
+    color: var(--colorWhite);
     transition: var(--transitionStyleButton);
     margin: 0; /* Remove the double white space */
     line-height: 24px;
@@ -104,26 +113,27 @@ bottom of the container.
     padding: 9px 24px;
 
     @media (--viewportMedium) {
-      color: var(--matterColorLightTransparent);
-      padding: 10px var(--LocationAutocompleteInput_sidePaddingDesktop);
+      color: var(--colorLightTransparent);
+      padding: 10px 36px;
       margin: 0;
     }
 
     &:hover,
     &.highlighted {
       cursor: pointer;
-      border-left: 6px solid var(--matterColorLight);
+      border-left: 6px solid var(--colorWhite);
       border-top-right-radius: 20px;
       border-bottom-right-radius: 20px;
-      color: var(--matterColorLight);
+      color: var(--colorWhite);
     }
   }
 }
 
 .currentLocation {
-  composes: h4 from global;
+  composes: p from global;
 }
 
 .currentLocationIcon {
   margin-right: 10px;
+  margin-bottom: 1px;
 }

@@ -38,19 +38,20 @@ export const Image2X = {
             name: 'crop',
             width: 200,
             height: 133,
-            url: 'https://via.placeholder.com/200x133',
+            url: 'https://picsum.photos/200/133/',
           },
           crop2x: {
             name: 'crop2x',
             width: 400,
             height: 266,
-            url: 'https://via.placeholder.com/400x266',
+            url: 'https://picsum.photos/400/266/',
           },
         },
       },
     },
     variants: ['crop', 'crop2x'],
   },
+  group: 'images',
 };
 
 /* Image with aspect ratio wrapper */
@@ -67,19 +68,20 @@ export const Image2XAspect = {
             name: 'crop',
             width: 200,
             height: 133,
-            url: 'https://via.placeholder.com/200x133',
+            url: 'https://picsum.photos/200/133/',
           },
           crop2x: {
             name: 'crop2x',
             width: 400,
             height: 266,
-            url: 'https://via.placeholder.com/400x266',
+            url: 'https://picsum.photos/400/266/',
           },
         },
       },
     },
     variants: ['crop', 'crop2x'],
   },
+  group: 'images',
 };
 
 /* Image with aspect ratio wrapper and wrong aspect */
@@ -95,20 +97,21 @@ export const Image2XWrongAspect = {
           crop: {
             name: 'crop',
             width: 200,
-            height: 133,
-            url: 'https://via.placeholder.com/200x133',
+            height: 200,
+            url: 'https://picsum.photos/200/200/',
           },
           crop2x: {
             name: 'crop2x',
             width: 400,
-            height: 266,
-            url: 'https://via.placeholder.com/400x266',
+            height: 400,
+            url: 'https://picsum.photos/400/400/',
           },
         },
       },
     },
     variants: ['crop', 'crop2x'],
   },
+  group: 'images',
 };
 
 export const Image2XWrongAspectNoWrapper = {
@@ -124,19 +127,20 @@ export const Image2XWrongAspectNoWrapper = {
             name: 'crop',
             width: 200,
             height: 133,
-            url: 'https://via.placeholder.com/200x133',
+            url: 'https://picsum.photos/200/133/',
           },
           crop2x: {
             name: 'crop2x',
             width: 400,
             height: 266,
-            url: 'https://via.placeholder.com/400x266',
+            url: 'https://picsum.photos/400/266/',
           },
         },
       },
     },
     variants: ['crop', 'crop2x'],
   },
+  group: 'images',
 };
 
 /* No image without aspect ratio wrapper */
@@ -147,6 +151,7 @@ export const ImageEmpty = {
     image: null,
     variants: ['crop', 'crop2x'],
   },
+  group: 'images',
 };
 
 /* No image with aspect ratio wrapper */
@@ -157,6 +162,7 @@ export const ImageEmptyWithAspect = {
     image: null,
     variants: ['crop', 'crop2x'],
   },
+  group: 'images',
 };
 
 /* Image without aspect ratio wrapper usign sizes */
@@ -181,13 +187,13 @@ export const ImageWithSizes = {
             name: 'crop',
             width: 200,
             height: 133,
-            url: 'https://via.placeholder.com/200x133',
+            url: 'https://picsum.photos/200/133/',
           },
           crop2x: {
             name: 'crop2x',
             width: 400,
             height: 266,
-            url: 'https://via.placeholder.com/400x266',
+            url: 'https://picsum.photos/400/266/',
           },
         },
       },
@@ -195,4 +201,5 @@ export const ImageWithSizes = {
     variants: ['crop', 'crop2x'],
     sizes: '(max-width: 600px) 200px, 400px',
   },
+  group: 'images',
 };

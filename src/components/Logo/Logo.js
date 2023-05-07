@@ -1,21 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
-import config from '../../config';
-import IconLogo from './IconLogo';
-import LogoImage from './gymnet-logo.png';
-import css from './Logo.module.css';
+import { useConfiguration } from '../../context/configurationContext';
 
 const Logo = props => {
+  const config = useConfiguration();
   const { className, format, ...rest } = props;
-  const mobileClasses = classNames(css.logoMobile, className);
+  // NOTE: logo images are set in src/config/brandingConfig.js
+  const { logoImageDesktopURL, logoImageMobileURL } = config.branding;
 
   if (format === 'desktop') {
-    return <img className={className} src={LogoImage} alt={config.siteTitle} {...rest} />;
+    return (
+      <img className={className} src={logoImageDesktopURL} alt={config.marketplaceName} {...rest} />
+    );
   }
 
-  return <IconLogo className={mobileClasses} {...rest} />;
+  return (
+    <img className={className} src={logoImageMobileURL} alt={config.marketplaceName} {...rest} />
+  );
 };
 
 const { oneOf, string } = PropTypes;

@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { any, string } from 'prop-types';
 import ReactDOMServer from 'react-dom/server';
 
 // react-dates needs to be initialized before using any react-dates component
@@ -12,13 +12,24 @@ import { Provider } from 'react-redux';
 import difference from 'lodash/difference';
 import mapValues from 'lodash/mapValues';
 import moment from 'moment';
-import { IntlProvider } from './util/reactIntl';
-import configureStore from './store';
-import routeConfiguration from './routeConfiguration';
-import Routes from './Routes';
-import config from './config';
 
-// Flex template application uses English translations as default translations.
+// Configs and store setup
+import defaultConfig from './config/configDefault';
+import appSettings from './config/settings';
+import configureStore from './store';
+
+// utils
+import { RouteConfigurationProvider } from './context/routeConfigurationContext';
+import { ConfigurationProvider } from './context/configurationContext';
+import { mergeConfig } from './util/configHelpers';
+import { IntlProvider } from './util/reactIntl';
+import { IncludeScripts } from './util/includeScripts';
+
+// routing
+import routeConfiguration from './routing/routeConfiguration';
+import Routes from './routing/Routes';
+
+// Sharetribe Web Template uses English translations as default translations.
 import defaultMessages from './translations/en.json';
 
 // If you want to change the language of default (fallback) translations,
@@ -76,61 +87,92 @@ const localeMessages = isTestEnv
   ? mapValues(defaultMessages, (val, key) => key)
   : addMissingTranslations(defaultMessages, messagesInLocale);
 
-const setupLocale = () => {
+const setupLocale = appConfig => {
+  let locale = appConfig.localization.locale;
   if (isTestEnv) {
     // Use english as a default locale in tests
     // This affects app.test.js and app.node.test.js tests
-    config.locale = 'en';
+    locale = 'en';
     return;
   }
 
   // Set the Moment locale globally
   // See: http://momentjs.com/docs/#/i18n/changing-locale/
-  moment.locale(config.locale);
+  moment.locale(locale);
 };
 
-export const ClientApp = props => {
-  const { store, hostedTranslations = {} } = props;
-  setupLocale();
+const Configurations = props => {
+  const { appConfig, children } = props;
+  const routeConfig = routeConfiguration(appConfig.layout);
+  setupLocale(appConfig);
   return (
-    <IntlProvider
-      locale={config.locale}
-      messages={{ ...localeMessages, ...hostedTranslations }}
-      textComponent="span"
-    >
-      <Provider store={store}>
-        <HelmetProvider>
-          <BrowserRouter>
-            <Routes routes={routeConfiguration()} />
-          </BrowserRouter>
-        </HelmetProvider>
-      </Provider>
-    </IntlProvider>
+    <ConfigurationProvider value={appConfig}>
+      <RouteConfigurationProvider value={routeConfig}>{children}</RouteConfigurationProvider>
+    </ConfigurationProvider>
   );
 };
 
-const { any, string } = PropTypes;
+export const ClientApp = props => {
+  const { store, hostedTranslations = {}, hostedConfig = {} } = props;
+  const appConfig = mergeConfig(hostedConfig, defaultConfig);
+
+  // Marketplace color and branding image comes from configs
+  // If set, we need to create CSS Property and set it to DOM (documentElement is selected here)
+  const elem = window.document.documentElement;
+  if (appConfig.branding.marketplaceColor) {
+    elem.style.setProperty('--marketplaceColor', appConfig.branding.marketplaceColor);
+    elem.style.setProperty('--marketplaceColorDark', appConfig.branding.marketplaceColorDark);
+    elem.style.setProperty('--marketplaceColorLight', appConfig.branding.marketplaceColorLight);
+  }
+  // This gives good input for debugging issues on live environments, but with test it's not needed.
+  const logLoadDataCalls = appSettings?.env !== 'test';
+
+  return (
+    <Configurations appConfig={appConfig}>
+      <IntlProvider
+        locale={appConfig.localization.locale}
+        messages={{ ...localeMessages, ...hostedTranslations }}
+        textComponent="span"
+      >
+        <Provider store={store}>
+          <HelmetProvider>
+            <IncludeScripts config={appConfig} />
+            <BrowserRouter>
+              <Routes
+                routes={routeConfiguration(appConfig.layout)}
+                logLoadDataCalls={logLoadDataCalls}
+              />
+            </BrowserRouter>
+          </HelmetProvider>
+        </Provider>
+      </IntlProvider>
+    </Configurations>
+  );
+};
 
 ClientApp.propTypes = { store: any.isRequired };
 
 export const ServerApp = props => {
-  const { url, context, helmetContext, store, hostedTranslations = {} } = props;
-  setupLocale();
+  const { url, context, helmetContext, store, hostedTranslations = {}, hostedConfig = {} } = props;
+  const appConfig = mergeConfig(hostedConfig, defaultConfig);
   HelmetProvider.canUseDOM = false;
   return (
-    <IntlProvider
-      locale={config.locale}
-      messages={{ ...localeMessages, ...hostedTranslations }}
-      textComponent="span"
-    >
-      <Provider store={store}>
-        <HelmetProvider context={helmetContext}>
-          <StaticRouter location={url} context={context}>
-            <Routes routes={routeConfiguration()} />
-          </StaticRouter>
-        </HelmetProvider>
-      </Provider>
-    </IntlProvider>
+    <Configurations appConfig={appConfig}>
+      <IntlProvider
+        locale={appConfig.localization.locale}
+        messages={{ ...localeMessages, ...hostedTranslations }}
+        textComponent="span"
+      >
+        <Provider store={store}>
+          <HelmetProvider context={helmetContext}>
+            <IncludeScripts config={appConfig} />
+            <StaticRouter location={url} context={context}>
+              <Routes />
+            </StaticRouter>
+          </HelmetProvider>
+        </Provider>
+      </IntlProvider>
+    </Configurations>
   );
 };
 

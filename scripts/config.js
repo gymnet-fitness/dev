@@ -25,7 +25,7 @@ const run = () => {
 
 ${chalk.bold.red(`You don't have required .env file!`)}
 
-Some environment variables are required before starting Flex template for web. You can create the .env file and configure the variables by running ${chalk.cyan.bold(
+Some environment variables are required before starting Sharetribe Web Template. You can create the .env file and configure the variables by running ${chalk.cyan.bold(
           'yarn run config'
         )}
 
@@ -114,10 +114,6 @@ const mandatoryVariables = settings => {
     settings && settings.REACT_APP_MAPBOX_ACCESS_TOKEN !== ''
       ? { default: settings.REACT_APP_MAPBOX_ACCESS_TOKEN }
       : {};
-  const currencyDefault =
-    settings && settings.REACT_APP_SHARETRIBE_MARKETPLACE_CURRENCY !== ''
-      ? settings.REACT_APP_SHARETRIBE_MARKETPLACE_CURRENCY
-      : 'USD';
 
   return [
     {
@@ -175,24 +171,6 @@ If you don't set the Mapbox key, the map components won't work in the applicatio
 `,
       ...mapBoxDefaultMaybe,
     },
-    {
-      type: 'input',
-      name: 'REACT_APP_SHARETRIBE_MARKETPLACE_CURRENCY',
-      message: `What is your marketplace currency?
-${chalk.dim(
-  'The currency used in the Marketplace must be in ISO 4217 currency code. For example USD, EUR, CAD, AUD, etc. The default value is USD.'
-)}
-`,
-      default: function() {
-        return currencyDefault;
-      },
-      validate: function(value) {
-        if (value.match(/^[a-zA-Z]{3}$/)) {
-          return true;
-        }
-        return 'Please enter currency in ISO 4217 format (e.g. USD, EUR, CAD...)';
-      },
-    },
   ];
 };
 
@@ -208,13 +186,8 @@ ${chalk.dim(
  */
 
 const advancedSettings = settings => {
-  const rootUrlDefault = settings ? settings.REACT_APP_CANONICAL_ROOT_URL : null;
-  const availabilityDefault = settings
-    ? settings.REACT_APP_AVAILABILITY_ENABLED.toLowerCase() === 'true'
-    : true;
-  const searchesDefault = settings
-    ? settings.REACT_APP_DEFAULT_SEARCHES_ENABLED.toLowerCase() === 'true'
-    : true;
+  const rootUrlDefault = settings ? settings.REACT_APP_MARKETPLACE_ROOT_URL : null;
+  const cspDefault = settings ? settings.REACT_APP_CSP : null;
 
   return [
     {
@@ -225,7 +198,7 @@ const advancedSettings = settings => {
     },
     {
       type: 'input',
-      name: 'REACT_APP_CANONICAL_ROOT_URL',
+      name: 'REACT_APP_MARKETPLACE_ROOT_URL',
       message: `What is your canonical root URL?
 ${chalk.dim(
   'Canonical root URL of the marketplace is needed for social media sharing, SEO optimization, and social logins. When developing the template application locally URL is usually http://localhost:3000 (Note: you should omit any trailing slash)'
@@ -239,27 +212,16 @@ ${chalk.dim(
       },
     },
     {
-      type: 'confirm',
-      name: 'REACT_APP_AVAILABILITY_ENABLED',
-      message: `Do you want to enable availability calendar?
+      type: 'input',
+      name: 'REACT_APP_CSP',
+      message: `Should Content Security Policy (CSP) be on block mode?
 ${chalk.dim(
-  'This setting enables the Availability Calendar for listings. The default value for this setting is true.'
+  'Content Security Policy should be on "block" mode, when the app is live. However, for development purposes "report" mode might make sense. The default value for this settings is true.'
 )}
 `,
-      default: availabilityDefault,
-      when: function(answers) {
-        return answers.showAdvancedSettings;
+      default: function() {
+        return cspDefault ? cspDefault : 'report';
       },
-    },
-    {
-      type: 'confirm',
-      name: 'REACT_APP_DEFAULT_SEARCHES_ENABLED',
-      message: `Do you want to enable default search suggestions?
-${chalk.dim(
-  'This setting enables the Default Search Suggestions in location autocomplete search input. The default value for this setting is true.'
-)}
-`,
-      default: searchesDefault,
       when: function(answers) {
         return answers.showAdvancedSettings;
       },
@@ -309,7 +271,7 @@ const showSuccessMessage = () => {
   console.log(`
 ${chalk.green.bold('.env file saved succesfully!')}
 
-Start the Flex template application by running ${chalk.bold.cyan('yarn run dev')}
+Start the Sharetribe Web Template application by running ${chalk.bold.cyan('yarn run dev')}
 
 Note that the .env file is a hidden file so it might not be visible directly in directory listing. If you want to update the environment variables run ${chalk.cyan.bold(
     'yarn run config'

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { number, object, shape, string } from 'prop-types';
 import { circlePolyline } from '../../util/maps';
-import config from '../../config';
 
 /**
  * DynamicGoogleMap uses Google Maps API.
@@ -27,7 +26,6 @@ class DynamicGoogleMap extends Component {
 
     if (hasDimensions) {
       const { center, zoom, address, mapsConfig } = this.props;
-      const { enabled, url, anchorX, anchorY, width, height } = mapsConfig.customMarker;
       const maps = window.google.maps;
       const controlPosition = window.google.maps.ControlPosition.LEFT_TOP;
 
@@ -77,24 +75,10 @@ class DynamicGoogleMap extends Component {
         const Polygon = window.google.maps.Polygon;
         new Polygon(circleProps);
       } else {
-        const markerIcon = enabled
-          ? {
-              icon: {
-                url,
-
-                // The origin for this image is (0, 0).
-                origin: new window.google.maps.Point(0, 0),
-                size: new window.google.maps.Size(width, height),
-                anchor: new window.google.maps.Point(anchorX, anchorY),
-              },
-            }
-          : {};
-
         new window.google.maps.Marker({
           position: center,
           map: this.map,
           title: address,
-          ...markerIcon,
         });
       }
     }
@@ -113,8 +97,6 @@ class DynamicGoogleMap extends Component {
 DynamicGoogleMap.defaultProps = {
   address: '',
   center: null,
-  zoom: config.maps.fuzzy.enabled ? config.maps.fuzzy.defaultZoomLevel : 11,
-  mapsConfig: config.maps,
 };
 
 DynamicGoogleMap.propTypes = {
@@ -123,8 +105,8 @@ DynamicGoogleMap.propTypes = {
     lat: number.isRequired,
     lng: number.isRequired,
   }).isRequired,
-  zoom: number,
-  mapsConfig: object,
+  zoom: number.isRequired,
+  mapsConfig: object.isRequired,
 };
 
 export default DynamicGoogleMap;

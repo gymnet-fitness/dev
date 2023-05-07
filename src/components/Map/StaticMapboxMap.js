@@ -1,9 +1,9 @@
 import React from 'react';
 import { string, shape, number, object } from 'prop-types';
 import polyline from '@mapbox/polyline';
-import { lazyLoadWithDimensions } from '../../util/contextHelpers';
+
+import { lazyLoadWithDimensions } from '../../util/uiHelpers';
 import { circlePolyline } from '../../util/maps';
-import config from '../../config';
 
 const formatColor = color => {
   return color.replace(/^#/, '');
@@ -23,11 +23,6 @@ const fuzzyCircleOverlay = (center, mapsConfig) => {
   return `path${styles}(${encodeURIComponent(polyline.encode(path))})`;
 };
 
-const customMarkerOverlay = (center, mapsConfig) => {
-  const { url } = mapsConfig.customMarker;
-  return `url-${encodeURIComponent(url)}(${center.lng},${center.lat})`;
-};
-
 const markerOverlay = center => {
   return `pin-s(${center.lng},${center.lat})`;
 };
@@ -35,9 +30,6 @@ const markerOverlay = center => {
 const mapOverlay = (center, mapsConfig) => {
   if (mapsConfig.fuzzy.enabled) {
     return fuzzyCircleOverlay(center, mapsConfig);
-  }
-  if (mapsConfig.customMarker.enabled) {
-    return customMarkerOverlay(center, mapsConfig);
   }
   return markerOverlay(center);
 };
@@ -57,16 +49,14 @@ const StaticMapboxMap = props => {
     (overlay ? `/${overlay}` : '') +
     `/${center.lng},${center.lat},${zoom}` +
     `/${width}x${height}` +
-    `?access_token=${config.maps.mapboxAccessToken}`;
+    `?access_token=${mapsConfig.mapboxAccessToken}`;
 
-  return <img src={src} alt={address} />;
+  return <img src={src} alt={address} crossOrigin="anonymous" />;
 };
 
 StaticMapboxMap.defaultProps = {
   address: '',
   center: null,
-  zoom: config.maps.fuzzy.enabled ? config.maps.fuzzy.defaultZoomLevel : 11,
-  mapsConfig: config.maps,
 };
 
 StaticMapboxMap.propTypes = {
@@ -75,8 +65,8 @@ StaticMapboxMap.propTypes = {
     lat: number.isRequired,
     lng: number.isRequired,
   }).isRequired,
-  zoom: number,
-  mapsConfig: object,
+  zoom: number.isRequired,
+  mapsConfig: object.isRequired,
 
   // from withDimensions
   dimensions: shape({

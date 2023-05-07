@@ -43,10 +43,11 @@
   composes: marketplaceModalCloseIcon from global;
   margin-left: 0;
   margin-right: 5px;
+  margin-bottom: 3px;
 }
 
 .iconCheckmark {
-  stroke: var(--successColor);
+  stroke: var(--colorSuccess);
   display: inline-block;
   margin: 12px 0 0 24px;
 }
@@ -63,12 +64,12 @@
 
 .expirationDateExpired {
   padding-left: 24px;
-  color: var(--failColor);
+  color: var(--colorFail);
 }
 
 .cardExpiredText {
   composes: h4 from global;
-  color: var(--failColor);
+  color: var(--colorFail);
   font-weight: var(--fontWeightSemiBold);
   margin-top: 13px;
   margin-bottom: 11px;
@@ -81,25 +82,29 @@
 
 .menuLabel {
   text-align: left;
-  font-weight: 500;
+  font-weight: var(--fontWeightMedium);
   padding: 0;
-  border-radius: 4px;
-  border: 1px solid var(--matterColorNegative);
+  border-radius: 6px;
+  border: 1px solid #d8dce6;
   transition: all 0.2s ease-out;
   z-index: calc(var(--zIndexPopup) + 1);
   position: relative;
 
+  background-color: #fff;
+  box-shadow: 0 2px 3px 0 rgba(216, 220, 230, 0.7);
+
   &:hover {
-    background-color: var(--matterColorLight);
-    border: 1px solid var(--matterColorAnti);
+    border: 1px solid #b8bfd1;
+    box-shadow: 0 2px 3px 0 rgba(216, 220, 230, 0.7);
   }
 
   &:focus {
     outline: none;
-    background-color: var(--matterColorLight);
-    border: 1px solid var(--matterColorNegative);
+    box-shadow: none;
+    background-color: var(--colorWhite);
+    border: 1px solid #d8dce6;
     text-decoration: none;
-    border-radius: 4px 4px 0px 0px;
+    border-radius: 6px 6px 0px 0px;
   }
 }
 
@@ -110,21 +115,31 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  padding: 12px 24px 10px 16px;
+  padding: 6px 24px 6px 10px;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%232D4053' stroke='%232D4053' stroke-width='.5' fill-rule='evenodd'%3E%3Cpath d='M4.687 15.315a.443.443 0 0 0 .626 0l3.557-3.556a.446.446 0 0 0-.629-.629L5 14.37l-3.241-3.24a.445.445 0 0 0-.629.63l3.557 3.553v.002ZM5.313 1.13a.443.443 0 0 0-.626 0L1.13 4.685a.446.446 0 0 0 .629.63L5 2.074l3.241 3.24a.445.445 0 0 0 .629-.629L5.313 1.131V1.13Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: center right 12px;
+  background-size: 8px 14px;
+
+  @media (--viewportMedium) {
+    padding: 11px 24px 11px 12px;
+    background-position: center right 16px;
+    background-size: 10px 16px;
+  }
 }
 
 .menuLabelWrapperExpired {
-  border: 1px solid var(--failColor);
+  border: var(--borderErrorField);
 }
 
 .menuContent {
+  width: 100% !important; /* To override inline style width which causes an overflow bug in mobile */
   position: absolute;
   z-index: var(--zIndexPopup);
 
-  background-color: var(--matterColorLight);
+  background-color: var(--colorWhite);
   box-shadow: var(--boxShadowFilterButton);
-  border-radius: 4px;
-  border: 1px solid var(--matterColorNegative);
+  border-radius: 6px;
+  border: 1px solid var(--colorGrey100);
 
   transition: all 0.15s ease-out;
 
@@ -138,7 +153,7 @@
 }
 
 .menuItem {
-  color: var(--matterColor);
+  color: var(--colorGrey700);
   &:hover {
     background-color: #f2f2f2;
   }
@@ -148,9 +163,9 @@
 .menuTextReplaceCard {
   composes: marketplaceMessageFontStyles from global;
   padding: 12px 8px;
-  color: var(--matterColor);
+  color: var(--colorGrey700);
   text-align: left;
-  font-weight: 500;
+  font-weight: var(--fontWeightMedium);
   width: 80%;
 
   &:hover {
@@ -172,35 +187,25 @@
 
 .menuDivider {
   composes: h5 from global;
-  color: var(--matterColorAnti);
+  color: var(--colorGrey300);
   padding: 14px 24px 2px 24px;
   margin: 0;
 }
 
-.iconArrow {
-  stroke: var(--matterColor);
-  fill: var(--matterColor);
-  transition: all 0.2s ease-out;
-}
-
-.IconArrowAnimation {
-  transform: rotate(180deg);
-}
-
 .savedPaymentMethodDelete {
   composes: h4 from global;
-  color: var(--matterColorAnti);
+  color: var(--colorGrey300);
   cursor: pointer;
   margin-top: 14px;
   margin-bottom: 10px;
 
   &:hover {
-    color: var(--matterColor);
+    color: var(--colorGrey700);
   }
 
   &:focus {
     outline: none;
-    color: var(--matterColor);
+    color: var(--colorGrey700);
   }
 }
 
@@ -224,13 +229,13 @@
 }
 
 .cancelCardDelete {
-  color: var(--matterColorAnti);
+  color: var(--colorGrey300);
   cursor: pointer;
   width: 50%;
   text-align: right;
   padding-right: 64px;
 
   &:hover {
-    color: var(--matterColor);
+    color: var(--colorGrey700);
   }
 }

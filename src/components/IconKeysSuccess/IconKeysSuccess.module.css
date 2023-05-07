@@ -3,9 +3,9 @@
 }
 
 .fillSuccessColor {
-  fill: var(--successColor);
+  fill: var(--colorSuccess);
 }
 
 .strokeLightColor {
-  stroke: var(--matterColorLight);
+  stroke: var(--colorWhite);
 }

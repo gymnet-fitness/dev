@@ -4,8 +4,49 @@ const { types } = require('sharetribe-flex-sdk');
 const { Money } = types;
 
 const { getAmountAsDecimalJS, convertDecimalJSToNumber } = require('./currency');
+const { nightsBetween, daysBetween } = require('./dates');
+const LINE_ITEM_NIGHT = 'line-item/night';
+const LINE_ITEM_DAY = 'line-item/day';
 
 /** Helper functions for constructing line items*/
+
+/**
+ * Calculates shipping fee based on saved public data fields and quantity.
+ * The total will be `shippingPriceInSubunitsOneItem + (shippingPriceInSubunitsAdditionalItems * (quantity - 1))`.
+ * E.g. 4 items ordered with shipping fees €10 for first item and €5 for additional items:
+ * €10 + (3 * €5) => €25
+ *
+ * @param {Money} shippingPriceInSubunitsOneItem
+ * @param {Money} shippingPriceInSubunitsAdditionalItems
+ * @param {string} currency code
+ * @param {int} quantity
+ *
+ * @returns {Money} lineTotal
+ */
+exports.calculateShippingFee = (
+  shippingPriceInSubunitsOneItem,
+  shippingPriceInSubunitsAdditionalItems,
+  currency,
+  quantity
+) => {
+  if (shippingPriceInSubunitsOneItem && currency && quantity === 1) {
+    return new Money(shippingPriceInSubunitsOneItem, currency);
+  } else if (
+    shippingPriceInSubunitsOneItem &&
+    shippingPriceInSubunitsAdditionalItems &&
+    currency &&
+    quantity > 1
+  ) {
+    const oneItemFee = getAmountAsDecimalJS(new Money(shippingPriceInSubunitsOneItem, currency));
+    const additionalItemsFee = getAmountAsDecimalJS(
+      new Money(shippingPriceInSubunitsAdditionalItems, currency)
+    );
+    const additionalItemsTotal = additionalItemsFee.times(quantity - 1);
+    const numericShippingFee = convertDecimalJSToNumber(oneItemFee.plus(additionalItemsTotal));
+    return new Money(numericShippingFee, currency);
+  }
+  return null;
+};
 
 /**
  * Calculates lineTotal for lineItem based on quantity.
@@ -84,6 +125,24 @@ exports.calculateTotalPriceFromSeats = (unitPrice, unitCount, seats) => {
 };
 
 /**
+ * Calculates the quantity based on the booking start and end dates depending on booking type.
+ *
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @param {string} type
+ *
+ * @returns {number} quantity
+ */
+exports.calculateQuantityFromDates = (startDate, endDate, type) => {
+  if (type === LINE_ITEM_NIGHT) {
+    return nightsBetween(startDate, endDate);
+  } else if (type === LINE_ITEM_DAY) {
+    return daysBetween(startDate, endDate);
+  }
+  throw new Error(`Can't calculate quantity from dates to unit type: ${type}`);
+};
+
+/**
  * Calculate the quantity of hours between start and end dates.
  * If the length of the timeslot is something else than hour (e.g. 30 minutes)
  * you can change parameter 'hours' to 'minutes' and use that to calculate the
@@ -99,6 +158,7 @@ exports.calculateTotalPriceFromSeats = (unitPrice, unitCount, seats) => {
  *
  */
 exports.calculateQuantityFromHours = (startDate, endDate) => {
+  // Note: the last parameter (true) ensures that floats are returned.
   return moment(endDate).diff(moment(startDate), 'hours', true);
 };
 
@@ -169,9 +229,9 @@ exports.calculateTotalForCustomer = lineItems => {
 };
 
 /**
- * Constructs lineItems that can be used directly in FTW.
+ * Constructs lineItems that can be used directly in this template.
  * This function checks lineItem code and adds attributes like lineTotal and reversal
- * which are added in API response and some FTW components are expecting.
+ * which are added in API response and some UI components are expecting.
  *
  * This can be used when user is not authenticated and we can't call speculative API endpoints directly
  *
@@ -188,7 +248,7 @@ exports.constructValidLineItems = lineItems => {
     }
 
     // lineItems are expected to be in similar format as when they are returned from API
-    // so that we can use them in e.g. BookingBreakdown component.
+    // so that we can use them in e.g. OrderBreakdown component.
     // This means we need to convert quantity to Decimal and add attributes lineTotal and reversal to lineItems
     const lineTotal = this.calculateLineTotal(lineItem);
     return {

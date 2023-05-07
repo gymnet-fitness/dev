@@ -10,25 +10,519 @@ way to update this template, but currently, we follow a pattern:
   cause conflicts.
 - Patch (v0.0.**X**): Bug fixes and small changes to components.
 
-Note: Previous release tags (before v4.0.0) are coming from upstream:
-https://github.com/sharetribe/flex-template-web/
-
 ---
 
-## Upcoming version 2022-XX-XX
+## Upcoming version 2023-XX-XX
 
-## [v11.0.2] 2022-10-17
+- [fix] ListingImageGallery: Mobile Safari was not showing thumbnail stripe correctly, if the
+  content overflew. [#158](https://github.com/sharetribe/web-template/pull/158)
+- [change] Update README.md [#157](https://github.com/sharetribe/web-template/pull/157)
+
+## [v1.0.0] 2023-04-25
+
+This is the official release of Sharetribe Web Template, which combines the features of FTW-daily,
+FTW-hourly and FTW-product into one configurable web template. It makes it easy to do things like
+change the default transaction process (it supports two different processes, booking and purchase,
+out of the box), switch between layout options, add custom fields and filters, and much more, all
+through simple JSON configurations. The new template also features a new availability management
+experience, redesigned email notifications, and several other improvements.
+
+### Changes on top of the **beta** release
+
+- [change] Update default booking transaction process and email templates.
+  [#155](https://github.com/sharetribe/web-template/pull/155)
+- [change] AuthenticationPage: long email address caused overflow on mobile layout.
+  [#154](https://github.com/sharetribe/web-template/pull/154)
+- [fix] Fix booking email templates to show correct end date in day-based bookings
+  [#153](https://github.com/sharetribe/web-template/pull/153)
+- [change] OrderPanel: separate mobile CTA buttons per process type
+  [#152](https://github.com/sharetribe/web-template/pull/152)
+- [fix] EditListingWizard: fix handling for outdated (old) listings.
+  [#151](https://github.com/sharetribe/web-template/pull/151)
+- [change] ListingImageGallery: thumbnail stripe was not overflowing correctly on mobile screens
+  [#150](https://github.com/sharetribe/web-template/pull/150)
+- [change] ListingImageGallery: prefer the aspect ratio of the first image with limits (2/1 ... 4/3)
+  [#149](https://github.com/sharetribe/web-template/pull/149)
+- [fix] ListingImageGallery: don't use sizes on fullscreen mode.
+  [#148](https://github.com/sharetribe/web-template/pull/148)
+- [fix] Mobile font-size had degraded to too small.
+  [#147](https://github.com/sharetribe/web-template/pull/147)
+- [fix] Email templates: Show booking time based on line item type in booking templates
+  [#145](https://github.com/sharetribe/web-template/pull/145)
+- [change] Listing field of type enum should be explicitly handled as strings.
+  [#146](https://github.com/sharetribe/web-template/pull/146)
+- [fix] ListingImageGallery was not setting image dimensions aka sizes.
+  [#144](https://github.com/sharetribe/web-template/pull/144)
+- [change] change the default aspect ratio of listing cards to 4/3.
+  [#143](https://github.com/sharetribe/web-template/pull/143)
+- [change] Add a new automatic transition to the default-booking transaction process and adjust the
+  timing of the complete transition [#142](https://github.com/sharetribe/web-template/pull/142)
+- [fix] Email templates: fix layout-breaking condition in purchase templates.
+  [141](https://github.com/sharetribe/web-template/pull/141)
+- [fix] Fix indentation in default transaction process email templates.
+  [#140](https://github.com/sharetribe/web-template/pull/140)
+- [fix] SearchPage error transparency and PageBuilder bg colors of sections.
+  [#139](https://github.com/sharetribe/web-template/pull/139)
+- [fix] EditListingDetailsForm: set listingFieldsConfig default prop to empty array to fix a bug
+  with initial null value not getting a default in props destructuring.
+  [#138](https://github.com/sharetribe/web-template/pull/138)
+- [change] Update helmet library from v4.6.0 to v6.0.1. This causes some breaking changes:
+
+  - https://github.com/helmetjs/helmet/blob/main/CHANGELOG.md#500---2022-01-02
+  - https://github.com/helmetjs/helmet/blob/main/CHANGELOG.md#600---2022-08-26
+
+  From these, we turned the _crossOriginEmbedderPolicy_ off due to issue with Youtube embed and
+  _useDefault_ flag too as these are tracked explicitly in csp.js
+
+  [#137](https://github.com/sharetribe/web-template/pull/137)
+
+- [change] Split redirection use case away from REACT_APP_SHARETRIBE_USING_SSL into
+  SERVER_SHARETRIBE_REDIRECT_SSL environment variable.
+  [#136](https://github.com/sharetribe/web-template/pull/136)
+- [change] Add shutdown process for server when receiving close signals.
+  [#135](https://github.com/sharetribe/web-template/pull/135)
+- [fix] SearchPages: show message if date range is invalid and ignore it.
+  [#134](https://github.com/sharetribe/web-template/pull/134)
+
+[v1.0.0]: https://github.com/sharetribe/web-template/compare/v1.0.0-beta...v1.0.0
+
+## v1.0.0-beta 2023-03-29
+
+This is the Sharetribe Web Template, which combines the features of FTW-daily, FTW-hourly and
+FTW-product into one configurable web template. It makes it easy to do things like change the
+default transaction process (it supports two different processes, booking and purchase, out of the
+box), switch between layout options, add custom fields and filters, and much more, all through
+simple JSON configurations. The new template also features a new availability management experience,
+redesigned email notifications, and several other improvements.
+
+For now, this is a beta release: the official Docs site doesn't yet mention the new template. In the
+coming weeks, the new Template will replace Saunatime as the Template that powers the Demo sites,
+and the Docs will be updated to reflect the fact that this is the new default Template.
+
+### Changes
+
+- [change] Comment out additional listingTypes. Those are useful for testing purposes, but multiple
+  listingTypes are not fully supported on search page yet.
+  [#130](https://github.com/sharetribe/web-template/pull/130)
+- [change] Add new email templates to default processes.
+  [#122](https://github.com/sharetribe/web-template/pull/122)
+- [fix] add fonts.googleapis.com to CSP connect-src.
+  [#129](https://github.com/sharetribe/web-template/pull/129)
+- [fix] search config for dates uses dateRangeMode not mode.
+  [#128](https://github.com/sharetribe/web-template/pull/128)
+- [Change] Rename 'listingExtendedData' and its variants to 'listingFields'.
+  [#127](https://github.com/sharetribe/web-template/pull/127)
+- [Change] Rename 'tire-size listing fields as 'tire' and update README.md.
+  [#126](https://github.com/sharetribe/web-template/pull/126)
+- [Change] Update README.md. Add links to beta version of Docs.
+  [#125](https://github.com/sharetribe/web-template/pull/125)
+- [fix] Heading was not imported correctly after changes to styling.
+  [#124](https://github.com/sharetribe/web-template/pull/124)
+- [change] rename some color-related CSS Properties.
+  [#122](https://github.com/sharetribe/web-template/pull/122)
+- [fix] Do not show stock in EditListingWizard if stockType is 'oneItem'.
+  [#121](https://github.com/sharetribe/web-template/pull/121)
+- [change] Update README.md and some code comments.
+  [#120](https://github.com/sharetribe/web-template/pull/120)
+- [delete] remove outdated translation files (fr.json, es.json, de.json). We'll introduce them
+  again, when they are updated to match the current set of translation keys.
+  [#119](https://github.com/sharetribe/web-template/pull/119)
+- [fix] CheckoutPage: save unitType from publicData, not unitType in listingType config.
+  [#118](https://github.com/sharetribe/web-template/pull/118)
+- [fix] typos, naming and improve the quantity handling if something is configured wrongly.
+  [#117](https://github.com/sharetribe/web-template/pull/117)
+- [change] Pages/SectionCarousel: show next card a bit on mobile (fix margin-right)
+  [#116](https://github.com/sharetribe/web-template/pull/116)
+- [change] refactor CSS Properties for Grey colors (remove --matterColor\*)
+  [#115](https://github.com/sharetribe/web-template/pull/115)
+- [change] Refactor configurations to better work with upcoming config assets.
+
+  - SearchPage layout: 'map' and 'grid'
+  - SearchPageWithList renamed as SearchPageWithGrid
+  - ListingPage layout: 'carousel' and 'coverPhoto'
+  - ListingPageFullImage renamed as ListingPageCarousel
+  - ListingPageHeroImage renamed as ListingPageCoverPhoto
+  - Also other config files were affected
+
+  [#114](https://github.com/sharetribe/web-template/pull/114)
+
+- [fix] Remove dublicate ids from styleguide page.
+  [#113](https://github.com/sharetribe/web-template/pull/113)
+- [change] Rename global duck files to start with lower case letter.
+  [#112](https://github.com/sharetribe/web-template/pull/112)
+- [change] Update tests to use React Testing Library instead of Enzyme.
+  [#28](https://github.com/sharetribe/web-template/pull/28)
+- [change] Small changes to Signup form according to review feedback.
+  [#111](https://github.com/sharetribe/web-template/pull/111)
+- [change] Update code comments in configMaps.js
+  [#110](https://github.com/sharetribe/web-template/pull/110)
+- [fix] EditListingDeliveryPanel: H3 import was missing
+  [#109](https://github.com/sharetribe/web-template/pull/109)
+- [fix] Fix back-navigation after successful payment and notification dots for booking process.
+  [#108](https://github.com/sharetribe/web-template/pull/108)
+- [fix] Terms: add translation key, NotFoundPage: fix tests.
+  [#107](https://github.com/sharetribe/web-template/pull/107)
+- [change] Make old pages to use LayoutComposer. Remove old layout components:
+
+  - LayoutSingleColumn (moved under LayoutComposer)
+  - LayoutSideNavigation (moved under LayoutComposer)
+  - LayoutWrapperTopbar
+  - LayoutWrapperMain
+  - LayoutWrapperSideNav
+  - LayoutWrapperAccountSettingsSideNav (moved under LayoutComposer)
+  - LayoutWrapperFooter
+
+  [#106](https://github.com/sharetribe/web-template/pull/106)
+
+- [add] Add isRequired handler for CustomFieldMultiEnum.
+  [#105](https://github.com/sharetribe/web-template/pull/105)
+- [add] Add keyword search option ot NotFoundPage.
+  [#103](https://github.com/sharetribe/web-template/pull/103)
+- [add] Add PrimaryButtonInline and SecondaryButtonInline. Refactor utility-classes away from
+  Buttons. [#102](https://github.com/sharetribe/web-template/pull/102)
+- [add] Add Heading and H1...H6 components to main app. These are separate from PageBuilder. So that
+  Pages could use different fonts if needed.
+  [#97](https://github.com/sharetribe/web-template/pull/97)
+- [add] Add --contentMaxWidth and --contentMaxWidthPages.
+  [#101](https://github.com/sharetribe/web-template/pull/101)
+- [change] Improve error handling on PageBuilder and LandingPage.
+  [#100](https://github.com/sharetribe/web-template/pull/100)
+- [add] Add privacy policy modal to sign up page and make it mandatory to click checkbox. This was
+  suggested as more legally clear way that users have noticed the terms.
+  [#99](https://github.com/sharetribe/web-template/pull/99)
+- [change] Handle situations, where tx process name is unrecognized.
+  [#98](https://github.com/sharetribe/web-template/pull/98)
+- [change] change enquiry/enquire to inquiry/inquire.
+  [#94](https://github.com/sharetribe/web-template/pull/94)
+- [change] Refactor remaining via.placeholder.com references to use picsum.photos instead.
+  [#96](https://github.com/sharetribe/web-template/pull/96)
+- [change] add multiple placeholder texts for custom listing fields.
+  [#93](https://github.com/sharetribe/web-template/pull/93)
+- [fix] Some heading style fixes and lineBreak fixes to microcopy.
+  [#92](https://github.com/sharetribe/web-template/pull/92)
+- [delete] Add LinkedLogo and use it in different Topbars.
+  [#91](https://github.com/sharetribe/web-template/pull/91)
+- [delete] Remove unused microcopy keys from en.json
+  [#90](https://github.com/sharetribe/web-template/pull/90)
+- [change] Rename default transaction process and associated files.
+  [#88](https://github.com/sharetribe/web-template/pull/88)
+- [change] New font (apple-system & 'Inter') and all kind of changes related to that.
+  [#73](https://github.com/sharetribe/web-template/pull/73)
+- [fix] When time zone changes, exceptions should be fetch again. (Query boundaries change.)
+  [#87](https://github.com/sharetribe/web-template/pull/87)
+- [add] Update translations (en.json). We'll change these later, as these follow biketribe theme.
+  [#86](https://github.com/sharetribe/web-template/pull/86)
+- [add] Add BookingLocationMaybe section into the TransactionPage.js
+  [#85](https://github.com/sharetribe/web-template/pull/85)
+- [change] Add listingType which contains transactionType. Defined in configListing.js
+  [#84](https://github.com/sharetribe/web-template/pull/84)
+- [delete] Remove unnecessary code and translation keys.
+  [#83](https://github.com/sharetribe/web-template/pull/83)
+- [change] Change of terminology: enquire to inquire and enquiry to inquiry. Process change happens
+  later. [#82](https://github.com/sharetribe/web-template/pull/82)
+- [fix] Update styleguide examples that produced errors.
+  [#81](https://github.com/sharetribe/web-template/pull/81)
+- [fix] WeeklyCalendar redirect should use start of week instead of today.
+  [#80](https://github.com/sharetribe/web-template/pull/80)
+- [fix] WeeklyCalendar should set currentMonth initially to intialVisibleMonth.
+  [#79](https://github.com/sharetribe/web-template/pull/79)
+- [fix] WeeklyCalendar had bugs in navigation buttons.
+  [#78](https://github.com/sharetribe/web-template/pull/78)
+- [add] Add environment variable to prevent data loading in SSR
+  [#77](https://github.com/sharetribe/web-template/pull/77)
+- [change] Refactor EditListingWizard CSS [#76](https://github.com/sharetribe/web-template/pull/76)
+- [change] Refactor CSS variables and rename contextHelpers.js as uiHelpers.js
+  [#75](https://github.com/sharetribe/web-template/pull/75)
+- [change] Availability management has been changed so that default view is Weekly calendar.
+
+  - All the times are shown in listing's time zone
+  - EditListingAvailabilityPlanForm handles the weekly default schedule
+  - EditListingAvailabilityExceptionForm makes it possible to add exceptions to the plan
+  - settings.verbose prints some debug info to browser's console (src/config/settings.js)
+
+  [#74](https://github.com/sharetribe/web-template/pull/74)
+
+- [change] Fixes: image variant creation, FieldDateRangeInput gets isDaily flag instead of
+  line-items, BookingTimeForm should show error message.
+  [#72](https://github.com/sharetribe/web-template/pull/72)
+- [change] TransactionPage: quantity integer was not parsed early enough.
+  [#71](https://github.com/sharetribe/web-template/pull/71)
+- [change] Move src/util/transaction\*.js files to new directory src/transactions/
+  [#70](https://github.com/sharetribe/web-template/pull/70)
+- [change] ResponsiveBackgroundImageContainer: allow undefined image (use marketplaceColor).
+  [#69](https://github.com/sharetribe/web-template/pull/69)
+- [change] Update emails in product process and make changes according to bug reports and change
+  requests.
+
+  - Add extra info microcopy in specific states
+  - Add delayed refresh for transaction entity after makeTransition call.
+  - ListingPage: Huge stock can't be rendered as select options (max 100 limit)
+
+  [#68](https://github.com/sharetribe/web-template/pull/68)
+
+- [change] Update processes
+
+  - Update email templates: remove outdated link to Transactionpage
+  - Update email templates: to work with different line-items (hour, day, night)
+  - Add new state to booking: expired (use it instead of declined)
+
+  [#67](https://github.com/sharetribe/web-template/pull/67)
+
+- [change] Fix for buggy situation when showStock flag is false.
+  [#66](https://github.com/sharetribe/web-template/pull/66)
+- [change] Update styleguide and couple of translations.
+  [#64](https://github.com/sharetribe/web-template/pull/64)
+- [change] Improve listingExtendedData config / includeForTransactionTypes handling.
+  [#63](https://github.com/sharetribe/web-template/pull/63)
+- [change] Refactor microcopy aka translations and pass arguments to them.
+  [#62](https://github.com/sharetribe/web-template/pull/62)
+- [change] Add fixes, remove some legacy code, and improve code comments.
+  [#61](https://github.com/sharetribe/web-template/pull/61)
+- [change] Rename default processes, and the references in code and translations.
+
+  - Reorder actions that decline or cancel booking in reference booking process
+  - Add update-protected-data action to enquiry and payment transitions
+  - This also adds couple of updated translations for biketribe
+
+  [#60](https://github.com/sharetribe/web-template/pull/60)
+
+- [change] Update styling of Inbox tabs and InboxItem.
+  [#59](https://github.com/sharetribe/web-template/pull/59)
+- [fix] Severa improvements and bug fixes. Most notable ones:
+
+  - Reduce transaction types to only 1
+  - CheckoutPage: the new listingTitle was only meant for mobile layout
+  - util/search.js: isStockInUse had a bug
+
+  [#58](https://github.com/sharetribe/web-template/pull/58)
+
+- [fix] Initial versions of new supported default transaction processes.
+  [#57](https://github.com/sharetribe/web-template/pull/57)
+- [change] change ListingExtendedData config includeForProcessAliases to includeForTransactionTypes
+  and remove isBookingUnitType in favor of isBookingProcessAlias.
+  [#56](https://github.com/sharetribe/web-template/pull/56)
+- [fix] Bug fixes and refactoring: AuthenticationPage/EmailVerificationInfo.js had bugs,
+  StripeConnectAccountInfo caused warnings.
+  [#55](https://github.com/sharetribe/web-template/pull/55)
+- [fix] ListingPage: the title of section details should not be visible if no details is set.
+  [#54](https://github.com/sharetribe/web-template/pull/54)
+- [add] Add flag: enforceValidTransactionType for listing query on SearchPage.
+  [#53](https://github.com/sharetribe/web-template/pull/53)
+- [fix] ListingImageGallery didn't get variantPrefix due to buggy mergeConfig.
+  [#51](https://github.com/sharetribe/web-template/pull/51)
+- [fix] Update configListing.js to more closely match Biketribe configs. Also fix label in
+  ListingPage/SectionDetailsMaybe and add grid for secondary filter panel.
+  [#50](https://github.com/sharetribe/web-template/pull/50)
+- [fix] TransactionPage/enquiry: timeSlot query was missing extra parameter
+  [#49](https://github.com/sharetribe/web-template/pull/49)
+- [change] Rename src/config/settingsApp.js as src/config/settings.js
+  [#48](https://github.com/sharetribe/web-template/pull/48)
+- [change] Improve transaction type support:
+
+  - Restrict searches to valid transactionTypes, transactionProcessAlias, and unitType
+  - Note: add search schemas with Flex CLI!
+  - Add more transactionTypes to make testing easier
+
+  [#47](https://github.com/sharetribe/web-template/pull/47)
+
+- [change] CheckoutPage: add location for bookingable listings too.
+  [#46](https://github.com/sharetribe/web-template/pull/46)
+- [change] Make OrderPanel to use React Portal instead of rendering within app's DOM.
+  [#45](https://github.com/sharetribe/web-template/pull/45)
+- [add] listing extended data:
+
+  - Sanitize configured custom fields
+  - Change schemaOptions to work with objects containing 'option' and 'label'.
+  - Use transactionType in EditListingWizard (active tab feature)
+
+  [#44](https://github.com/sharetribe/web-template/pull/44)
+
+- [change] Biketribe theming: update links in footer and add social media sharing images.
+  [#43](https://github.com/sharetribe/web-template/pull/43)
+- [change] Biketribe theming: lots of UI related changes, but also some refactoring of components.
+  [#42](https://github.com/sharetribe/web-template/pull/42)
+- [change] Refactor configurations:
+
+  - Split defaultConfig to sub files based on context
+    - brandingConfig sets marketplaceColor, logo, brandImage, social sharing graphics
+    - layoutConfig sets layouts for SearchPage and ListingPage
+    - listingConfig sets extended data config for listing
+    - mapsConfig sets configurations for map provider and location search
+    - searchConfig sets mainSearchType, default filters and sort config
+    - stripeConfig sets Stripe publishable key and other Stripe related configs
+    - transactionConfig creates a preset for selected transaction: process name, alias, unitType,
+      etc.
+  - CookieConsent component is removed!
+    - GA is the only integration that needs cookie consent to our best knowledge
+    - The existing Cookie Consent didn't seem to meet EU requirements anymore.
+  - GA script is set in src/util/includeScripts.js file instead of server/renderer.js
+  - Custom icon for map marker removed (it was not used).
+
+  - Renaming:
+    - REACT_APP_CANONICAL_ROOT_URL > REACT_APP_MARKETPLACE_ROOT_URL
+    - canonicalRootURL > marketplaceRootURL
+    - siteTitle > marketplaceName
+
+  [#41](https://github.com/sharetribe/web-template/pull/41)
+
+- [change] Split to defaultConfig.js and appSettings.js and move default configs to React Context.
+  [#39](https://github.com/sharetribe/web-template/pull/39)
+- [change] SearchPage changes: cleaning some shared code and add Dates filter.
+
+  - Add Dates filter. It works with listings that have different time zones in use.
+    - Uses prolonged date range: start=ETC-14h & end: ETC+12
+  - Clean SearchPage variants: Rename SearchPage.helpers.js as SearchPage.shared.js and move several
+    shared functions to this shared file.
+
+  [#35](https://github.com/sharetribe/web-template/pull/35)
+
+- [change] OrderPanel: update consistent look-and-feel for the order forms.
+
+  - Remove unused FieldBirthdayInput component
+  - Remove unused timeZone parameter
+
+  [#34](https://github.com/sharetribe/web-template/pull/34)
+
+- [add]TimeRange component. (Remove BookingTimeInfo from shared components)
+  [#30](https://github.com/sharetribe/web-template/pull/30)
+- [change]Rename the default booking process: flex-booking-default-process.
+  [#29](https://github.com/sharetribe/web-template/pull/29)
+- [change] ListingPage: remove filtersConfig. Use listingExtendedData & defaultFilters instead.
+  [#27](https://github.com/sharetribe/web-template/pull/27)
+- [change] SearchPage: remove filtersConfig. Use listingExtendedData & defaultFilters instead.
+  [#26](https://github.com/sharetribe/web-template/pull/26)
+- [add] EditListingWizard: panels get picked based on selected transaction process. In addition,
+  submit button translations and pricing panel are refactored.
+  [#23](https://github.com/sharetribe/web-template/pull/23)
+- [add] EditListingDetailsPanel: add more custom extended data fields and initialize form
+  accordingly. Transaction process alias can be set once (i.e. before listing draft is created).
+  [#24](https://github.com/sharetribe/web-template/pull/24)
+- [change] Extract getStateData to own page-specific files.
+  [#21](https://github.com/sharetribe/web-template/pull/21)
+- [add] marketplace-custom-config.js: add listingExtendedData config.
+  [#22](https://github.com/sharetribe/web-template/pull/22)
+- [change] FieldDateRangeInput: rename unitType as lineItemUnitType in DateRangeInput
+  [#20](https://github.com/sharetribe/web-template/pull/20)
+- [change] InboxPage: use React Intl (ICU) select syntax for tx status.
+  [#19](https://github.com/sharetribe/web-template/pull/19)
+- [change] Refactor orderData passing to checkout page, pass processAlias to CheckoutPage thunk
+  functions and unitType variable usage. [#17](https://github.com/sharetribe/web-template/pull/17)
+- [add] Refactor unitType usage and make OrderBreakdown work with it.
+  [#15](https://github.com/sharetribe/web-template/pull/15)
+- [add] ListingPage: start enquiry from process found from public data.
+  [#14](https://github.com/sharetribe/web-template/pull/14)
+- [add] EditListingDetailsPanel: transactionProcessAlias and unitType
+
+  - unitType could be 'item', 'day', 'night', 'hour'
+  - Remove EditListingFeaturesPanel & EditListingFeaturesForm
+  - Remove EditListingPoliciesPanel & EditListingPoliciesForm
+
+  [#13](https://github.com/sharetribe/web-template/pull/13)
+
+- [add] InboxPage: support for multiple processes.
+  [#12](https://github.com/sharetribe/web-template/pull/12)
+- [add] TransactionPage: support for multiple processes.
+  [#11](https://github.com/sharetribe/web-template/pull/11)
+- [add] Add getTransitionsNeedingProviderAttention to transcation.js and use it in user.duck.js
+  [#10](https://github.com/sharetribe/web-template/pull/10)
+- [change] CheckoutPage: transitions get transition name and isPrivileged as params.
+  [#9](https://github.com/sharetribe/web-template/pull/9)
+- [change] UI facelift for field elements, including text field, textarea and select.
+  [#1](https://github.com/sharetribe/web-template/pull/1)
+- [change] Refactor action button transition thunks and pass transition name to it.
+  [#8](https://github.com/sharetribe/web-template/pull/8)
+- [add] Another process graph: src/util/transactionProcessBooking.js
+  [#4](https://github.com/sharetribe/web-template/pull/4)
+- [change] Refactor TransactionPage title construction and translation keys.
+  [#3](https://github.com/sharetribe/web-template/pull/3)
+- [fix] Temporarily disallow Node v17, since it causes issues with dependencies.
+  [#7](https://github.com/sharetribe/web-template/pull/7)
+- [change] Extract product process graph to separate file and change transaction.js
+
+  - process graphs are in separate files
+  - transaction.js is importing supported processes and exporting "getProcess" function for
+    selecting process in UI components
+  - transitions and states are accessible through selected process
+
+  [#2](https://github.com/sharetribe/web-template/pull/2)
+
+## [v11.1.0] 2023-02-28
+
+- [fix] AuthenticationPage.duck.js: had wrong asset name.
+  [#173](https://github.com/sharetribe/ftw-product/pull/173)
+
+### Updates from upstream (FTW-daily v10.1.0)
+
+- [change] remove background-color from images (to allow opacity).
+  [#1590](https://github.com/sharetribe/ftw-daily/pull/1590)
+- [change] improve error handling possibilities on PageBuilder.
+  [#1589](https://github.com/sharetribe/ftw-daily/pull/1589)
+- [fix] AuthenticationPage.duck.js: had wrong asset name.
+  [#1588](https://github.com/sharetribe/ftw-daily/pull/1588)
+- [change] P.js: remove requirement for mandatory children.
+  [#1587](https://github.com/sharetribe/ftw-daily/pull/1587)
+
+  [v11.1.0]: https://github.com/sharetribe/ftw-product/compare/v11.0.0.../v11.1.0
+
+## [v11.0.0] 2023-02-14
+
+### Updates from upstream (FTW-daily v10.0.0)
+
+- [add] This adds support for page asset files that can be created in Console. These asset files are
+  taken into use for
+
+  - LandingPage
+  - TermsOfServicePage
+  - PrivacyPolicyPage
+  - AboutPage
+  - and other static pages can also be created through Console (they'll be visible in route:
+    /p/:asset-name/)
+
+  [#1520](https://github.com/sharetribe/ftw-daily/pull/1520)
+
+  [v11.0.0]: https://github.com/sharetribe/ftw-product/compare/v10.1.0.../v11.0.0
+
+## [v10.1.0] 2023-02-07
+
+### Updates from upstream (FTW-daily v9.1.0)
+
+- [change] Norway's stripe config should use NOK not EUR.
+  [#1579](https://github.com/sharetribe/ftw-daily/pull/1579)
+- [delete] Update README.md after changes in [#1555].
+  [#1569](https://github.com/sharetribe/ftw-daily/pull/1569)
+- [change] Added some dependabot updates earlier: passport-0.6.0, loader-utils-2.0.4,
+  decode-uri-component-0.2.2 Note: Passport-0.6.0 changed login and logout parameter list.
+- [change] Update Browserlist db / caniuse-lite.
+  [#1567](https://github.com/sharetribe/ftw-daily/pull/1567)
+- [change] Update minimum Node version to >=16.18.0. (v14.15 had problems with some libs and v14
+  support ends soon.) [#1566](https://github.com/sharetribe/ftw-daily/pull/1566)
+- [delete] Remove unnecessary polyfills (dependencies might still use these)
+
+  - array-includes
+  - array.prototype.find
+  - object.entries
+  - object.values
+  - Number.parseFloat, Number.parseInt, Number.isNaN
+
+  [#1565](https://github.com/sharetribe/ftw-daily/pull/1565)
+
+- [add] Add the cross-env package to better support Windows command prompts
+  [#1555](https://github.com/sharetribe/ftw-daily/pull/1555)
+
+  [v10.1.0]: https://github.com/sharetribe/ftw-product/compare/v10.0.3...v10.1.0
+
+## [v10.0.3] 2022-10-17
 
 ### Updates from upstream (FTW-daily v9.0.2)
 
 - [change] Add links to free Privacy Policy and Terms of Service templates
   [#1553](https://github.com/sharetribe/ftw-daily/pull/1553)
 
-  [v11.0.2]: https://github.com/sharetribe/ftw-hourly/compare/v11.0.1...v11.0.2
+  [v10.0.3]: https://github.com/sharetribe/ftw-product/compare/v10.0.2...v10.0.3
 
-## [v11.0.1] 2022-08-29
+## [v10.0.2] 2022-08-30
 
-### Updates from upstream (FTW-daily v9.0.1)
+### Updates from upstream (FTW-product v10.0.2)
 
 - [fix] Use sharetribe-scripts v6.0.1. Fixes for
 
@@ -43,9 +537,15 @@ https://github.com/sharetribe/flex-template-web/
   FieldReviewRating, SearchFiltersSecondary and TopbarMobileMenu.
   [#1537](https://github.com/sharetribe/ftw-daily/pull/1537)
 
-  [v11.0.1]: https://github.com/sharetribe/ftw-hourly/compare/v11.0.0...v11.0.1
+  [v10.0.2]: https://github.com/sharetribe/ftw-product/compare/v10.0.1...v10.0.2
 
-## [v11.0.0] 2022-07-11
+## [v10.0.1] 2022-07-11
+
+- ListingPage.test.js needed an update due to missing 'stock' in includes.
+
+  [v10.0.1]: https://github.com/sharetribe/ftw-product/compare/v10.0.0...v10.0.1
+
+## [v10.0.0] 2022-07-11
 
 This is a major release since it includes a major update to sharetribe-scripts aka our fork of
 Create React App.It includes major update to Webpack (v4 > v5) and PostCSS (v7 > v8). These caused
@@ -56,7 +556,7 @@ some advanced CSS syntax to be invalid - and therefore some changes must be done
 
 Read more from PR: https://github.com/sharetribe/ftw-daily/pull/1531
 
-### Updates from upstream (FTW-daily v9.0.0)
+Changes:
 
 - [change] sharetribe-scripts is updated to v6.0.0. This causes a new major release for FTW
   templates. Because most of the CSS files need to be updated!
@@ -66,18 +566,21 @@ Read more from PR: https://github.com/sharetribe/ftw-daily/pull/1531
   touch swipes. [#1529](https://github.com/sharetribe/ftw-daily/pull/1529)
 - [fix] Fixing a small typo. [#1518](https://github.com/sharetribe/ftw-daily/pull/1518)
 
-  [v11.0.0]: https://github.com/sharetribe/ftw-hourly/compare/v10.6.1...v11.0.0
+  [v10.0.0]: https://github.com/sharetribe/ftw-product/compare/v9.3.1...v10.0.0
 
-## [v10.6.1] 2022-05-19
+## [v9.3.1] 2022-05-19
 
-- [fix] undefined REACT_APP_GOOGLE_ANALYTICS_ID caused an error. There was also invalid characters
-  (zero-width space) on added directive [#194](https://github.com/sharetribe/ftw-hourly/pull/194)
+- [fix] undefined REACT_APP_GOOGLE_ANALYTICS_ID caused an error.
+  [#150](https://github.com/sharetribe/ftw-product/pull/150)
 
-  [v10.6.1]: https://github.com/sharetribe/ftw-hourly/compare/v10.6.0...v10.6.1
+  [v9.3.0]: https://github.com/sharetribe/ftw-product/compare/v9.3.0...v9.3.1
 
-## [v10.6.0] 2022-05-19
+## [v9.3.0] 2022-05-19
 
-Note: this caused an error. Use v10.6.1 instead.
+Note: this caused an error. Use v9.3.1 instead.
+
+- [fix] undefined REACT_APP_GOOGLE_ANALYTICS_ID caused an error.
+  [#149](https://github.com/sharetribe/ftw-product/pull/149)
 
 ### Updates from upstream (FTW-daily v8.6.0)
 
@@ -90,14 +593,14 @@ Note: this caused an error. Use v10.6.1 instead.
 - [change] Update some outdated dependencies.
   [#1514](https://github.com/sharetribe/ftw-daily/pull/1514)
 
-  [v10.6.0]: https://github.com/sharetribe/ftw-hourly/compare/v10.5.0...v10.6.0
+  [v9.3.0]: https://github.com/sharetribe/ftw-product/compare/v9.2.0...v9.3.0
 
-## [v10.5.0] 2022-05-16
+## [v9.2.0] 2022-05-16
 
 - Add support for hosted translations. (PR made in upstream repo: FTW-daily)
 
-- [delete] Remove old unused translation keys.
-  [#190](https://github.com/sharetribe/ftw-hourly/pull/190)
+- [delete] Remove old unused translation keys
+  [#146](https://github.com/sharetribe/ftw-product/pull/146)
 
 ### Updates from upstream (FTW-daily v8.5.0)
 
@@ -113,12 +616,18 @@ Note: this caused an error. Use v10.6.1 instead.
 - [delete] Remove old unused translation keys.
   [#1511](https://github.com/sharetribe/ftw-daily/pull/1511)
 
-  [v10.5.0]: https://github.com/sharetribe/ftw-hourly/compare/v10.4.1...v10.5.0
+  [v9.2.0]: https://github.com/sharetribe/ftw-daily/compare/v9.1.2...v9.2.0
 
-## [v10.4.1] 2022-03-16
+## [v9.1.2] 2022-03-16
 
-- [fix] FieldDateInput: input font-size must be min 16px for mobile. EditListingPage.duck: fix image
-  upload (dublicate images shown). [#186](https://github.com/sharetribe/ftw-daily/pull/186)
+### Updates from upstream (FTW-product v9.1.2)
+
+- [fix] Process graph had an error: provider notification about dispute being canceled was not sent
+  to provider but customer. [#135](https://github.com/sharetribe/ftw-product/pull/135)
+- [fix] CheckoutPage: add missing link for fallback error, when submitting.
+  [#137](https://github.com/sharetribe/ftw-product/pull/137)
+- [fix] CheckoutPage: if the saveAfterOnetimePayment checkbox is checked and then unchecked, the
+  value is already an array. [#136](https://github.com/sharetribe/ftw-product/pull/136)
 
 ### Updates from upstream (FTW-daily v8.4.1)
 
@@ -131,29 +640,24 @@ Note: this caused an error. Use v10.6.1 instead.
 - [add] Code comment about "REACT_APP" prefix in environment variables.
   [#1492](https://github.com/sharetribe/ftw-daily/pull/1492)
 
-  [v10.4.1]: https://github.com/sharetribe/ftw-hourly/compare/v10.4.0...v10.4.1
+  [v9.1.2]: https://github.com/sharetribe/ftw-product/compare/v9.1.1...v9.1.2
 
-## [v10.4.0] 2021-12-02
+## [v9.1.1] 2022-01-24
 
-- [fix] When changing calendar month, the current month was not set correctly. (Selecting date
-  closes the react-dates calendar and today was saved instead of currently selected one.)
-  [#176](https://github.com/sharetribe/ftw-hourly/pull/176)
-- [fix] Temporarily disallow Node v17, since it causes issues with dependencies.
-  [#173](https://github.com/sharetribe/ftw-hourly/pull/173)
-- [change] Use en-US defaults for all time formatting. This changes the format from "23:00" to
-  "11:00 PM" in places where it wasn't consistent. This can be controlled with the `hourCycle`
-  option in the `formattingOptions` parameter given to the `localizeAndFormatDate` function in
-  `src/util/dates.js`.
+### Updates from upstream (FTW-product v9.1.1)
 
-  To get the former behavior back, use `hourCycle: 'h24'`. See full list of options here:
+- [fix] A full-page refresh on product when stock = 1 causes 500 error. SSR gets change request
+  automatically from Final Form/FromSpy, and therefore window.fetch gets called on the server.
+  [#133](https://github.com/sharetribe/ftw-product/pull/133)
+- [fix] Add a missing return statement on ProductOrderForm. The code path is relevant only for
+  listings that are created outside of EditListingWizard.
+  [#127](https://github.com/sharetribe/ftw-product/pull/127)
 
-  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/hourCycle
+  [v9.1.1]: https://github.com/sharetribe/ftw-product/compare/v9.1.0...v9.1.1
 
-  This change also fixes the date util tests in a local environment.
+## [v9.1.0] 2021-12-02
 
-  [#171](https://github.com/sharetribe/ftw-hourly/pull/171)
-
-### Updates from upstream (FTW-daily v8.4.0)
+### Updates from upstream (FTW-product v9.1.0)
 
 - [fix] Mobile safari zooms if input-related elements have smaller font-size than 16px. This updates
   textarea and select element styles too. [#1489](https://github.com/sharetribe/ftw-daily/pull/1489)
@@ -182,15 +686,249 @@ Note: this caused an error. Use v10.6.1 instead.
 - [fix] Fix modal close button text/icon alignment
   [#1476](https://github.com/sharetribe/ftw-daily/pull/1476)
 
-  [v10.4.0]: https://github.com/sharetribe/ftw-hourly/compare/v10.3.0...v10.4.0
+  [v9.1.0]: https://github.com/sharetribe/ftw-product/compare/v9.0.1...v9.1.0
 
-## [v10.3.0] 2021-09-22
+## [v9.0.1] 2021-11-26
 
-- [fix] EditListingPage: fix an old bug (before we had draft-listing state the update flow was
-  different and we cleared state after a sequence of API calls)
-  [#164](https://github.com/sharetribe/ftw-hourly/pull/164)
+- [fix] Fixes issue with default payment card that was created by PR #111. Essentially, before
+  confirming PaymentIntent, we now check if the PaymentIntent has already been confirmed.
+  [#121](https://github.com/sharetribe/ftw-product/pull/121)
+- [fix] StripePaymentForm: add missing optional chaining: defaultPaymentMethod?.id
+  [#120](https://github.com/sharetribe/ftw-product/pull/120)
+- [fix] Temporarily disallow Node v17, since it causes issues with dependencies.
+  [#119](https://github.com/sharetribe/ftw-product/pull/119)
 
-### Updates from upstream (FTW-daily v8.3.0)
+  [v9.0.1]: https://github.com/sharetribe/ftw-product/compare/v9.0.0...v9.0.1
+
+## [v9.0.0] 2021-09-30
+
+This is the first release of FTW-product. However, it is build on top of FTW-daily (v8.0.0) - so, we
+start versioning from v9.0.0.
+
+- We have done pretty big changes to directory structure:
+
+  - Configuration files are moved under src/config/
+  - Route configuration is moved under src/src/routing/
+  - Page-specific UI components are moved under page-directory (incl. forms)
+
+- SearchPage and ListingPage have 2 layout variants that can be taken into use.
+- Transaction process has been changed
+- Listing's use stock management
+
+Read more from https://sharetribe.com/docs/ftw-introduction/ftw-product/
+
+- [change] ListingPage: improve image gallery styles
+  [#115](https://github.com/sharetribe/ftw-product/pull/115)
+- [add] Add message about no results with current query and reset filters button.
+  [114](https://github.com/sharetribe/ftw-product/pull/114)
+- [fix] Small bug fixes and naming changes.
+  [113](https://github.com/sharetribe/ftw-product/pull/113)
+- [fix] CheckoutPage: don't enable submit button when selecting onetime payment. In addition, pass
+  payment method id to stripe when re-trying with saved payment method after onetime payment.
+  [#111](https://github.com/sharetribe/ftw-product/pull/111)
+- [fix] searchMode is only relevant for multi-enum schema.
+  [112](https://github.com/sharetribe/ftw-product/pull/112)
+- [fix] Fix "Out of Stock" UI flash before current stock is loaded
+  [103](https://github.com/sharetribe/ftw-product/pull/103)
+- [change] review bugs and change requests.
+
+  - SearchPage: if stock is used, add minStock filter
+  - CheckoutPage: remove payment info about provider acceptance needed.
+  - ProductOrderForm: hide quantity and deliveryMethod fields if stock = 0
+  - ProductOrderForm: add validators and focus+show error msg, if submitting too early.
+  - PrimaryButton: change text color for disabled mode
+  - EditListingPricingPanel: if stock is 0, use that (boolean bug)
+  - ActivityFeed: 2 translations for deliveries (shipped vs picked up)
+
+  [#110](https://github.com/sharetribe/ftw-product/pull/110)
+
+- [change] SearchPage: update schema title to include keywords.
+  [#108](https://github.com/sharetribe/ftw-product/pull/108)
+- [change] Line-items: calculate commission from base price.
+  [#106](https://github.com/sharetribe/ftw-product/pull/106)
+- [change] Update translations (en.json) to match Sneakertime concept.
+  [#104](https://github.com/sharetribe/ftw-product/pull/104)
+- [fix] TransactionPanel: smaller gap between OrderBreakdown and title.
+  [#107](https://github.com/sharetribe/ftw-product/pull/107)
+- [fix] EditListingPricingPanel: default stock value is 1.
+  [#105](https://github.com/sharetribe/ftw-product/pull/105)
+- [fix] SearchPage: fix bugs and review issues
+  [#102](https://github.com/sharetribe/ftw-product/pull/102)
+- [fix] Fix order after enquiry [#101](https://github.com/sharetribe/ftw-product/pull/101)
+- [fix] Fix missing author and stock info in OrderPanel on the TransactionPage
+  [#100](https://github.com/sharetribe/ftw-product/pull/100)
+- [fix] Update stock from 0 (the value was considered false).
+  [#99](https://github.com/sharetribe/ftw-product/pull/99)
+- [change] Review changes to some of the pages - part 2.
+  [#98](https://github.com/sharetribe/ftw-product/pull/98)
+- [change] Review changes to some of the pages.
+  [#96](https://github.com/sharetribe/ftw-product/pull/96)
+- [change] Rename listing page variant config and file names
+  [#95](https://github.com/sharetribe/ftw-product/pull/95)
+- [change] Add listingManagementType config that replaces the more specific enableAvailability
+  config [#93](https://github.com/sharetribe/ftw-product/pull/93)
+- [add] Update schema for ListingPage component
+  [#88](https://github.com/sharetribe/ftw-product/pull/88)
+- [fix] Fix iphone layout for TopbarMobileMenu with spacer div.
+  [#91](https://github.com/sharetribe/ftw-product/pull/91)
+- [fix] Fix stretched mobile logo on iOS/Safari
+  [#90](https://github.com/sharetribe/ftw-product/pull/90)
+- [add] Add ActionBar component to ListingPageProduct.
+  [#87](https://github.com/sharetribe/ftw-product/pull/87)
+- [add] ListingPage: add column containers and other layout tuning.
+  [#86](https://github.com/sharetribe/ftw-product/pull/86)
+- [add] ProfilePage: add showAuthoInfo flag for listing cards.
+  [#84](https://github.com/sharetribe/ftw-product/pull/84)
+- [add] ProfilePage: fetch correct image aspect ratios for listing cards.
+  [#83](https://github.com/sharetribe/ftw-product/pull/83)
+- [fix] EditListingPhotosPanel: refactor and fix photos panel (uploading showed images twice).
+  [#79](https://github.com/sharetribe/ftw-product/pull/79)
+- [fix] EditListingPage.duck.js: updating stock should not affect listing creation call.
+  [#81](https://github.com/sharetribe/ftw-product/pull/81)
+- [fix] ManageListingPage: fix the position of loading text
+  [#80](https://github.com/sharetribe/ftw-product/pull/80)
+- [add] Add app icons and fix height of mobile logo
+  [#78](https://github.com/sharetribe/ftw-product/pull/78)
+- [change] Update translation for SectionFilteredSearches.filteredSearch
+  [#77](https://github.com/sharetribe/ftw-product/pull/77)
+- [add] Update billing details from shipping address by default when changing payment method to
+  one-time payment. [#76](https://github.com/sharetribe/ftw-product/pull/76)
+- [change] Moved LandingPage-related sections under its directory, added SectionFilteredSearches
+  component and removed unused SectionThumbnailLinks component.
+  [#75](https://github.com/sharetribe/ftw-product/pull/75)
+- [add] Stock info and link to correct tab included to ManageListingCard.
+  [#74](https://github.com/sharetribe/ftw-product/pull/74)
+- [change] Social media images updated for Sneakertime.
+  [#72](https://github.com/sharetribe/ftw-product/pull/72)
+- [change] Marketplace colors updated for Sneakertime.
+  [#71](https://github.com/sharetribe/ftw-product/pull/71)
+- [change] Landing page Hero and How it works sections updated.
+  [#70](https://github.com/sharetribe/ftw-product/pull/70)
+- [fix] EditListingPage: use correct image aspect ratio for listing images
+  [#69](https://github.com/sharetribe/ftw-product/pull/69)
+- [add] TransactionPage: add DisputeModal component.
+  [#68](https://github.com/sharetribe/ftw-product/pull/68)
+- [add] TransactionPanel: show shipping and pickup addresses.
+  [#66](https://github.com/sharetribe/ftw-product/pull/66)
+- [change] Update OrderBreakdown line-items and move breakdown estimation to OrderPanel.
+  [#67](https://github.com/sharetribe/ftw-product/pull/67)
+- [fix] server/api-util/lineItems.js: 'orderData' instead of 'order'.
+  [#65](https://github.com/sharetribe/ftw-product/pull/65)
+- [change] Update transaction process and handle stockReservationQuantity transition parameter.
+  [#60](https://github.com/sharetribe/ftw-product/pull/60)
+- [change] InboxPage: update inbox-items and provider notifications (red dots)
+  [#63](https://github.com/sharetribe/ftw-product/pull/63)
+- [change] CheckoutPage: move error message generation to a dedicated function.
+  [#61](https://github.com/sharetribe/ftw-product/pull/61)
+- [add] TransactionPage: use custom image variant for listing.
+  [#62](https://github.com/sharetribe/ftw-product/pull/62)
+- [add] Add 'line-item/pickup-fee' and update OrderBreakdown component
+  [#59](https://github.com/sharetribe/ftw-product/pull/59)
+- [fix] Add uncommitted change to TransactionPage: onSubmitOrderRequest
+  [#58](https://github.com/sharetribe/ftw-product/pull/58)
+- [change] Rename bookingProcessAlias as transactionProcessAlias.
+  [#57](https://github.com/sharetribe/ftw-product/pull/57)
+- [change] Rename bookingUnitType as lineItemUnitType.
+  [#56](https://github.com/sharetribe/ftw-product/pull/56)
+- [change] Rename BookingPanel as OrderPanel.
+  [#55](https://github.com/sharetribe/ftw-product/pull/55)
+- [change] Rename BookingBreakdown as OrderBreakdown.
+  [#54](https://github.com/sharetribe/ftw-product/pull/54)
+- [change] CheckoutPage: add shipping details to form, change bookindData to orderData, and add
+  other UI changes. [#52](https://github.com/sharetribe/ftw-product/pull/52)
+- [fix] ManageListingPage: review changes [#51](https://github.com/sharetribe/ftw-product/pull/51)
+- [fix] SearchPage: review changes [#50](https://github.com/sharetribe/ftw-product/pull/50)
+- [fix] util/dates.js: Fix earlier copy-paste error.
+  [#49](https://github.com/sharetribe/ftw-product/pull/49)
+- [fix] Add missing heading for reviewed transaction on TransactionPage.
+  [#48](https://github.com/sharetribe/ftw-product/pull/48)
+- [change] Transaction process has changed. This adds changes to util/transaction.js
+  [#31](https://github.com/sharetribe/ftw-product/pull/31)
+- [change] Changes to ManageListingsPage: use AspectRatioWrapper on ManageListingCard,small layout
+  changes and a new overlay for out of stock items.
+  [#46](https://github.com/sharetribe/ftw-product/pull/46)
+- [change] Footer translation keys updated. [#47](https://github.com/sharetribe/ftw-product/pull/47)
+- [change] Footer updated. [#45](https://github.com/sharetribe/ftw-product/pull/45)
+- [add] Add category values. [#44](https://github.com/sharetribe/ftw-product/pull/44)
+- [change] Favicon updated. [#43](https://github.com/sharetribe/ftw-product/pull/43)
+- [change] siteTitle and PostalAddress updated.
+  [#42](https://github.com/sharetribe/ftw-product/pull/42)
+- [change] Top bar translation keys updated.
+  [#40](https://github.com/sharetribe/ftw-product/pull/40)
+- [change] Add UI for adjusting stock to pricing panel in EditListingWizard. This doesn't store any
+  data related to stock yet! [#39](https://github.com/sharetribe/ftw-product/pull/39)
+- [change] Privacy Policy and Terms translation keys updated.
+  [#37](https://github.com/sharetribe/ftw-product/pull/37)
+- [fix] Fix padding problem in EditListingWizard by handling the paddings in one place.
+  [#34](https://github.com/sharetribe/ftw-product/pull/34)
+- [change] Use AspectRatioWrapper on EditListingPhotosPanel.
+  [#33](https://github.com/sharetribe/ftw-product/pull/33)
+- [add] ListingPage is split into 2 variants: ListingPageBooking and ListingPageProduct.
+  [#32](https://github.com/sharetribe/ftw-product/pull/32)
+- [add] Add EditListingDeliveryPanel. [#29](https://github.com/sharetribe/ftw-product/pull/29)
+- [change] Remove EditListingFeaturesPanel, EditListingPoliciesPanel and
+  EditListingAvailabilityPanel from EditListingWizard because they are not used in FTW-product
+  template. [#30](https://github.com/sharetribe/ftw-product/pull/30)
+- [add] SearchPage is splitted to 2 variants SearchPageWithMap and SearchPageWithList.
+
+  - MainPanel (subcomponent of search page) is removed.
+  - There's a new component, AspectRatioWrapper, and configuration that can be used to fetch custom
+    listing image variants.
+  - API supports nowadays additional sorting on top of keyword filtered listings. SortBy is
+    configured work with this setup.
+
+  [#23](https://github.com/sharetribe/ftw-product/pull/23)
+
+- [change] Rename EditListingDescriptionPanel to EditListingDetailsPanel and add more generic
+  CustomFieldEnum for showing enum fields like category, size and brand.
+  [#27](https://github.com/sharetribe/ftw-product/pull/27)
+- [remove] Articles in docs directory was just pointing Flex Docs.
+  [#21](https://github.com/sharetribe/ftw-product/pull/21)
+- [change] Update functions in util/dates.js
+  [#19](https://github.com/sharetribe/ftw-product/pull/19)
+- [add] Add moment-timezone library on dates.js. Reorder & group util/dates functions. Remove
+  unnecessary spread of moment library imports.
+  [#18](https://github.com/sharetribe/ftw-product/pull/18)
+- [change] Make Topbar search configurable and use keyword-search there
+  [#20](https://github.com/sharetribe/ftw-product/pull/20)
+- [change] Move stripe related forms and forms directory
+  [#17](https://github.com/sharetribe/ftw-product/pull/17)
+- [change] Remove PayoutDetailsForm and rename some functions
+  [#16](https://github.com/sharetribe/ftw-product/pull/16)
+- [change] Move BookingDatesForm under BookingPanel
+  [#15](https://github.com/sharetribe/ftw-product/pull/15)
+- [change] Regroup examples in styleguide using prefixes
+  [#14](https://github.com/sharetribe/ftw-product/pull/14)
+- [change] Group page specific Styleguide examples by page name
+  [#13](https://github.com/sharetribe/ftw-product/pull/13)
+- [change] Move more components under other components and pages
+  [#12](https://github.com/sharetribe/ftw-product/pull/12)
+- [change] Move forms under the page directory they are used in
+  [#11](https://github.com/sharetribe/ftw-product/pull/11)
+- [change] Components and forms that are used only in the SearchPage are nested under the page
+  directory. [#9](https://github.com/sharetribe/ftw-product/pull/9)
+- [change] The `containers/index.js` file is now removed and the components imported directly to
+  improve code splitting. [#8](https://github.com/sharetribe/ftw-product/pull/8)
+- [change] Move EditListingWizard et al. under EditListingPage
+  [#7](https://github.com/sharetribe/ftw-product/pull/7)
+- [change] Components and forms that are used only in the TransactionPage (ActivityFeed,
+  ReviewModal, ReviewForm, TransactionPanel, SendMessageForm) are moved under the TransactionPage.
+  [#6](https://github.com/sharetribe/ftw-product/pull/6)
+- [change] Forms that are used only in the AuthenticationPage (ConfirmSignupForm, LoginForm,
+  SignupForm) are moved under the AuthenticationPage.
+  [#5](https://github.com/sharetribe/ftw-product/pull/5)
+- [change] Routing configuration and components are moved to a separate `src/routing` directory.
+  [#4](https://github.com/sharetribe/ftw-product/pull/4)
+- [change] Configuration files are moved to a separate `src/config` directory. The main config file
+  is still imported with the same path as there is the index file in the directory.
+  [#2](https://github.com/sharetribe/ftw-product/pull/2)
+- [remove] OrderDetailsPanel and Discussion components were not used.
+  [#1](https://github.com/sharetribe/ftw-product/pull/1)
+
+  [v9.0.0]:
+  https://github.com/sharetribe/ftw-product/compare/03b27abe9aa022b0997ed98b72285391940cbfa6...v9.0.0
+
+## [v8.3.0] 2021-09-22
 
 - [change] Increase input font size on mobile to avoid Mobile Safari zooming in when focusing on
   inputs. [#1473](https://github.com/sharetribe/ftw-daily/pull/1473)
@@ -207,16 +945,9 @@ Note: this caused an error. Use v10.6.1 instead.
 - [fix] Adblockers might block Google analytics (window.ga) and cause an error.
   [#1462](https://github.com/sharetribe/ftw-daily/pull/1462)
 
-  [v10.3.0]: https://github.com/sharetribe/ftw-hourly/compare/v10.2.0...v10.3.0
+  [v8.3.0]: https://github.com/sharetribe/ftw-daily/compare/v8.2.0...v8.3.0
 
-## [v10.2.0] 2021-08-06
-
-- [fix] Fix bug wrong current month after leaving date input with wrong month
-  [#161](https://github.com/sharetribe/ftw-hourly/pull/161)
-- [fix] Handle changing the start time in BookingTimeForm so that it doesn't cause error for
-  fetching the lineItems. [#143](https://github.com/sharetribe/ftw-hourly/pull/143)
-
-### Updates from upstream (FTW-daily v8.2.0)
+## [v8.2.0] 2021-08-06
 
 - [change] Update lodash version number in package.json resolutions section.
   [#1459](https://github.com/sharetribe/ftw-daily/pull/1459)
@@ -245,13 +976,9 @@ Note: this caused an error. Use v10.6.1 instead.
 - [fix] searchMode (has_all/has_any) disappeared, when search-by-moving-the-map was used.
   [#1443](https://github.com/sharetribe/ftw-daily/pull/1443)
 
-  [v10.2.0]: https://github.com/sharetribe/ftw-hourly/compare/v10.1.1...v10.2.0
+  [v8.2.0]: https://github.com/sharetribe/ftw-daily/compare/v8.1.1...v8.2.0
 
-## [v10.1.1] 2021-04-20
-
-- [fix] currency for Poland (PLN) [#140](https://github.com/sharetribe/ftw-hourly/pull/140)
-
-### Updates from upstream (FTW-daily v8.1.0)
+## [v8.1.1] 2021-04-20
 
 - [change] Update jose to v3.11.4 [#1433](https://github.com/sharetribe/ftw-daily/pull/1433)
 - [add] Update fr.json, es.json and partially de.json
@@ -262,11 +989,9 @@ Note: this caused an error. Use v10.6.1 instead.
   hot-loading.[#1429](https://github.com/sharetribe/ftw-daily/pull/1429)
 - [fix] currency for Poland (PLN) [#1427](https://github.com/sharetribe/ftw-daily/pull/1427)
 
-  [v10.1.1]: https://github.com/sharetribe/ftw-hourly/compare/v10.1.0...v10.1.1
+  [v8.1.1]: https://github.com/sharetribe/ftw-daily/compare/v8.1.0...v8.1.1
 
-## [v10.1.0] 2021-03-11
-
-### Updates from upstream (FTW-daily v8.1.0)
+## [v8.1.0] 2021-03-11
 
 - [change] Specify required Node.js versions in package.json and update the node version used in
   CircleCI. Currently, the required Node.js version comes from
@@ -277,18 +1002,16 @@ Note: this caused an error. Use v10.6.1 instead.
 - [add] Add `LoadableComponentErrorBoundary` for handling ChunkLoadErrors with error boundary.
   [#1416](https://github.com/sharetribe/ftw-daily/pull/1416)
 
-  [v10.1.0]: https://github.com/sharetribe/ftw-hourly/compare/v10.0.0...v10.1.0
+  [v8.1.0]: https://github.com/sharetribe/ftw-daily/compare/v8.0.0...v8.1.0
 
-## [v10.0.0] 2021-02-17
+## [v8.0.0] 2021-02-17
 
 This major release adds support for code-splitting using
 [Loadable Components](https://loadable-components.com/). At this point, we added route-based code
 splitting, which meant changes to routeConfiguration.js and how "loadData" & "setInitialValues"
 functions are defined and passed to routeConfiguration. Read more from
 [Flex Docs](https://www.sharetribe.com/docs/ftw-routing/how-code-splitting-works-in-ftw/) and
-related pull requests.
-
-### Updates from upstream (FTW-daily v8.0.0)
+related pull requests:
 
 - [fix] Remove unintended Lodash usage, unspecified window-scope calls and unused vars
   [#1413](https://github.com/sharetribe/ftw-daily/pull/1413)
@@ -296,18 +1019,9 @@ related pull requests.
   components. Read more from the pull request.
   [#1411](https://github.com/sharetribe/ftw-daily/pull/1411)
 
-  [v10.0.0]: https://github.com/sharetribe/ftw-hourly/compare/v9.3.0...v10.0.0
+  [v8.0.0]: https://github.com/sharetribe/ftw-daily/compare/v7.3.0...v8.0.0
 
-## [v9.3.0] 2021-01-13
-
-- [fix] Use dayCountAvailableForBooking config instead of hard-coded value in FieldDateAndTimeInput
-  so that it matches the date range that is used in react-dates components.
-  [#129](https://github.com/sharetribe/ftw-hourly/pull/129)
-- [fix] Use default timezone when fetching availability exceptions if availabilityPlan and
-  information about listing's timezone doesn't exist yet.
-  [#130](https://github.com/sharetribe/ftw-hourly/pull/130)
-
-### Updates from upstream (FTW-daily v7.3.0)
+## [v7.3.0] 2021-01-13
 
 - [fix] Move well-known/\* endpoints related to OIDC proxy setup from `apiRouter` to new
   `wellKnownRouter`so that they can be enabled outside the basic auth setup. It also makes it
@@ -318,23 +1032,16 @@ related pull requests.
   the user away from EmailVerificationPage.
   [#1397](https://github.com/sharetribe/ftw-daily/pull/1397)
 
-  [v9.3.0]: https://github.com/sharetribe/ftw-hourly/compare/v9.2.0...v9.3.0
+  [v7.3.0]: https://github.com/sharetribe/ftw-daily/compare/v7.2.0...v7.3.0
 
-## [v9.2.0] 2020-12-16
-
-### Updates from upstream (FTW-daily v7.2.0)
+## [v7.2.0] 2020-12-16
 
 - [add] Add helper functions for setting up your own OIDC authentication and using FTW server as
   proxy when needed. [#1383](https://github.com/sharetribe/ftw-daily/pull/1383)
 
-[v9.2.0]: https://github.com/sharetribe/ftw-hourly/compare/v9.1.0...v9.2.0
+  [v7.2.0]: https://github.com/sharetribe/ftw-daily/compare/v7.1.0...v7.2.0
 
-## [v9.1.0] 2020-12-15
-
-- [fix] Remove deprecated time zone keys that Node implementation doesn't recongnize anymore.
-  [#124](https://github.com/sharetribe/ftw-hourly/pull/124)
-
-### Updates from upstream (FTW-daily v7.1.0)
+## [v7.1.0] 2020-12-15
 
 - [change] Handle entity update with sparse attributes.
   [#1392](https://github.com/sharetribe/ftw-daily/pull/1392)
@@ -352,15 +1059,13 @@ related pull requests.
 - [fix] Fix FieldCheckbox validation on blur event on Firefox.
   [#1384](https://github.com/sharetribe/ftw-daily/pull/1384)
 
-  [v9.1.0]: https://github.com/sharetribe/ftw-hourly/compare/v9.0.0...v9.1.0
+  [v7.1.0]: https://github.com/sharetribe/ftw-daily/compare/v7.0.0...v7.1.0
 
-## [v9.0.0] 2020-11-17
+## [v7.0.0] 2020-11-17
 
 This major release renames all the CSS files. If you have made custom components or customized
 existing ones, you should read the related [PR](https://github.com/sharetribe/ftw-daily/pull/1374)
 for more information.
-
-### Updates from upstream (FTW-daily v7.0.0)
 
 - [change] Update sharetribe-scripts (our fork of create-react-app) to v4.0.0. In addition to
   changes that CRA@v4 brought along,
@@ -370,11 +1075,9 @@ for more information.
 
   Read the PR for more info: [#1374](https://github.com/sharetribe/ftw-daily/pull/1374)
 
-  [v9.0.0]: https://github.com/sharetribe/ftw-hourly/compare/v8.5.0...v9.0.0
+  [v7.0.0]: https://github.com/sharetribe/ftw-daily/compare/v6.5.0...v7.0.0
 
-## [v8.5.0] 2020-11-16
-
-### Updates from upstream (FTW-daily v6.5.0)
+## [v6.5.0] 2020-11-16
 
 - [add] Add support for Google login. This works in the same way as Facebook flow so you can check
   the [Facebook PR](https://github.com/sharetribe/ftw-daily/pull/1364) for the more details.
@@ -385,20 +1088,16 @@ for more information.
 - [fix] 401 return code when rendering on SSR.
   [#1379](https://github.com/sharetribe/ftw-daily/pull/1379)
 
-[v8.5.0]: https://github.com/sharetribe/ftw-hourly/compare/v8.4.2...v8.5.0
+  [v6.5.0]: https://github.com/sharetribe/ftw-daily/compare/v6.4.2...v6.5.0
 
-## [v8.4.2] 2020-10-30
-
-### Updates from upstream (FTW-daily v6.4.2)
+## [v6.4.2] 2020-10-30
 
 - [fix] Fix the issue with form on AuthenticationPage not showing on smaller screens when using
   Safari as browser. [#1377](https://github.com/sharetribe/ftw-daily/pull/1377)
 
-  [v8.4.2]: https://github.com/sharetribe/ftw-hourly/compare/v8.4.1...v8.4.2
+  [v6.4.2]: https://github.com/sharetribe/ftw-daily/compare/v6.4.1...v6.4.2
 
-## [v8.4.1] 2020-10-20
-
-### Updates from upstream (FTW-daily v6.4.1)
+## [v6.4.1] 2020-10-20
 
 - [add] Add new Stripe countires Bulgaria, Cyprus, Czech Republic, Malta and Romania to the
   `StripeConnectAccountForm`. Also reorder BANK_CODE & BRANCH_CODE in UI to more logical order.
@@ -410,11 +1109,9 @@ for more information.
 - [fix] Pass additional values from `ConfirmSignupForm` forward as user's protected data.
   [#1368](https://github.com/sharetribe/ftw-daily/pull/1368)
 
-  [v8.4.1]: https://github.com/sharetribe/ftw-hourly/compare/v8.4.0...v8.4.1
+  [v6.4.1]: https://github.com/sharetribe/ftw-daily/compare/v6.4.0...v6.4.1
 
-## [v8.4.0] 2020-10-15
-
-### Updates from upstream (FTW-daily v6.4.0)
+## [v6.4.0] 2020-10-14
 
 - [add] Add Facebook login as a first step towards supporting social logins and SSO in FTW. This PR
   introduces new endpoints `createUserWithIdp` and `loginWithIdp` and strategy for logging in with
@@ -428,18 +1125,16 @@ for more information.
 - [fix] Remove duplicate page schema from body.
   [#1355](https://github.com/sharetribe/ftw-daily/pull/1355)
 
-[v8.4.0]: https://github.com/sharetribe/ftw-hourly/compare/v8.3.1...v8.4.0
+  [v6.4.0]: https://github.com/sharetribe/ftw-daily/compare/v6.3.1...v6.4.0
 
-## [v8.3.1] 2020-08-19
+## [v6.3.1] 2020-08-19
 
 - [fix] Fix popup-button in SelectSingleFilterPopup.css and adjust Footer with correct baselines.
   [#1353](https://github.com/sharetribe/ftw-daily/pull/1353)
 
-[v8.3.1]: https://github.com/sharetribe/ftw-hourly/compare/v8.3.0...v8.3.1
+[v6.3.1]: https://github.com/sharetribe/ftw-daily/compare/v6.3.0...v6.3.1
 
-## [v8.3.0] 2020-08-19
-
-### Updates from upstream (FTW-daily v6.3.0)
+## [v6.3.0] 2020-08-19
 
 - [change] We decided to change the default font to Poppins.
   [#1349](https://github.com/sharetribe/ftw-daily/pull/1349)
@@ -451,11 +1146,12 @@ for more information.
 - [change] In `StripeConnectAccountForm` show error message from Stripe if there is one when
   fetching account link. [#1346](https://github.com/sharetribe/ftw-daily/pull/1346)
 
-[v8.3.0]: https://github.com/sharetribe/ftw-hourly/compare/v8.2.0...v8.3.0
+[v6.3.0]: https://github.com/sharetribe/ftw-daily/compare/v6.2.0...v6.3.0
 
-## [v8.2.0] 2020-08-12
+## [v6.2.0] 2020-08-12
 
-### Updates from upstream (FTW-daily v6.2.0)
+This change set was originally released as a patch update 6.1.2 but after reconsideration it's
+released as a minor update 6.2.0.
 
 - [fix] remove typo [#1343](https://github.com/sharetribe/ftw-daily/pull/1343)
 - [change] Request custom image variants for avatar
@@ -466,21 +1162,16 @@ for more information.
   sligthly different. Otherwise, these changes should not affect the behavior of the function.
   [#1339](https://github.com/sharetribe/ftw-daily/pull/1339)
 
-[v8.2.0]: https://github.com/sharetribe/ftw-hourly/compare/v8.1.1...v8.2.0
+[v6.2.0]: https://github.com/sharetribe/flex-template-web/compare/v6.1.1...v6.2.0
 
-## [v8.1.1] 2020-07-21
+## [v6.1.1] 2020-07-21
 
 - [fix] Fix config script for NodeJS v14.5.0
   [#1327](https://github.com/sharetribe/ftw-daily/pull/1327)
 
-[v8.1.1]: https://github.com/sharetribe/ftw-hourly/compare/v8.1.0...v8.1.1
+[v6.1.1]: https://github.com/sharetribe/flex-template-web/compare/v6.1.0...v6.1.1
 
-## [v8.1.0] 2020-07-01
-
-- [change] Change the transaction process name to be `flex-hourly-default-process/release-1`
-  [#104](https://github.com/sharetribe/ftw-hourly/pull/104)
-
-### Updates from upstream (FTW-daily v6.1.0)
+## [v6.1.0] 2020-07-01
 
 - [fix] MainPanel: search filter bug. Address and bounds are handled outside of MainPanel, URL
   params should be trusted instead of values stored to state.
@@ -493,11 +1184,9 @@ for more information.
 - [fix] Sync bookingUnitType variables and update comments. Client app's API (proxy) server needs to
   know about unit type. [#1317](https://github.com/sharetribe/ftw-daily/pull/1317)
 
-[v8.1.0]: https://github.com/sharetribe/ftw-hourly/compare/v8.0.0...v8.1.0
+[v6.1.0]: https://github.com/sharetribe/flex-template-web/compare/v6.0.0...v6.1.0
 
-## [v8.0.0] 2020-07-01
-
-### Updates from upstream (FTW-daily v6.0.0)
+## [v6.0.0] 2020-06-25
 
 - [change] Use privileged transitions for price calculation by default and update the process alias.
   [#1314](https://github.com/sharetribe/ftw-daily/pull/1314)
@@ -511,11 +1200,9 @@ for more information.
 - [fix] `yarn run dev-backend` was expecting NODE_ENV.
   [#1303](https://github.com/sharetribe/ftw-daily/pull/1303)
 
-[v8.0.0]: https://github.com/sharetribe/ftw-hourly/compare/v7.0.0...v8.0.0
+[v6.0.0]: https://github.com/sharetribe/flex-template-web/compare/v5.0.0...v6.0.0
 
-## [v7.0.0] 2020-06-04
-
-### Updates from upstream (FTW-daily v5.0.0)
+## [v5.0.0] 2020-06-04
 
 - [change] Streamlining filter setup. Everyone who customizes FTW-templates, needs to update filters
   and unfortunately the related code has been spread out in multiple UI containers.
@@ -537,11 +1224,9 @@ for more information.
 
   [#1296](https://github.com/sharetribe/ftw-daily/pull/1296)
 
-[v7.0.0]: https://github.com/sharetribe/ftw-hourly/compare/v6.6.0...v7.0.0
+[v5.0.0]: https://github.com/sharetribe/flex-template-web/compare/v4.5.0...v5.0.0
 
-## [v6.6.0] 2020-06-04
-
-### Updates from upstream
+## [v4.5.0] 2020-06-01
 
 - [fix] In some situations, ProfileMenu has began to overflow on TopbarDesktop.
   [#1290](https://github.com/sharetribe/ftw-daily/pull/1290)
@@ -552,59 +1237,40 @@ for more information.
 - [change] Start the backend API router in dev mode with a dev server.
   [#1297](https://github.com/sharetribe/ftw-daily/pull/1297)
 
-[v6.6.0]: https://github.com/sharetribe/ftw-hourly/compare/v6.5.1...v6.6.0
+[v4.5.0]: https://github.com/sharetribe/flex-template-web/compare/v4.4.3...v4.5.0
 
-## [v6.5.1] 2020-05-13
-
-- [fix] Check length of `selectedConfigOptions` in `SectionFeaturesMaybe` to choose between one and
-  two column layout. [#92](https://github.com/sharetribe/ftw-hourly/pull/90)
-
-### Updates from upstream
-
-This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.4.3
+## [v4.4.3] 2020-05-13
 
 - [fix] Allow white space on Japanese bank account info. Japan collects bank name and account owner
   name in addition to routing numbers. [#1287](https://github.com/sharetribe/ftw-daily/pull/1287)
 - [fix] wrongly named default props handleSubmit renamed to onSubmit
   [#1288](https://github.com/sharetribe/ftw-daily/pull/1288)
 
-## [v6.5.0] 2020-04-17
+[v4.4.3]: https://github.com/sharetribe/flex-template-web/compare/v4.4.2...v4.4.3
 
-- [change] Reorganize search filters [#89](https://github.com/sharetribe/ftw-hourly/pull/89)
-- [fix] Remove unnecessary required props, which were introduced accidentally in upstream update
-  (v6.3.0). [#88](https://github.com/sharetribe/ftw-hourly/pull/88/)
-- [add] Time-based availability filtering with a start/end date + min booking duration search filter
-  [#85](https://github.com/sharetribe/ftw-hourly/pull/85)
-
-## [v6.4.1] 2020-04-09
-
-### One change in this template
-
-- [fix] Fix user display name references in example tx process email templates
-  [#86](https://github.com/sharetribe/ftw-hourly/pull/86/)
-
-### Updates from upstream
-
-This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.4.2
+## [v4.4.2] 2020-04-09
 
 - [fix] Handle deleted reviews in ActivityFeed
   [#1283](https://github.com/sharetribe/ftw-daily/pull/1283)
 
-[v6.4.1]: https://github.com/sharetribe/ftw-hourly/compare/v6.4.0...v6.4.1
+[v4.4.2]: https://github.com/sharetribe/flex-template-web/compare/v4.4.1...v4.4.2
 
-## [v6.4.0] 2020-04-01
-
-This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.4.1
+## [v4.4.1] 2020-03-30
 
 - [change] Improve the search page sorting and filters UI for different screen sizes
   [#1280](https://github.com/sharetribe/ftw-daily/pull/1280)
+
+[v4.4.1]: https://github.com/sharetribe/flex-template-web/compare/v4.4.0...v4.4.1
+
+## [v4.4.0] 2020-03-25
+
 - [add] Search result sorting [#1277](https://github.com/sharetribe/ftw-daily/pull/1277)
+- [change] Move category and amenities search filters from primary filters to secondary filters.
+  [#1275](https://github.com/sharetribe/ftw-daily/pull/1275)
 
-[v6.4.0]: https://github.com/sharetribe/ftw-hourly/compare/v6.3.0...v6.4.0
+[v4.4.0]: https://github.com/sharetribe/flex-template-web/compare/v4.3.0...v4.4.0
 
-## [v6.3.0] 2020-03-16
-
-This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.3.0
+## [v4.3.0] 2020-03-16
 
 - [change] Redirect user back to Stripe during Connect Onboarding Flow when user is returned to
   failure URL provided that the Account Link generation is successful.
@@ -621,11 +1287,9 @@ This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.3.0
   possibility to use modals without Portal because of `ModalInMobile` component.
   [#1258](https://github.com/sharetribe/ftw-daily/pull/1258)
 
-[v6.3.0]: https://github.com/sharetribe/ftw-hourly/compare/v6.2.0...v6.3.0
+  [v4.3.0]: https://github.com/sharetribe/flex-template-web/compare/v4.2.0...v4.3.0
 
-## [v6.2.0] 2020-02-18
-
-This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.2.0
+## [v4.2.0] 2020-02-18
 
 - [add] Show a banner when a user is logged in with limited access.
   [#1259](https://github.com/sharetribe/ftw-daily/pull/1259)
@@ -635,27 +1299,19 @@ This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.2.0
 - [change] Add `handlebars` 4.5.3 and `serialize-javascript` 2.1.1 to resolutions in `package.json`.
   [#1251](https://github.com/sharetribe/ftw-daily/pull/1251)
 
-[v6.2.0]: https://github.com/sharetribe/ftw-hourly/compare/v6.1.0...v6.2.0
+  [v4.2.0]: https://github.com/sharetribe/flex-template-web/compare/v4.1.0...v4.2.0
 
-## [v6.1.0] 2020-02-03
+## [v4.1.0] 2020-02-03
 
-Update from upstream (first 3 bullets) and a couple of pending changes.
-
-- [fix] PaymentMethodsForm: remove unused 'invalid' prop that breaks some versions of Final Form
+- [fix] Remove unused 'invalid' prop that breaks some versions of Final Form
   [#1255](https://github.com/sharetribe/ftw-daily/pull/1255)
 - [fix] Fix `console.warn` functions. [#1252](https://github.com/sharetribe/ftw-daily/pull/1252)
 - [add] Add missing countries (e.g. MX and JP) to `StripeBankAccountTokenInput` validations.
   [#1250](https://github.com/sharetribe/ftw-daily/pull/1250)
-- [add] Add French and Spanish translations for yogatime
-  [#72](https://github.com/sharetribe/ftw-hourly/pull/72)
-- [fix] Fix bug in showing availability exceptions. This bug was introduced in v6.0.0.
-  [#71](https://github.com/sharetribe/ftw-hourly/pull/71)
 
-[v6.1.0]: https://github.com/sharetribe/ftw-hourly/compare/v6.0.0...v6.1.0
+  [v4.0.1]: https://github.com/sharetribe/flex-template-web/compare/v4.0.0...v4.1.0
 
-## [v6.0.0] 2019-12-20
-
-This is update from [upstream](https://github.com/sharetribe/ftw-daily): v4.0.0
+## [v4.0.0] 2019-12-19
 
 - [change] Use Stripe's [Connect onboarding](https://stripe.com/docs/connect/connect-onboarding) for
   adding and updating the identity information of the Stripe account.
@@ -678,9 +1334,9 @@ enabling users to update the account so that it doesn't get restricted.
 - [fix] Update links to API Reference docs.
   [#1231](https://github.com/sharetribe/ftw-daily/pull/1231)
 
-[v6.0.0]: https://github.com/sharetribe/ftw-hourly/compare/v5.1.0...v6.0.0
+  [v4.0.0]: https://github.com/sharetribe/flex-template-web/compare/v3.7.0...v4.0.0
 
-## [v5.1.0] 2019-12-09
+## [v3.7.0] 2019-12-09
 
 - [change] Make it easier to reorder EditListingWizard tabs/panels.
   [#1240](https://github.com/sharetribe/ftw-daily/pull/1240)
@@ -689,13 +1345,9 @@ enabling users to update the account so that it doesn't get restricted.
   https://support.stripe.com/questions/connect-address-validation).
 - [add] Add IconEdit [#1237](https://github.com/sharetribe/ftw-daily/pull/1237)
 
-  [v5.1.0]: https://github.com/sharetribe/ftw-hourly/compare/v5.0.3...v5.1.0
+  [v3.7.0]: https://github.com/sharetribe/flex-template-web/compare/v3.6.1...v3.7.0
 
-## [v5.0.3] 2019-12-09
-
-Update from [upstream](https://github.com/sharetribe/ftw-daily): v3.6.1
-
-## [v5.0.2] 2019-11-26
+## [v3.6.1] 2019-11-26
 
 - [fix] Fix XSS-vulnerability on SearchPage where URL param 'address' was exposed directly to
   schema, which is just a script tag: <script type="application/ld+json">. On server-side, this
@@ -705,113 +1357,14 @@ However, CSP prevents any data breach: injected js can't send data to unknonwn 3
 
 NOTE: Check that `REACT_APP_CSP` is in block mode on your production environment. You can read more
 from Flex docs: https://www.sharetribe.com/docs/guides/how-to-set-up-csp-for-ftw/
-[#62](https://github.com/sharetribe/ftw-hourly/pull/62)
+[#1233](https://github.com/sharetribe/flex-template-web/pull/1233)
 
-- [fix] Add missing translation key EditListingDescriptionPanel.createListingTitle and change link
-  name in UserNav. [#62](https://github.com/sharetribe/ftw-hourly/pull/62)
+- [change] Rename repository form `flex-template-web` to `ftw-daily`.
+  [#1230](https://github.com/sharetribe/flex-template-web/pull/1230)
 
-[v5.0.2]: https://github.com/sharetribe/ftw-hourly/compare/v5.0.1...v5.0.2
+  [v3.6.1]: https://github.com/sharetribe/flex-template-web/compare/v3.6.0...v3.6.1
 
-## [v5.0.1] 2019-11-22
-
-- [fix] Fix proptype validation error for initialized date object for FieldDateInput
-  [#58](https://github.com/sharetribe/ftw-hourly/pull/58)
-- [fix] Change the text in price filter. [#59](https://github.com/sharetribe/ftw-hourly/pull/59)
-
-[v5.0.1]: https://github.com/sharetribe/ftw-hourly/compare/v5.0.0...v5.0.1
-
-## [v5.0.0] 2019-11-21
-
-This release creates lots of changes to the default logic (only one listing aka teacher profile
-allowed), translations files (Saunatime is changed to Yogatime), and it also adds
-AvailabilityExceptions to EditListingAvailabilityPanel. If you have started with the original Flex
-Template for Web, you need to be extra careful when you switch to this release, since there are pull
-request that you might need to revert when you take update from upstream. (E.g. you might want to
-allow multiple listings in your marketplace.)
-
-- [change] Copy-text changes (most of them to EditListingWizard panels and all the "classes" are
-  changed to "sessions") [#55](https://github.com/sharetribe/ftw-time/pull/55)
-- [fix] Reseting bookingStartDate picker didn't reset the current month.
-  [#54](https://github.com/sharetribe/ftw-time/pull/54)
-- [change] Yogatime UI tweaks.
-
-  - Change hard-coded "sauna" strings and rules tab in EditListingWizard.
-  - Change font-size in Avatar.
-  - Remove booking subtitle on LandingPage.
-  - Enforce no-wrap on SelectSingleFilter.
-  - Copy-text changes.
-  - Make AvailabilityPlan clickable (opens edit form)
-
-  [#53](https://github.com/sharetribe/ftw-time/pull/53)
-
-- [change] About page. [#50](https://github.com/sharetribe/ftw-time/pull/50)
-- [change] Remove “Hosted by” text from CheckoutPage. Link provider's avatar to listing instead of
-  the user profile on InboxPage and on TransactionPage. Don't add a link to profile to Avatar on
-  ActivityFeed or Reviews. [#47](https://github.com/sharetribe/ftw-time/pull/47)
-- [fix] Add allowOnlyOneListing prop to EditListingPage and redirect to existing listing if true.
-  [#52](https://github.com/sharetribe/ftw-time/pull/52)
-- [fix] Recently added Footer on EditListingWizard was on top of payout details modal.
-  [#51](https://github.com/sharetribe/ftw-time/pull/51)
-- [change] Hide policy tab ("sauna rules") from `EditListingWizard`. Also, fix height of the page
-  when data is loading so that the footer stays in place.
-  [#49](https://github.com/sharetribe/ftw-time/pull/49)
-- [change] Changes to `ListingPage` desing: make header image full width and avatar bigger, show
-  only selected yoga styles, move price from `SectionHeading` to Panel and remove hosted by text and
-  the whole `SectionHostMaybe`. We also moved the `Modal` with `EnquiryForm` directly to
-  `ListingPage`. [#46](https://github.com/sharetribe/ftw-time/pull/46)
-- [add] EditListingAvailabilityPanel: add list of current AvailabilityExceptions and edit form in
-  modal. [#45](https://github.com/sharetribe/ftw-time/pull/45)
-- [fix] Fix date formatting in example tx process email templates
-  [#48](https://github.com/sharetribe/ftw-time/pull/48)
-- [change] Change images and update favicons. Also, update links on the `LandingPage`. Make the
-  `OwnListingLink` component more generic so that it can be used also in the `SectionHowItWorks`.
-  [#42](https://github.com/sharetribe/ftw-time/pull/42/)
-- [change] Replace amenities with yoga styles and category with certificate in search filters and
-  EditListingEizard. Show the updated public data also on ListingPage. Add new flags
-  `hideFromFilters` and `hideFromListingInfo` to certificate filter in
-  `marketplace-custom-config.js`. These new flags are used to determine if the value shoud be
-  visible in search filters or listing info (ListingPage and ListingCard).
-  [#44](https://github.com/sharetribe/ftw-time/pull/44)
-- [fix] Fix the listing link on `Topbar` so that link works also with listings in draft or pending
-  approval states. [#41](https://github.com/sharetribe/ftw-time/pull/41)
-- [change] Remove listings section from `ProfilePage`.
-  [#43](https://github.com/sharetribe/ftw-time/pull/43)
-- [fix] Fix proptype checks for FieldDateAndTimeInput and FieldDateInput.
-  [#39](https://github.com/sharetribe/ftw-time/pull/39)
-- [fix] Fix same date detection on TimeRange component.
-  [#38](https://github.com/sharetribe/ftw-time/pull/38)
-- [change] Hide inbox tabs if user doesn't have a listing.
-  [#37](https://github.com/sharetribe/ftw-time/pull/37)
-- [change] Change the logo, marketplace color and favicons from Saunatime to Yogatime.
-  [#36](https://github.com/sharetribe/ftw-time/pull/36)
-- [change] Change the default locations used in `Topbar` and `Footer`.
-  [#35](https://github.com/sharetribe/ftw-time/pull/35)
-- [change] Hide the end date from `FieldDateAndTimeInput`. If you want to enable longer booking
-  periods you can get the end date field back with couple of code changes.
-  [#34](https://github.com/sharetribe/ftw-time/pull/34)
-- [fix] Fix the bugs in BookingTimeForm when the day has availability up to midnight. The next day
-  should not be counted as available if there is no availabilty set to that day. Also, the
-  calculated end date should be same as the start day if the start time is at 23:00
-  [#33](https://github.com/sharetribe/ftw-time/pull/33)
-- [change] Remove ManageListingsPage from routing and change the links in Topbar to point either
-  AddListingPage or EditListingPage depending on if the user already has a listing or not.
-  [#30](https://github.com/sharetribe/ftw-time/pull/30)
-- [change] Move isDayBlocked prop to FieldDateAndTimeInput.
-  [#32](https://github.com/sharetribe/ftw-time/pull/32)
-- [change] Extract TimeRange component away from BookingTimeInfo. Updates also FieldRadioButton,
-  IconClose, and removes unused translations (EditListingAvailabilityForm was removed).
-  [#31](https://github.com/sharetribe/ftw-time/pull/31)
-
-  [v5.0.0]: https://github.com/sharetribe/ftw-time/compare/v4.1.0...v5.0.0
-
-## [v4.1.0] 2019-11-04
-
-### One change in this template
-
-- [fix] change console.warning to console.warn and remove examples from FieldDateRangeInput
-  component (the component is not updated to work with time-based availability).
-
-### Changes from upstream
+## [v3.6.0] 2019-11-04
 
 - [change] update react-dates from 20.3.0 to 21.3.1
   [#1223](https://github.com/sharetribe/flex-template-web/pull/1223)
@@ -834,54 +1387,9 @@ allow multiple listings in your marketplace.)
 - [change] Add default tx process definition. Remove default email templates.
   [#1220](https://github.com/sharetribe/flex-template-web/pull/1220)
 
-  [v4.1.0]: https://github.com/sharetribe/ftw-time/compare/v4.0.0...v4.1.0
+  [v3.6.0]: https://github.com/sharetribe/flex-template-web/compare/v3.5.1...v3.6.0
 
-## [v4.0.0] 2019-10-25
-
-- [add] Add default process and email templates to `ext/transaction-process`.
-  [#20](https://github.com/sharetribe/ftw-time/pull/20)
-- [fix] BookingTimeForm: UI improvements to date and time pickers.
-  [#23](https://github.com/sharetribe/ftw-time/pull/23)
-- [fix] Make the time selects fixed with on `EditListingPage` and add hover color to remove entry
-  icon. [#22](https://github.com/sharetribe/ftw-time/pull/22)
-- [fix] BookingTimeForm: do not pick exclusive end date from selected timeslot
-  [#21](https://github.com/sharetribe/ftw-time/pull/21)
-- [fix] Due to DST, one sharp hour (03:00) happens twice a day.
-  [#19](https://github.com/sharetribe/ftw-time/pull/19)
-- [fix] Submit buttons need extra space to the end of the form on mobile browsers.
-  [#18](https://github.com/sharetribe/ftw-time/pull/18)
-- [remove] `EditListingAvailabilityForm` component. It's for day-based process.
-  [#17](https://github.com/sharetribe/ftw-time/pull/17)
-- [add] AvailabilityPlan edit form created and `EditListingAvailabilityPanel` uses it.
-  [#8](https://github.com/sharetribe/ftw-time/pull/8)
-- [fix] Query up to 500 timeslots per request and fix border-bottom of disabled FieldSelect.
-  [#16](https://github.com/sharetribe/ftw-time/pull/16)
-- [add] Add more tests to functions in `util/dates.js`.
-  [#11](https://github.com/sharetribe/ftw-time/pull/11)
-- [add] Update translations to use hour instead of unit.
-  [#15](https://github.com/sharetribe/ftw-time/pull/15)
-- [fix] Fix BookingTimeForm and add monthly timeslots to picker.
-  [#13](https://github.com/sharetribe/ftw-time/pull/13)
-- [add] Add time-based dates to `BookingBreakdown` on `CheckoutPage`.
-  [#11](https://github.com/sharetribe/ftw-time/pull/11)
-- [add] New components `BookingTimeForm` and `FieldDateAndTimeInput` for handling time-based
-  availability. Also change template to use time-based transaction process.
-  [#7](https://github.com/sharetribe/ftw-time/pull/7)
-- [add] Inbox and TransactionPage use time zones to display booking times
-  [#10](https://github.com/sharetribe/ftw-time/pull/10)
-- [add] Fetch timeSlots on ListingPage and TransactionPage.
-  [#9](https://github.com/sharetribe/ftw-time/pull/9)
-- [remove] Remove dateFromAPIToLocalNoon and dateFromLocalToAPI.
-  [#6](https://github.com/sharetribe/ftw-time/pull/6)
-- [add] Add new component `FieldTimeZoneSelect`. Also add `moment-timezone` as a dependency and some
-  helper functions to `util/dates.js` for handling timezones and tiem-based timeslots.
-  [#5](https://github.com/sharetribe/ftw-time/pull/5)
-- [add] add FieldTimeZoneSelect component and a script that can extract IANA time zone keys from
-  moment-timezone's JSON formatted files. [#2](https://github.com/sharetribe/ftw-time/pull/2)
-
-  [v4.0.0]: https://github.com/sharetribe/ftw-time/compare/v3.5.1...v4.0.0
-
-## [v3.5.1] 2019-09-17
+## [v3.5.1] 2019-09-16
 
 - [add] add orverriding function `onAdd` and `onRemove` for `CustomOverlayView` in
   `SearchMapWithGoogleMap` to abide to React rules and do not `unmountComponentAtNode` when a
@@ -990,6 +1498,8 @@ allow multiple listings in your marketplace.)
 - Update dependecies: all the easily updateable minor and batch updates: array.prototype.find,
   babel-jest, core-js, enzyme (et al.), express, helmet, inquirer, lodash, nodemon, raf, redux,
   source-map-support [#1163](https://github.com/sharetribe/flex-template-web/pull/1163)
+
+  [v3.4.0]: https://github.com/sharetribe/flex-template-web/compare/v3.3.0...v3.4.0
 
 ## [v3.3.0] 2019-08-22
 
