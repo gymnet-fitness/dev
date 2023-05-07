@@ -1,1 +1,0 @@
-We have sent you a payment for an order for {{transaction.listing.title}}
